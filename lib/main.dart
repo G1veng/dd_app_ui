@@ -17,8 +17,11 @@ class MyApp extends StatelessWidget {
           AppNavigator.onGeneratedRoutes(settings, context),
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          textTheme: Theme.of(context).textTheme.apply(
+                fontSizeFactor: 1.1,
+                fontSizeDelta: 2.0,
+              )),
       home: LoaderWidget.create(),
     );
   }
