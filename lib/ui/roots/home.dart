@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 
 class _HomeSate {
   final int counter;
+  final bool isRuning;
 
-  _HomeSate({this.counter = 0});
+  _HomeSate({this.counter = 0, this.isRuning = false});
 
-  _HomeSate copyWith({int counter = 0}) {
-    return _HomeSate(counter: counter);
+  _HomeSate copyWith({int counter = 0, isRuning}) {
+    return _HomeSate(counter: counter, isRuning: isRuning);
   }
 }
 
@@ -26,7 +27,9 @@ class _ViewModel extends ChangeNotifier {
   void increment() {
     var innerState = state;
 
-    state = state.copyWith(counter: (innerState.counter + 1));
+    state = state.copyWith(
+        counter: (innerState.counter + 1),
+        isRuning: state.isRuning == false ? true : false);
   }
 
   int getCounter() {
@@ -36,6 +39,14 @@ class _ViewModel extends ChangeNotifier {
   void logout() async {
     await _authService.logout();
     AppNavigator.toLoader();
+  }
+
+  IconData getIcon() {
+    if (state.isRuning == true) {
+      return Icons.accessible_forward_sharp;
+    } else {
+      return Icons.accessible_outlined;
+    }
   }
 }
 
@@ -68,10 +79,10 @@ class HomeWidget extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: viewModel.increment,
-        tooltip: 'Increment',
-        child: const Icon(Icons.access_alarm_sharp),
+        icon: Icon(viewModel.getIcon()),
+        label: const Text("Increment"),
       ),
     );
   }
