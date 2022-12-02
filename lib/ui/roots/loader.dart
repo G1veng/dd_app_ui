@@ -1,4 +1,4 @@
-import 'package:dd_app_ui/data/auth_service.dart';
+import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

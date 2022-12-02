@@ -1,4 +1,6 @@
-import 'package:dd_app_ui/data/auth_service.dart';
+import 'package:dd_app_ui/data/services/auth_service.dart';
+import 'package:dd_app_ui/exceptions/nonetwork_exception.dart';
+import 'package:dd_app_ui/exceptions/wrong_credential_exception.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,13 +8,16 @@ import 'package:provider/provider.dart';
 class _ViewModelState {
   final String? password;
   final String? login;
+  final String? errorMessage;
 
-  _ViewModelState({this.password, this.login});
+  _ViewModelState({this.password, this.login, this.errorMessage});
 
-  _ViewModelState copyWith({String? login, String? password}) {
+  _ViewModelState copyWith(
+      {String? login, String? password, String? errorMessage}) {
     return _ViewModelState(
       login: login ?? this.login,
       password: password ?? this.password,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -45,9 +50,15 @@ class _ViewModel extends ChangeNotifier {
   }
 
   void login() async {
-    await _authService
-        .auth(state.login, state.password)
-        .then((value) => AppNavigator.toLoader());
+    try {
+      await _authService
+          .auth(state.login, state.password)
+          .then((value) => AppNavigator.toLoader());
+    } on NoNetworkException {
+      state = state.copyWith(errorMessage: "No network");
+    } on WrongCredentionalException {
+      state = state.copyWith(errorMessage: "Wrong login or password");
+    }
   }
 }
 
@@ -81,6 +92,8 @@ class AuthWidget extends StatelessWidget {
                           viewModel.checkFields() ? viewModel.login : null,
                       child: const Text("Login"),
                     ),
+                    if (viewModel.state.errorMessage != null)
+                      Text(viewModel.state.errorMessage!),
                   ],
                 ))));
   }
