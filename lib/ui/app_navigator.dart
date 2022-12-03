@@ -1,12 +1,14 @@
 import 'package:dd_app_ui/ui/roots/auth.dart';
 import 'package:dd_app_ui/ui/roots/home.dart';
 import 'package:dd_app_ui/ui/roots/loader.dart';
+import 'package:dd_app_ui/ui/roots/user_profile.dart';
 import 'package:flutter/cupertino.dart';
 
 class NavigationRoutes {
   static const loader = "/";
   static const auth = "/auth";
   static const home = "/home";
+  static const userProfile = "/user_profile";
 }
 
 class AppNavigator {
@@ -27,17 +29,28 @@ class AppNavigator {
         ?.pushNamedAndRemoveUntil(NavigationRoutes.auth, (route) => false);
   }
 
+  static void toUserProfile() {
+    key.currentState?.pushNamed(NavigationRoutes.userProfile);
+  }
+
   static Route<dynamic>? onGeneratedRoutes(RouteSettings settings, context) {
     switch (settings.name) {
       case NavigationRoutes.loader:
         return PageRouteBuilder(
-            pageBuilder: ((_, __, ___) => LoaderWidget.create()));
+          pageBuilder: ((_, __, ___) => LoaderWidget.create()),
+        );
       case NavigationRoutes.home:
         return PageRouteBuilder(
-            pageBuilder: (_, __, ___) => HomeWidget.create("home"));
+          pageBuilder: (_, __, ___) => HomeWidget.create(),
+        );
       case NavigationRoutes.auth:
         return PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const AuthWidget().create());
+          pageBuilder: (_, __, ___) => const AuthWidget().create(),
+        );
+      case NavigationRoutes.userProfile:
+        return PageRouteBuilder(
+          pageBuilder: (_, __, ___) => UserProfileWidget.create(),
+        );
       default:
         return null;
     }

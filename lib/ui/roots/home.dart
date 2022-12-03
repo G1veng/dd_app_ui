@@ -1,4 +1,7 @@
 import 'package:dd_app_ui/data/services/auth_service.dart';
+import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
+import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,17 +9,38 @@ import 'package:provider/provider.dart';
 class _HomeSate {
   final int counter;
   final bool isRuning;
+  final User? user;
+  final int currentPageIndex;
 
-  _HomeSate({this.counter = 0, this.isRuning = false});
+  _HomeSate(
+      {this.counter = 0,
+      this.isRuning = false,
+      this.user,
+      this.currentPageIndex = 0});
 
-  _HomeSate copyWith({int counter = 0, isRuning}) {
-    return _HomeSate(counter: counter, isRuning: isRuning);
+  _HomeSate copyWith({
+    counter = 0,
+    isRuning,
+    user,
+    currentPageIndex = 0,
+  }) {
+    return _HomeSate(
+      counter: counter ?? this.counter,
+      isRuning: isRuning ?? this.isRuning,
+      user: user ?? this.user,
+      currentPageIndex: currentPageIndex ?? this.currentPageIndex,
+    );
   }
 }
 
 class _ViewModel extends ChangeNotifier {
   var _state = _HomeSate();
   final _authService = AuthService();
+  Map<String, String>? headers;
+
+  _ViewModel() {
+    asyncInit();
+  }
 
   _HomeSate get state => _state;
   set state(_HomeSate val) {
@@ -48,12 +72,33 @@ class _ViewModel extends ChangeNotifier {
       return Icons.accessible_outlined;
     }
   }
+
+  void asyncInit() async {
+    var user = await SharedPrefs.getStoredUser();
+    var token = await TokenStorage.getAccessToken();
+
+    if (user != null) {
+      state = state.copyWith(user: user);
+    }
+
+    if (token != null) {
+      headers = {"Authorization": "Bearer $token"};
+    }
+  }
+
+  void changeActivePage(int currentPageIndex) {
+    switch (currentPageIndex) {
+      case 1:
+        AppNavigator.toUserProfile();
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 class HomeWidget extends StatelessWidget {
-  final String title;
-
-  const HomeWidget({Key? key, required this.title}) : super(key: key);
+  const HomeWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -61,35 +106,32 @@ class HomeWidget extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: "Logout",
-            onPressed: viewModel.logout,
-          )
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(title),
-            Text(viewModel.getCounter().toString()),
-          ],
+        centerTitle: true,
+        title: const Text(
+          "Instagram",
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: viewModel.increment,
-        icon: Icon(viewModel.getIcon()),
-        label: const Text("Increment"),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) => viewModel.changeActivePage(index),
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: '',
+            tooltip: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person),
+            label: '',
+            tooltip: 'Profile',
+          ),
+        ],
       ),
     );
   }
 
-  static Widget create(String title) => ChangeNotifierProvider<_ViewModel>(
+  static Widget create() => ChangeNotifierProvider<_ViewModel>(
         create: (context) => _ViewModel(),
         lazy: false,
-        child: HomeWidget(title: title),
+        child: const HomeWidget(),
       );
 }

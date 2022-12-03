@@ -19,14 +19,14 @@ class _AuthClient implements AuthClient {
   String? baseUrl;
 
   @override
-  Future<TokenResponse> getToken(body) async {
+  Future<TokenResponse?> getToken(body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<TokenResponse>(Options(
+        .fetch<Map<String, dynamic>?>(_setStreamType<TokenResponse>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -38,7 +38,33 @@ class _AuthClient implements AuthClient {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = TokenResponse.fromJson(_result.data!);
+    final value =
+        _result.data == null ? null : TokenResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<TokenResponse?> getRefreshToken(body) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>?>(_setStreamType<TokenResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/api/Auth/RefreshToken',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value =
+        _result.data == null ? null : TokenResponse.fromJson(_result.data!);
     return value;
   }
 
