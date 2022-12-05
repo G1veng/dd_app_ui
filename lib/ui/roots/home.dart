@@ -3,6 +3,7 @@ import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
+import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -115,12 +116,12 @@ class HomeWidget extends StatelessWidget {
         onDestinationSelected: (int index) => viewModel.changeActivePage(index),
         destinations: const <Widget>[
           NavigationDestination(
-            icon: Icon(Icons.home),
+            icon: Icon(MyIcons.home),
             label: '',
             tooltip: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person),
+            icon: Icon(MyIcons.userOutline),
             label: '',
             tooltip: 'Profile',
           ),

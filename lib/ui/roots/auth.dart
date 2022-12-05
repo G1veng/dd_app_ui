@@ -2,6 +2,7 @@ import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/exceptions/nonetwork_exception.dart';
 import 'package:dd_app_ui/exceptions/wrong_credential_exception.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
+import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +18,7 @@ class _ViewModelState {
     return _ViewModelState(
       login: login ?? this.login,
       password: password ?? this.password,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: errorMessage,
     );
   }
 }
@@ -50,6 +51,10 @@ class _ViewModel extends ChangeNotifier {
   }
 
   void login() async {
+    if (state.errorMessage != null) {
+      state = state.copyWith(errorMessage: null);
+    }
+
     try {
       await _authService
           .auth(state.login, state.password)
@@ -92,8 +97,17 @@ class AuthWidget extends StatelessWidget {
                           viewModel.checkFields() ? viewModel.login : null,
                       child: const Text("Login"),
                     ),
-                    if (viewModel.state.errorMessage != null)
-                      Text(viewModel.state.errorMessage!),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (viewModel.state.errorMessage != null)
+                          const Icon(MyIcons.emoUnhappy),
+                        if (viewModel.state.errorMessage == null)
+                          const Icon(MyIcons.emoHappy),
+                        if (viewModel.state.errorMessage != null)
+                          Text(viewModel.state.errorMessage!),
+                      ],
+                    ),
                   ],
                 ))));
   }

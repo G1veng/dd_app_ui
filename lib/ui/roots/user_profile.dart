@@ -9,6 +9,7 @@ import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 
 class _UserProfileState {
   final User? user;
@@ -234,7 +235,7 @@ class UserProfileWidget extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: viewModel.logout,
-            icon: const Icon(Icons.exit_to_app),
+            icon: const Icon(MyIcons.logout),
           )
         ],
       ),
@@ -309,12 +310,12 @@ class UserProfileWidget extends StatelessWidget {
         onDestinationSelected: (int index) => viewModel.changeActivePage(index),
         destinations: const <Widget>[
           NavigationDestination(
-            icon: Icon(Icons.home_filled),
+            icon: Icon(MyIcons.homeOutline),
             label: '',
             tooltip: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person),
+            icon: Icon(MyIcons.user),
             label: '',
             tooltip: 'Profile',
           ),
