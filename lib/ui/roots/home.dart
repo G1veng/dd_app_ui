@@ -1,4 +1,3 @@
-import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
@@ -36,11 +35,10 @@ class _HomeSate {
 
 class _ViewModel extends ChangeNotifier {
   var _state = _HomeSate();
-  final _authService = AuthService();
   Map<String, String>? headers;
 
   _ViewModel() {
-    asyncInit();
+    _asyncInit();
   }
 
   _HomeSate get state => _state;
@@ -49,32 +47,7 @@ class _ViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void increment() {
-    var innerState = state;
-
-    state = state.copyWith(
-        counter: (innerState.counter + 1),
-        isRuning: state.isRuning == false ? true : false);
-  }
-
-  int getCounter() {
-    return state.counter;
-  }
-
-  void logout() async {
-    await _authService.logout();
-    AppNavigator.toLoader();
-  }
-
-  IconData getIcon() {
-    if (state.isRuning == true) {
-      return Icons.accessible_forward_sharp;
-    } else {
-      return Icons.accessible_outlined;
-    }
-  }
-
-  void asyncInit() async {
+  void _asyncInit() async {
     var user = await SharedPrefs.getStoredUser();
     var token = await TokenStorage.getAccessToken();
 

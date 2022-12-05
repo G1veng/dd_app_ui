@@ -59,7 +59,7 @@ class _ViewModel extends ChangeNotifier {
   int take = 10, skip = 0;
 
   _ViewModel({required this.context}) {
-    asyncInit();
+    _asyncInit();
   }
 
   set state(_UserProfileState val) {
@@ -69,7 +69,7 @@ class _ViewModel extends ChangeNotifier {
 
   _UserProfileState get state => _state;
 
-  void asyncInit() async {
+  void _asyncInit() async {
     var user = await SharedPrefs.getStoredUser();
     var headers = await TokenStorage.getAccessToken();
     var postFiles =
@@ -204,7 +204,7 @@ class _ViewModel extends ChangeNotifier {
     return false;
   }
 
-  Future _requestNextPosts() async {
+  Future requestNextPosts() async {
     var postFiles =
         await _apiService.getCurrentUserPosts(take: take, skip: skip);
 
@@ -292,7 +292,7 @@ class UserProfileWidget extends StatelessWidget {
                 child: NotificationListener<ScrollNotification>(
                     onNotification: (scrollNotification) {
                       if (scrollNotification is ScrollEndNotification) {
-                        viewModel._requestNextPosts();
+                        viewModel.requestNextPosts();
                         return true;
                       }
                       return false;
