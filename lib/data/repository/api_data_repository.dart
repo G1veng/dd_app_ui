@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request.dart';

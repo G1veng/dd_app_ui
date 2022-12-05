@@ -33,7 +33,7 @@ class _UserProfileState {
     userPostAmount,
     userSubscriptionsAmount,
     userSubscribersAmount,
-    postFiles,
+    userPosts,
   }) {
     return _UserProfileState(
       user: user ?? this.user,
@@ -44,16 +44,18 @@ class _UserProfileState {
           userSubscribersAmount ?? this.userSubscribersAmount,
       userSubscriptionsAmount:
           userSubscriptionsAmount ?? this.userSubscriptionsAmount,
-      userPosts: postFiles ?? this.userPosts,
+      userPosts: userPosts ?? this.userPosts,
     );
   }
 }
 
 class _ViewModel extends ChangeNotifier {
   final BuildContext context;
+  final List<Flexible> _allImages = [];
   var _state = _UserProfileState();
   final _authService = AuthService();
   final _apiService = ApiService();
+  int take = 10, skip = 0;
 
   _ViewModel({required this.context}) {
     asyncInit();
@@ -69,7 +71,8 @@ class _ViewModel extends ChangeNotifier {
   void asyncInit() async {
     var user = await SharedPrefs.getStoredUser();
     var headers = await TokenStorage.getAccessToken();
-    var postFiles = await _apiService.getCurrentUserPosts(take: 10, skip: 0);
+    var postFiles =
+        await _apiService.getCurrentUserPosts(take: take, skip: skip);
 
     state = state.copyWith(
       userPostAmount: await _apiService.getUserPostAmount(),
@@ -86,7 +89,9 @@ class _ViewModel extends ChangeNotifier {
     }
 
     if (postFiles != null) {
-      state = state.copyWith(postFiles: postFiles);
+      state = state.copyWith(userPosts: postFiles);
+      skip += 10;
+      take += 10;
     }
   }
 
@@ -122,48 +127,92 @@ class _ViewModel extends ChangeNotifier {
     }
   }
 
-  List<Widget> getImages() {
+  void postPressed(String id) {} //TODO Добавить обработчик нажатия на пост
+
+  void _getAllImages() {
     int counter = 0;
-    List<Flexible> widgets = [];
+
+    while (_haveNextImage(counter)) {
+      _allImages.add(
+        Flexible(
+            child: SizedBox(
+                height: MediaQuery.of(context).size.width / 3,
+                width: MediaQuery.of(context).size.width / 3,
+                child: IconButton(
+                    padding: const EdgeInsets.all(0.0),
+                    onPressed: () => postPressed(state.userPosts![0].id!),
+                    icon: Image.network(
+                      "$baseUrl${state.userPosts![0].postFiles![0].link}",
+                      headers: state.headers,
+                      alignment: Alignment.centerLeft,
+                      height: MediaQuery.of(context).size.width / 3,
+                      width: MediaQuery.of(context).size.width / 3,
+                    )))),
+      );
+
+      counter++;
+    }
+  }
+
+  List<Widget> fillImageField() {
     List<Widget> res = [];
+    int counter = 0;
+    List<Flexible> temp = [];
 
-    if (state.userPosts != null) {
-      while (_haveNextImage(counter)) {
-        widgets.add(
-          Flexible(
-              child: Container(
-                  margin: const EdgeInsets.all(1.0),
-                  child: Image.network(
-                    "$baseUrl${state.userPosts![0].postFiles![0].link}",
-                    headers: state.headers,
-                    height: MediaQuery.of(context).size.width / 3.5,
-                  ))),
-        );
+    _getAllImages();
 
-        if (widgets.length == 3) {
-          res.add(Row(
-            children: widgets,
-          ));
+    for (int i = 0; i < _allImages.length; i++) {
+      counter++;
 
-          widgets = [];
-        }
+      if (counter == 3) {
+        res.add(Row(
+          children: [
+            _allImages[i - 2],
+            _allImages[i - 1],
+            _allImages[i],
+          ],
+        ));
 
-        counter++;
+        counter = 0;
+      }
+    }
+
+    if (counter != 0) {
+      for (int i = _allImages.length - 1;
+          i >= _allImages.length - counter;
+          i--) {
+        temp.add(_allImages[i]);
       }
 
-      res.add(Row(
-        children: widgets,
-      ));
+      res.add(Row(children: temp));
     }
+
+    notifyListeners();
 
     return res;
   }
 
   bool _haveNextImage(int index) {
-    if (state.userPosts!.length == index) {
-      return false;
-    } else {
-      return true;
+    if (state.userPosts != null) {
+      if (state.userPosts!.length == index) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future _requestNextPosts() async {
+    var postFiles =
+        await _apiService.getCurrentUserPosts(take: take, skip: skip);
+
+    state = state.copyWith(userPosts: postFiles);
+
+    if (postFiles != null) {
+      state = state.copyWith(userPosts: postFiles);
+      skip += 10;
+      take += 10;
     }
   }
 }
@@ -218,19 +267,19 @@ class UserProfileWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Posts:\t${viewModel.getUserPostsAmount()}",
+                            "Posts:  ${viewModel.getUserPostsAmount()}",
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "Followers:\t${viewModel.getUserSubscribersAmount()}",
+                            "Followers:  ${viewModel.getUserSubscribersAmount()}",
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "Following:\t${viewModel.getUserSubscriptionsAmount()}",
+                            "Following:  ${viewModel.getUserSubscriptionsAmount()}",
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "Birth date:\t${viewModel.getUserBirtDate()}",
+                            "Birth date:  ${viewModel.getUserBirtDate()}",
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -239,12 +288,20 @@ class UserProfileWidget extends StatelessWidget {
               ],
             ),
             Expanded(
-                child: SingleChildScrollView(
-              child: Wrap(
-                direction: Axis.horizontal,
-                children: viewModel.getImages(),
-              ),
-            )),
+                child: NotificationListener<ScrollNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification is ScrollEndNotification) {
+                        viewModel._requestNextPosts();
+                        return true;
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        direction: Axis.horizontal,
+                        children: viewModel.fillImageField(),
+                      ),
+                    ))),
           ],
         ),
       ),

@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import "package:dio/dio.dart";
@@ -24,7 +22,7 @@ abstract class ApiClient {
   Future<int> getUserSubscribersAmount();
 
   @GET("/api/Post/GetCurrentUserPosts")
-  Future<List<PostModelResponse>?> getCurrentUserPosts(
+  Future<List<PostModelResponse>?>? getCurrentUserPosts(
     @Query("take") int take,
     @Query("skip") int skip,
   );
