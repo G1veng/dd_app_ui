@@ -59,16 +59,6 @@ class _ViewModel extends ChangeNotifier {
       headers = {"Authorization": "Bearer $token"};
     }
   }
-
-  void changeActivePage(int currentPageIndex) {
-    switch (currentPageIndex) {
-      case 1:
-        AppNavigator.toUserProfile();
-        break;
-      default:
-        break;
-    }
-  }
 }
 
 class HomeWidget extends StatelessWidget {
@@ -85,40 +75,30 @@ class HomeWidget extends StatelessWidget {
           "Instagram",
         ),
       ),
-      // bottomNavigationBar: NavigationBar(
-      //   selectedIndex: 0,
-      //   onDestinationSelected: (int index) => viewModel.changeActivePage(index),
-      //   destinations: const <Widget>[
-      //     NavigationDestination(
-      //       icon: Icon(MyIcons.home),
-      //       label: '',
-      //       tooltip: 'Home',
-      //     ),
-      //     NavigationDestination(
-      //       icon: Icon(MyIcons.userOutline),
-      //       label: '',
-      //       tooltip: 'Profile',
-      //     ),
-      //   ],
-      // ),
       bottomNavigationBar: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(MyIcons.home),
-                  )),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: IconButton(
-                      onPressed: () => AppNavigator.toUserProfile(),
-                      icon: const Icon(MyIcons.userOutline))),
-            ],
-          )),
+          height: MediaQuery.of(context).size.height * 0.09,
+          child: Column(children: [
+            const Divider(
+              color: Colors.grey,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                    width: MediaQuery.of(context).size.width / 2,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(MyIcons.home),
+                    )),
+                SizedBox(
+                    width: MediaQuery.of(context).size.width / 2,
+                    child: IconButton(
+                        onPressed: () => AppNavigator.toUserProfile(),
+                        icon: const Icon(MyIcons.userOutline))),
+              ],
+            ),
+          ])),
     );
   }
 

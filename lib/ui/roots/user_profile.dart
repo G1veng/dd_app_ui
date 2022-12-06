@@ -7,6 +7,7 @@ import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
@@ -116,18 +117,6 @@ class _ViewModel extends ChangeNotifier {
   String getUserBirtDate() =>
       state.user == null ? '' : Jiffy(state.user!.birthDate, "yyyy-MM-dd").MMMd;
 
-  void changeActivePage(
-    int currentPageIndex,
-  ) {
-    switch (currentPageIndex) {
-      case 0:
-        AppNavigator.toHome();
-        break;
-      default:
-        break;
-    }
-  }
-
   void postPressed(String id) {} //TODO Добавить обработчик нажатия на пост
 
   void _getAllImages() {
@@ -225,6 +214,8 @@ class UserProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _portraitModeOnly();
+
     var viewModel = context.watch<_ViewModel>();
 
     return Scaffold(
@@ -244,11 +235,12 @@ class UserProfileWidget extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            Row(
+            IntrinsicHeight(
+                child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
-                  margin: const EdgeInsets.all(20.0),
+                  margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
                   child: (viewModel.state.headers != null &&
                           viewModel.state.user != null)
                       ? CircleAvatar(
@@ -263,81 +255,92 @@ class UserProfileWidget extends StatelessWidget {
                           radius: 50.0,
                         ),
                 ),
+                const SizedBox(
+                    height: 75,
+                    child: VerticalDivider(
+                      width: 5,
+                      color: Colors.grey,
+                    )),
                 Flexible(
                   child: Container(
-                      margin: const EdgeInsets.fromLTRB(0.0, 0, 0.0, 0.0),
+                      margin: const EdgeInsets.fromLTRB(5.0, 0, 0.0, 0.0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(children: [
-                            const Text(
-                              "Posts ",
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                            Text(
-                              viewModel.getUserPostsAmount(),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                          ]),
-                          Column(children: [
-                            const Text(
-                              "Followers ",
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                            Text(
-                              viewModel.getUserSubscribersAmount(),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                          ]),
-                          Column(children: [
-                            const Text(
-                              "Followings ",
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                            Text(
-                              viewModel.getUserSubscriptionsAmount(),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                          ]),
-                          Column(children: [
-                            const Text(
-                              "Birth date ",
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                            Text(
-                              viewModel.getUserBirtDate(),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: fontSize,
-                              ),
-                            ),
-                          ]),
+                          Expanded(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "Post ",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: fontSize,
+                                      ),
+                                    )),
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      viewModel.getUserPostsAmount(),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: fontSize + 10,
+                                      ),
+                                    )),
+                              ])),
+                          Expanded(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "Followers ",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: fontSize,
+                                      ),
+                                    )),
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      viewModel.getUserSubscribersAmount(),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: fontSize + 10,
+                                      ),
+                                    )),
+                              ])),
+                          Expanded(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "Followings ",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: fontSize,
+                                      ),
+                                    )),
+                                Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      viewModel.getUserSubscriptionsAmount(),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: fontSize + 10,
+                                      ),
+                                    )),
+                              ])),
                         ],
                       )),
                 ),
               ],
-            ),
+            )),
             Expanded(
                 child: NotificationListener<ScrollNotification>(
                     onNotification: (scrollNotification) {
@@ -358,22 +361,44 @@ class UserProfileWidget extends StatelessWidget {
       ),
       bottomNavigationBar: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: IconButton(
-                    onPressed: () => AppNavigator.toHome(),
-                    icon: const Icon(MyIcons.homeOutline),
-                  )),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: IconButton(
-                      onPressed: () {}, icon: const Icon(MyIcons.user))),
-            ],
-          )),
+          height: MediaQuery.of(context).size.height * 0.1,
+          child: Column(children: [
+            const Divider(
+              color: Colors.grey,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                    width: MediaQuery.of(context).size.width / 2,
+                    child: IconButton(
+                      onPressed: () => AppNavigator.toHome(),
+                      icon: const Icon(MyIcons.homeOutline),
+                    )),
+                SizedBox(
+                    width: MediaQuery.of(context).size.width / 2,
+                    child: IconButton(
+                        onPressed: () {}, icon: const Icon(MyIcons.user))),
+              ],
+            ),
+          ])),
     );
+  }
+
+  void _portraitModeOnly() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  void _enableRotation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   static Widget create() => ChangeNotifierProvider<_ViewModel>(
