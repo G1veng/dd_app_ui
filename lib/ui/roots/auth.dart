@@ -81,17 +81,31 @@ class AuthWidget extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextField(
-                      controller: viewModel.loginTec,
-                      decoration:
-                          const InputDecoration(hintText: "Enter login"),
-                    ),
-                    TextField(
-                      obscureText: true,
-                      controller: viewModel.passwordTec,
-                      decoration:
-                          const InputDecoration(hintText: "Enter password"),
-                    ),
+                    Container(
+                        margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 10.0),
+                        alignment: Alignment.center,
+                        child: TextField(
+                          controller: viewModel.loginTec,
+                          decoration: InputDecoration(
+                              errorText: viewModel.loginTec.text.isEmpty
+                                  ? "This field is required"
+                                  : null,
+                              border: const OutlineInputBorder(),
+                              hintText: "Enter login"),
+                          textAlign: TextAlign.start,
+                        )),
+                    Container(
+                        margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
+                        child: TextField(
+                          obscureText: true,
+                          controller: viewModel.passwordTec,
+                          decoration: InputDecoration(
+                              errorText: viewModel.passwordTec.text.isEmpty
+                                  ? "This field is required"
+                                  : null,
+                              border: const OutlineInputBorder(),
+                              hintText: "Enter password"),
+                        )),
                     ElevatedButton(
                       onPressed:
                           viewModel.checkFields() ? viewModel.login : null,
