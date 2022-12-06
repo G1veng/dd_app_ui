@@ -2,6 +2,7 @@ import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/exceptions/nonetwork_exception.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
+import 'package:getwidget/getwidget.dart';
 
 class _UserProfileState {
   final User? user;
@@ -53,11 +55,13 @@ class _UserProfileState {
 
 class _ViewModel extends ChangeNotifier {
   final BuildContext context;
-  final List<Flexible> _allImages = [];
+  final List<String> ids = [];
+  final List<GestureDetector> _allImages = [];
   var _state = _UserProfileState();
   final _authService = AuthService();
   final _apiService = ApiService();
   int take = 10, skip = 0;
+  bool isLoading = true;
 
   _ViewModel({required this.context}) {
     _asyncInit();
@@ -71,16 +75,26 @@ class _ViewModel extends ChangeNotifier {
   _UserProfileState get state => _state;
 
   void _asyncInit() async {
-    var user = await SharedPrefs.getStoredUser();
-    var headers = await TokenStorage.getAccessToken();
-    var postFiles =
-        await _apiService.getCurrentUserPosts(take: take, skip: skip);
+    isLoading = true;
+    User? user;
+    String? headers;
+    List<PostModelResponse>? userPosts;
 
-    state = state.copyWith(
-      userPostAmount: await _apiService.getUserPostAmount(),
-      userSubscribersAmount: await _apiService.getUserSubscribersAmount(),
-      userSubscriptionsAmount: await _apiService.getUserSubscriptionsAmount(),
-    );
+    try {
+      user = await SharedPrefs.getStoredUser();
+      headers = await TokenStorage.getAccessToken();
+      userPosts = await _apiService.getCurrentUserPosts(take: take, skip: skip);
+
+      state = state.copyWith(
+        userPostAmount: await _apiService.getUserPostAmount(),
+        userSubscribersAmount: await _apiService.getUserSubscribersAmount(),
+        userSubscriptionsAmount: await _apiService.getUserSubscriptionsAmount(),
+      );
+    } on NoNetworkException {
+      _showDialog("Network error", "Network erorr, please try later");
+    } on Exception {
+      _showDialog("Error", "Happened unexpected error, please try later");
+    }
 
     if (user != null) {
       state = state.copyWith(user: user);
@@ -90,15 +104,66 @@ class _ViewModel extends ChangeNotifier {
       state = state.copyWith(headers: headers);
     }
 
-    if (postFiles != null) {
-      state = state.copyWith(userPosts: postFiles);
+    if (userPosts != null) {
+      if (state.userPosts == null) {
+        state = state.copyWith(userPosts: userPosts);
+      } else {
+        state.userPosts!.addAll(userPosts);
+      }
+
+      addImages(userPosts.length);
+
       skip += 10;
       take += 10;
     }
+
+    if (user != null || headers != null || userPosts != null) {
+      isLoading = false;
+    }
+  }
+
+  void _showDialog(String title, String description) {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text(title),
+              content: Text(description),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'Cancel'),
+                  child: const Text('Ok'),
+                ),
+              ],
+            ));
+  }
+
+  void addImages(int size) {
+    for (int i = state.userPosts!.length - size;
+        i < state.userPosts!.length;
+        i++) {
+      _allImages.add(GestureDetector(
+          onTap: () => postPressed(state.userPosts![i].id!),
+          child: GFAvatar(
+            backgroundImage: Image.network(
+              "$baseUrl${state.userPosts![i].postFiles![0].link}",
+              headers: state.headers,
+            ).image,
+            radius: (MediaQuery.of(context).size.width / 6) - 1,
+            shape: GFAvatarShape.square,
+          )));
+    }
+
+    notifyListeners();
   }
 
   void logout() async {
-    await _authService.logout();
+    try {
+      await _authService.logout();
+    } on NoNetworkException {
+      _showDialog("Network error", "No network, please try later");
+    } on Exception {
+      _showDialog("Error", "Happened unexpected error, please try later");
+    }
     AppNavigator.toLoader();
   }
 
@@ -117,90 +182,29 @@ class _ViewModel extends ChangeNotifier {
   String getUserBirtDate() =>
       state.user == null ? '' : Jiffy(state.user!.birthDate, "yyyy-MM-dd").MMMd;
 
-  void postPressed(String id) {} //TODO Добавить обработчик нажатия на пост
-
-  void _getAllImages() {
-    int counter = 0;
-
-    while (_haveNextImage(counter)) {
-      _allImages.add(
-        Flexible(
-            child: SizedBox(
-                height: MediaQuery.of(context).size.width / 3,
-                width: MediaQuery.of(context).size.width / 3,
-                child: IconButton(
-                    padding: const EdgeInsets.all(0.0),
-                    onPressed: () => postPressed(state.userPosts![0].id!),
-                    icon: Image.network(
-                      "$baseUrl${state.userPosts![0].postFiles![0].link}",
-                      headers: state.headers,
-                      alignment: Alignment.centerLeft,
-                      height: MediaQuery.of(context).size.width / 3,
-                      width: MediaQuery.of(context).size.width / 3,
-                    )))),
-      );
-
-      counter++;
-    }
-  }
-
-  List<Widget> fillImageField() {
-    List<Widget> res = [];
-    int counter = 0;
-    List<Flexible> temp = [];
-
-    _getAllImages();
-
-    for (int i = 0; i < _allImages.length; i++) {
-      counter++;
-
-      if (counter == 3) {
-        res.add(Row(
-          children: [
-            _allImages[i - 2],
-            _allImages[i - 1],
-            _allImages[i],
-          ],
-        ));
-
-        counter = 0;
-      }
-    }
-
-    if (counter != 0) {
-      for (int i = _allImages.length - 1;
-          i >= _allImages.length - counter;
-          i--) {
-        temp.add(_allImages[i]);
-      }
-
-      res.add(Row(children: temp));
-    }
-
-    notifyListeners();
-
-    return res;
-  }
-
-  bool _haveNextImage(int index) {
-    if (state.userPosts != null) {
-      if (state.userPosts!.length == index) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-    return false;
-  }
+  void postPressed(
+      String postId) {} //TODO Добавить обработчик перехода на выбранный пост
 
   Future requestNextPosts() async {
-    var postFiles =
-        await _apiService.getCurrentUserPosts(take: take, skip: skip);
+    List<PostModelResponse>? userPosts;
 
-    state = state.copyWith(userPosts: postFiles);
+    try {
+      userPosts = await _apiService.getCurrentUserPosts(take: take, skip: skip);
+    } on NoNetworkException {
+      _showDialog("Network error", "Network erorr, please try later");
+    } on Exception {
+      _showDialog("Error", "Happened unexpected error, please try later");
+    }
 
-    if (postFiles != null) {
-      state = state.copyWith(userPosts: postFiles);
+    if (userPosts != null) {
+      if (state.userPosts == null) {
+        state = state.copyWith(userPosts: userPosts);
+      } else {
+        state.userPosts!.addAll(userPosts);
+      }
+
+      addImages(userPosts.length);
+
       skip += 10;
       take += 10;
     }
@@ -341,6 +345,10 @@ class UserProfileWidget extends StatelessWidget {
                 ),
               ],
             )),
+            if (viewModel.isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
             Expanded(
                 child: NotificationListener<ScrollNotification>(
                     onNotification: (scrollNotification) {
@@ -352,8 +360,10 @@ class UserProfileWidget extends StatelessWidget {
                     },
                     child: SingleChildScrollView(
                       child: Wrap(
+                        runSpacing: 2.0,
+                        spacing: 2.0,
                         direction: Axis.horizontal,
-                        children: viewModel.fillImageField(),
+                        children: viewModel._allImages,
                       ),
                     ))),
           ],
@@ -361,7 +371,7 @@ class UserProfileWidget extends StatelessWidget {
       ),
       bottomNavigationBar: SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.1,
+          height: MediaQuery.of(context).size.height * 0.09,
           child: Column(children: [
             const Divider(
               color: Colors.grey,
@@ -389,15 +399,6 @@ class UserProfileWidget extends StatelessWidget {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
-    ]);
-  }
-
-  void _enableRotation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
   }
 

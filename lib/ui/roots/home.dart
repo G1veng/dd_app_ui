@@ -66,8 +66,6 @@ class HomeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var viewModel = context.watch<_ViewModel>();
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
