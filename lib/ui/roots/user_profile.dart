@@ -219,6 +219,8 @@ class _ViewModel extends ChangeNotifier {
 }
 
 class UserProfileWidget extends StatelessWidget {
+  static const double fontSize = 12;
+
   const UserProfileWidget({Key? key}) : super(key: key);
 
   @override
@@ -263,26 +265,74 @@ class UserProfileWidget extends StatelessWidget {
                 ),
                 Flexible(
                   child: Container(
-                      margin: const EdgeInsets.fromLTRB(20.0, 0, 0, 0),
-                      child: Column(
+                      margin: const EdgeInsets.fromLTRB(0.0, 0, 0.0, 0.0),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Posts:  ${viewModel.getUserPostsAmount()}",
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            "Followers:  ${viewModel.getUserSubscribersAmount()}",
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            "Following:  ${viewModel.getUserSubscriptionsAmount()}",
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            "Birth date:  ${viewModel.getUserBirtDate()}",
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          Column(children: [
+                            const Text(
+                              "Posts ",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                            Text(
+                              viewModel.getUserPostsAmount(),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                          ]),
+                          Column(children: [
+                            const Text(
+                              "Followers ",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                            Text(
+                              viewModel.getUserSubscribersAmount(),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                          ]),
+                          Column(children: [
+                            const Text(
+                              "Followings ",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                            Text(
+                              viewModel.getUserSubscriptionsAmount(),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                          ]),
+                          Column(children: [
+                            const Text(
+                              "Birth date ",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                            Text(
+                              viewModel.getUserBirtDate(),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: fontSize,
+                              ),
+                            ),
+                          ]),
                         ],
                       )),
                 ),
@@ -306,21 +356,23 @@ class UserProfileWidget extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) => viewModel.changeActivePage(index),
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(MyIcons.homeOutline),
-            label: '',
-            tooltip: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(MyIcons.user),
-            label: '',
-            tooltip: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: IconButton(
+                    onPressed: () => AppNavigator.toHome(),
+                    icon: const Icon(MyIcons.homeOutline),
+                  )),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: IconButton(
+                      onPressed: () {}, icon: const Icon(MyIcons.user))),
+            ],
+          )),
     );
   }
 

@@ -85,21 +85,40 @@ class HomeWidget extends StatelessWidget {
           "Instagram",
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) => viewModel.changeActivePage(index),
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(MyIcons.home),
-            label: '',
-            tooltip: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(MyIcons.userOutline),
-            label: '',
-            tooltip: 'Profile',
-          ),
-        ],
-      ),
+      // bottomNavigationBar: NavigationBar(
+      //   selectedIndex: 0,
+      //   onDestinationSelected: (int index) => viewModel.changeActivePage(index),
+      //   destinations: const <Widget>[
+      //     NavigationDestination(
+      //       icon: Icon(MyIcons.home),
+      //       label: '',
+      //       tooltip: 'Home',
+      //     ),
+      //     NavigationDestination(
+      //       icon: Icon(MyIcons.userOutline),
+      //       label: '',
+      //       tooltip: 'Profile',
+      //     ),
+      //   ],
+      // ),
+      bottomNavigationBar: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(MyIcons.home),
+                  )),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: IconButton(
+                      onPressed: () => AppNavigator.toUserProfile(),
+                      icon: const Icon(MyIcons.userOutline))),
+            ],
+          )),
     );
   }
 
