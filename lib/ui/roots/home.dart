@@ -5,6 +5,7 @@ import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
+import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
@@ -151,41 +152,18 @@ class HomeWidget extends StatelessWidget {
     var viewModel = context.watch<_ViewModel>();
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          "NotInstagram",
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            "NotInstagram",
+          ),
         ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: viewModel.posts,
-      ),
-      bottomNavigationBar: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.09,
-          child: Column(children: [
-            const Divider(
-              color: Colors.grey,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                    width: MediaQuery.of(context).size.width / 2,
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(MyIcons.home),
-                    )),
-                SizedBox(
-                    width: MediaQuery.of(context).size.width / 2,
-                    child: IconButton(
-                        onPressed: () => AppNavigator.toUserProfile(),
-                        icon: const Icon(MyIcons.userOutline))),
-              ],
-            ),
-          ])),
-    );
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: viewModel.posts,
+        ),
+        bottomNavigationBar:
+            CustomBottomNavigationBar.create(context: context, isHome: true));
   }
 
   static Widget create() => ChangeNotifierProvider<_ViewModel>(
