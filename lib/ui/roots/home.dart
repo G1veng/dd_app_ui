@@ -70,9 +70,10 @@ class HomeWidget extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          "Instagram",
+          "NotInstagram",
         ),
       ),
+      body: Column(),
       bottomNavigationBar: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height * 0.09,
