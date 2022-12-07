@@ -106,11 +106,22 @@ class AuthWidget extends StatelessWidget {
                               border: const OutlineInputBorder(),
                               hintText: "Enter password"),
                         )),
-                    ElevatedButton(
-                      onPressed:
-                          viewModel.checkFields() ? viewModel.login : null,
-                      child: const Text("Login"),
-                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(
+                          margin: const EdgeInsets.all(5.0),
+                          child: ElevatedButton(
+                            onPressed: viewModel.checkFields()
+                                ? viewModel.login
+                                : null,
+                            child: const Text("Login"),
+                          )),
+                      Container(
+                          margin: const EdgeInsets.all(5.0),
+                          child: ElevatedButton(
+                            onPressed: () => {AppNavigator.toRegistration()},
+                            child: const Text("Go to registration"),
+                          ))
+                    ]),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

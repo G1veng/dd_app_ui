@@ -19,4 +19,14 @@ abstract class ApiRepository {
   Future<List<PostModelResponse>?> getCurrentUserPosts(int take, int skip);
 
   Future<List<User>?> getUsers();
+
+  Future<List<PostModelResponse>?> getSubscriptionsPosts(int take, int skip);
+
+  Future createUser({
+    required name,
+    required email,
+    required password,
+    required retryPassword,
+    required birthDate,
+  });
 }

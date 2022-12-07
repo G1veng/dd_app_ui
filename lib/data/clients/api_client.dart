@@ -29,4 +29,10 @@ abstract class ApiClient {
 
   @GET("/api/User/GetUsers")
   Future<List<User>?> getUsers();
+
+  @GET("/api/Post/GetSubscriptionPosts")
+  Future<List<PostModelResponse>?>? getSubscriptionPosts(
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
 }

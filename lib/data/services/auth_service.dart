@@ -10,6 +10,21 @@ import '../../internal/dependecies/repository_model.dart';
 class AuthService {
   final ApiRepository _api = RepositoryModule.apiRepository();
 
+  Future createUser(
+      {required name,
+      required email,
+      required password,
+      required retryPassword,
+      required birthDate}) async {
+    await _api.createUser(
+      name: name,
+      email: email,
+      password: password,
+      retryPassword: retryPassword,
+      birthDate: birthDate,
+    );
+  }
+
   Future auth(String? login, String? password) async {
     if (login != null && password != null) {
       try {

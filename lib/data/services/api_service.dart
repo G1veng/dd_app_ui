@@ -71,4 +71,17 @@ class ApiService {
       }
     }
   }
+
+  Future<List<PostModelResponse>?> getSubscriptionPosts(
+      int take, int skip) async {
+    try {
+      return await _api.getSubscriptionsPosts(take, skip);
+    } on DioError catch (e) {
+      if (e.error is SocketException) {
+        throw NoNetworkException();
+      } else {
+        throw Exception();
+      }
+    }
+  }
 }

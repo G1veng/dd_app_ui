@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/domain/models/create_user_request.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request.dart';
 import 'package:dd_app_ui/domain/models/token_request.dart';
 import "package:dio/dio.dart";
@@ -23,4 +24,7 @@ abstract class AuthClient {
   Future<TokenResponse?> getRefreshToken(
     @Body() RefreshTokenRequest body,
   );
+
+  @POST("/api/User/CreateUser")
+  Future createUser(@Body() CreateUserRequest body);
 }

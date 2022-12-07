@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
+import 'package:dd_app_ui/domain/models/create_user_request.dart';
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
@@ -62,5 +63,27 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future<List<User>?> getUsers() async {
     return await _api.getUsers();
+  }
+
+  @override
+  Future<List<PostModelResponse>?> getSubscriptionsPosts(
+      int take, int skip) async {
+    return await _api.getSubscriptionPosts(take, skip);
+  }
+
+  @override
+  Future createUser(
+      {required name,
+      required email,
+      required password,
+      required retryPassword,
+      required birthDate}) async {
+    return await _auth.createUser(CreateUserRequest(
+      name: name,
+      email: email,
+      password: password,
+      retryPassword: retryPassword,
+      birthDate: birthDate,
+    ));
   }
 }
