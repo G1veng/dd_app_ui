@@ -165,6 +165,9 @@ class HomeWidget extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height * 0.09,
           child: Column(children: [
+            const Divider(
+              color: Colors.grey,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
