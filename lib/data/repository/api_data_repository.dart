@@ -1,6 +1,7 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/domain/models/create_user_request.dart';
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
+import 'package:dd_app_ui/domain/models/post_request.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 
@@ -85,5 +86,20 @@ class ApiDataRepository extends ApiRepository {
       retryPassword: retryPassword,
       birthDate: birthDate,
     ));
+  }
+
+  @override
+  Future<PostRequest?> getPost({required String postId}) async {
+    return await _api.getPost(postId);
+  }
+
+  @override
+  Future<bool> getPostLikeState({required String postId}) async {
+    return await _api.getPostLikeState(postId);
+  }
+
+  @override
+  Future changePostLikeState({required String postId}) async {
+    return await _api.changePostLikeState(postId);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
+import 'package:dd_app_ui/domain/models/post_request.dart';
 import 'package:dd_app_ui/domain/models/token_response.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 
@@ -29,4 +30,10 @@ abstract class ApiRepository {
     required retryPassword,
     required birthDate,
   });
+
+  Future<PostRequest?> getPost({required String postId});
+
+  Future<bool> getPostLikeState({required String postId});
+
+  Future changePostLikeState({required String postId});
 }

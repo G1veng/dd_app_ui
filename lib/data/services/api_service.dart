@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dd_app_ui/domain/models/post_model_response.dart';
+import 'package:dd_app_ui/domain/models/post_request.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/repository/api_repository.dart';
 import 'package:dd_app_ui/exceptions/nonetwork_exception.dart';
@@ -83,5 +84,17 @@ class ApiService {
         throw Exception();
       }
     }
+  }
+
+  Future<PostRequest?> getPost({required String postId}) async {
+    return await _api.getPost(postId: postId);
+  }
+
+  Future<bool> getPostLikeState({required String postId}) async {
+    return await _api.getPostLikeState(postId: postId);
+  }
+
+  Future changePostLikeState({required String postId}) async {
+    return await _api.changePostLikeState(postId: postId);
   }
 }

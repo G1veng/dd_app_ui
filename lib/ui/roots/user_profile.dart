@@ -32,6 +32,17 @@ class _UserProfileState {
     this.userPosts,
   });
 
+  _UserProfileState clearUserPosts() {
+    return _UserProfileState(
+      user: user,
+      headers: headers,
+      userPostAmount: userPostAmount,
+      userSubscribersAmount: userSubscribersAmount,
+      userSubscriptionsAmount: userSubscriptionsAmount,
+      userPosts: null,
+    );
+  }
+
   _UserProfileState copyWith({
     user,
     headers,
@@ -63,6 +74,7 @@ class _ViewModel extends ChangeNotifier {
   final _apiService = ApiService();
   int take = 10, skip = 0;
   bool isLoading = true;
+  bool isUpdating = false;
 
   _ViewModel({required this.context}) {
     _asyncInit();
@@ -75,7 +87,9 @@ class _ViewModel extends ChangeNotifier {
 
   _UserProfileState get state => _state;
 
-  void _asyncInit() async {
+  Future _asyncInit() async {
+    take = 10;
+    skip = 0;
     isLoading = true;
     User? user;
     String? headers;
@@ -142,19 +156,56 @@ class _ViewModel extends ChangeNotifier {
     for (int i = state.userPosts!.length - size;
         i < state.userPosts!.length;
         i++) {
-      _allImages.add(GestureDetector(
-          onTap: () => postPressed(state.userPosts![i].id!),
-          child: GFAvatar(
-            backgroundImage: Image.network(
-              "$baseUrl${state.userPosts![i].postFiles![0].link}",
-              headers: state.headers,
-            ).image,
-            radius: (MediaQuery.of(context).size.width / 6) - 1,
-            shape: GFAvatarShape.square,
-          )));
+      if (state.userPosts![i].postFiles!.isEmpty) {
+        _allImages.add(GestureDetector(
+            onTap: () => postPressed(state.userPosts![i].id!),
+            child: Expanded(
+                child: SizedBox(
+                    height: (MediaQuery.of(context).size.width / 3) - 2,
+                    width: (MediaQuery.of(context).size.width / 3) - 2,
+                    child: Container(
+                        color: const Color.fromARGB(255, 165, 165, 167),
+                        child: Center(
+                          child: Text(
+                            state.userPosts![i].text!,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.clip,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ))))));
+      } else {
+        _allImages.add(GestureDetector(
+            onTap: () => postPressed(state.userPosts![i].id!),
+            child: GFAvatar(
+              backgroundImage: Image.network(
+                "$baseUrl${state.userPosts![i].postFiles![0].link}",
+                headers: state.headers,
+              ).image,
+              radius: (MediaQuery.of(context).size.width / 6) - 1,
+              shape: GFAvatarShape.square,
+            )));
+      }
     }
 
     notifyListeners();
+  }
+
+  void updateScreen() async {
+    if (!isUpdating) {
+      isUpdating = true;
+      _startDelay();
+      _allImages.clear();
+      state = state.clearUserPosts();
+
+      await _asyncInit();
+    }
+  }
+
+  void _startDelay() async {
+    await Future.delayed(const Duration(seconds: 1));
+    isUpdating = false;
   }
 
   void logout() async {
@@ -238,136 +289,144 @@ class UserProfileWidget extends StatelessWidget {
           ],
         ),
         body: SafeArea(
-          child: Column(
-            children: <Widget>[
-              IntrinsicHeight(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
-                    child: (viewModel.state.headers != null &&
-                            viewModel.state.user != null)
-                        ? CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              "$baseUrl${viewModel.state.user!.avatar}",
-                              headers: viewModel.state.headers,
+          child: GestureDetector(
+            child: Column(
+              children: <Widget>[
+                IntrinsicHeight(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
+                      child: (viewModel.state.headers != null &&
+                              viewModel.state.user != null)
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                "$baseUrl${viewModel.state.user!.avatar}",
+                                headers: viewModel.state.headers,
+                              ),
+                              radius: 50.0,
+                            )
+                          : const CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              radius: 50.0,
                             ),
-                            radius: 50.0,
-                          )
-                        : const CircleAvatar(
-                            backgroundColor: Colors.grey,
-                            radius: 50.0,
-                          ),
-                  ),
-                  const SizedBox(
-                      height: 75,
-                      child: VerticalDivider(
-                        width: 5,
-                        color: Colors.grey,
-                      )),
-                  Flexible(
-                    child: Container(
-                        margin: const EdgeInsets.fromLTRB(5.0, 0, 0.0, 0.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        "Post ",
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                        ),
-                                      )),
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        viewModel.getUserPostsAmount(),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: fontSize + 10,
-                                        ),
-                                      )),
-                                ])),
-                            Expanded(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        "Followers ",
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                        ),
-                                      )),
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        viewModel.getUserSubscribersAmount(),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: fontSize + 10,
-                                        ),
-                                      )),
-                                ])),
-                            Expanded(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        "Followings ",
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                        ),
-                                      )),
-                                  Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        viewModel.getUserSubscriptionsAmount(),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: fontSize + 10,
-                                        ),
-                                      )),
-                                ])),
-                          ],
+                    ),
+                    const SizedBox(
+                        height: 75,
+                        child: VerticalDivider(
+                          width: 5,
+                          color: Colors.grey,
                         )),
+                    Flexible(
+                      child: Container(
+                          margin: const EdgeInsets.fromLTRB(5.0, 0, 0.0, 0.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                  child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          "Post ",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                          ),
+                                        )),
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          viewModel.getUserPostsAmount(),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: fontSize + 10,
+                                          ),
+                                        )),
+                                  ])),
+                              Expanded(
+                                  child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          "Followers ",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                          ),
+                                        )),
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          viewModel.getUserSubscribersAmount(),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: fontSize + 10,
+                                          ),
+                                        )),
+                                  ])),
+                              Expanded(
+                                  child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          "Followings ",
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                          ),
+                                        )),
+                                    Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          viewModel
+                                              .getUserSubscriptionsAmount(),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: fontSize + 10,
+                                          ),
+                                        )),
+                                  ])),
+                            ],
+                          )),
+                    ),
+                  ],
+                )),
+                if (viewModel.isLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ],
-              )),
-              if (viewModel.isLoading)
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              Expanded(
-                  child: NotificationListener<ScrollNotification>(
-                      onNotification: (scrollNotification) {
-                        if (scrollNotification is ScrollEndNotification) {
-                          viewModel.requestNextPosts();
-                          return true;
-                        }
-                        return false;
-                      },
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          runSpacing: 2.0,
-                          spacing: 2.0,
-                          direction: Axis.horizontal,
-                          children: viewModel._allImages,
-                        ),
-                      ))),
-            ],
+                Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                        onNotification: (scrollNotification) {
+                          if (scrollNotification is ScrollEndNotification) {
+                            viewModel.requestNextPosts();
+                            return true;
+                          }
+                          return false;
+                        },
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            runSpacing: 2.0,
+                            spacing: 2.0,
+                            direction: Axis.horizontal,
+                            children: viewModel._allImages,
+                          ),
+                        ))),
+              ],
+            ),
+            onVerticalDragUpdate: (details) =>
+                details.delta.distance > 10.0 ? viewModel.updateScreen() : null,
           ),
         ),
         bottomNavigationBar: CustomBottomNavigationBar.create(

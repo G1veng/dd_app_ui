@@ -108,7 +108,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<PostModelResponse>?>? getCurrentUserPosts(
+  Future<List<PostModelResponse>?> getCurrentUserPosts(
     take,
     skip,
   ) async {
@@ -165,7 +165,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<PostModelResponse>?>? getSubscriptionPosts(
+  Future<List<PostModelResponse>?> getSubscriptionPosts(
     take,
     skip,
   ) async {
@@ -193,6 +193,74 @@ class _ApiClient implements ApiClient {
         ?.map((dynamic i) =>
             PostModelResponse.fromJson(i as Map<String, dynamic>))
         .toList();
+    return value;
+  }
+
+  @override
+  Future<PostRequest?> getPost(postId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'postId': postId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio
+        .fetch<Map<String, dynamic>?>(_setStreamType<PostRequest>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/api/Post/GetPost',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value =
+        _result.data == null ? null : PostRequest.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<bool> getPostLikeState(postId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'postId': postId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<bool>(_setStreamType<bool>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/Post/GetPostLikeState',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
+    return value;
+  }
+
+  @override
+  Future<dynamic> changePostLikeState(postId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'postId': postId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch(_setStreamType<dynamic>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/Post/ChangePostLikeState',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data;
     return value;
   }
 

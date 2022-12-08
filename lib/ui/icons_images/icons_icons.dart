@@ -20,6 +20,10 @@
 ///         Author:    Crowdsourced, for Fontello project
 ///         License:   SIL (http://scripts.sil.org/OFL)
 ///         Homepage:  http://fontello.com
+/// * Web Symbols, Copyright (c) 2011 by Just Be Nice studio. All rights reserved.
+///         Author:    Just Be Nice studio
+///         License:   SIL (http://scripts.sil.org/OFL)
+///         Homepage:  http://www.justbenicestudio.com/
 /// * MFG Labs, Copyright (C) 2012 by Daniel Bruce
 ///         Author:    MFG Labs
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -57,6 +61,10 @@ class MyIcons {
       IconData(0xe80a, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData emoHappy =
       IconData(0xe80b, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData heart_1 =
+      IconData(0xe80c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData heartEmpty =
+      IconData(0xe80d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData logout =
       IconData(0xf02d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
