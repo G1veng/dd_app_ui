@@ -3,6 +3,7 @@ import 'package:dd_app_ui/ui/roots/home.dart';
 import 'package:dd_app_ui/ui/roots/loader.dart';
 import 'package:dd_app_ui/ui/roots/registration.dart';
 import 'package:dd_app_ui/ui/roots/user_profile.dart';
+import 'package:dd_app_ui/ui/roots/users.dart';
 import 'package:flutter/cupertino.dart';
 
 class NavigationRoutes {
@@ -11,6 +12,7 @@ class NavigationRoutes {
   static const home = "/home";
   static const userProfile = "/user_profile";
   static const registration = "/registration";
+  static const users = "/users";
 }
 
 class AppNavigator {
@@ -33,6 +35,10 @@ class AppNavigator {
   static void toAuth() {
     key.currentState
         ?.pushNamedAndRemoveUntil(NavigationRoutes.auth, (route) => false);
+  }
+
+  static void toUsers() {
+    key.currentState?.pushNamed(NavigationRoutes.users);
   }
 
   static void toUserProfile() {
@@ -60,6 +66,9 @@ class AppNavigator {
       case NavigationRoutes.registration:
         return PageRouteBuilder(
             pageBuilder: (_, __, ___) => RegistrationWidget.create());
+      case NavigationRoutes.users:
+        return PageRouteBuilder(
+            pageBuilder: (_, __, ___) => UsersWidget.create());
       default:
         return null;
     }

@@ -1,10 +1,9 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/data/clients/auth_client.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
-import 'package:dd_app_ui/domain/models/refresh_token_request.dart';
+import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
-import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dio/dio.dart';
 
 class ApiModule {
@@ -42,17 +41,14 @@ class ApiModule {
           try {
             if (rt != null) {
               var token = await auth()
-                  .getRefreshToken(RefreshTokenRequest(refreshToken: rt));
+                  .getRefreshToken(RefreshTokenRequestModel(refreshToken: rt));
               await TokenStorage.setStoredToken(token);
               options.headers["Authorization"] = "Bearer ${token!.accessToken}";
             }
           } catch (e) {
             var service = AuthService();
-            if (await service.checkAuth()) {
-              await service.logout();
-              AppNavigator.toLoader();
-            }
-
+            await service.logout();
+            //AppNavigator.toLoader();
             return handler
                 .resolve(Response(statusCode: 400, requestOptions: options));
           } finally {

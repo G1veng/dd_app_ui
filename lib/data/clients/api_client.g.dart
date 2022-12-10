@@ -108,7 +108,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<PostModelResponse>?> getCurrentUserPosts(
+  Future<List<PostModel>?> getCurrentUserPosts(
     take,
     skip,
   ) async {
@@ -119,8 +119,8 @@ class _ApiClient implements ApiClient {
     };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio
-        .fetch<List<dynamic>>(_setStreamType<List<PostModelResponse>>(Options(
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<PostModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -133,8 +133,7 @@ class _ApiClient implements ApiClient {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     var value = _result.data
-        ?.map((dynamic i) =>
-            PostModelResponse.fromJson(i as Map<String, dynamic>))
+        ?.map((dynamic i) => PostModel.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
   }
@@ -165,7 +164,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<PostModelResponse>?> getSubscriptionPosts(
+  Future<List<PostModel>?> getSubscriptionPosts(
     take,
     skip,
   ) async {
@@ -176,8 +175,8 @@ class _ApiClient implements ApiClient {
     };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio
-        .fetch<List<dynamic>>(_setStreamType<List<PostModelResponse>>(Options(
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<PostModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -190,20 +189,19 @@ class _ApiClient implements ApiClient {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     var value = _result.data
-        ?.map((dynamic i) =>
-            PostModelResponse.fromJson(i as Map<String, dynamic>))
+        ?.map((dynamic i) => PostModel.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
   }
 
   @override
-  Future<PostRequest?> getPost(postId) async {
+  Future<PostModel?> getPost(postId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'postId': postId};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio
-        .fetch<Map<String, dynamic>?>(_setStreamType<PostRequest>(Options(
+        .fetch<Map<String, dynamic>?>(_setStreamType<PostModel>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -216,7 +214,7 @@ class _ApiClient implements ApiClient {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value =
-        _result.data == null ? null : PostRequest.fromJson(_result.data!);
+        _result.data == null ? null : PostModel.fromJson(_result.data!);
     return value;
   }
 
@@ -261,6 +259,29 @@ class _ApiClient implements ApiClient {
         )
         .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = _result.data;
+    return value;
+  }
+
+  @override
+  Future<User?> getUserById(userId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result =
+        await _dio.fetch<Map<String, dynamic>?>(_setStreamType<User>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/api/User/GetUser',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data == null ? null : User.fromJson(_result.data!);
     return value;
   }
 

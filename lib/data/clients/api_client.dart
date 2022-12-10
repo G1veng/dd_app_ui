@@ -1,5 +1,4 @@
-import 'package:dd_app_ui/domain/models/post_model_response.dart';
-import 'package:dd_app_ui/domain/models/post_request.dart';
+import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import "package:dio/dio.dart";
 import 'package:retrofit/retrofit.dart';
@@ -23,7 +22,7 @@ abstract class ApiClient {
   Future<int> getUserSubscribersAmount();
 
   @GET("/api/Post/GetCurrentUserPosts")
-  Future<List<PostModelResponse>?> getCurrentUserPosts(
+  Future<List<PostModel>?> getCurrentUserPosts(
     @Query("take") int take,
     @Query("skip") int skip,
   );
@@ -32,17 +31,20 @@ abstract class ApiClient {
   Future<List<User>?> getUsers();
 
   @GET("/api/Post/GetSubscriptionPosts")
-  Future<List<PostModelResponse>?> getSubscriptionPosts(
+  Future<List<PostModel>?> getSubscriptionPosts(
     @Query("take") int take,
     @Query("skip") int skip,
   );
 
   @GET("/api/Post/GetPost")
-  Future<PostRequest?> getPost(@Query("postId") String postId);
+  Future<PostModel?> getPost(@Query("postId") String postId);
 
   @GET("/api/Post/GetPostLikeState")
   Future<bool> getPostLikeState(@Query("postId") String postId);
 
   @POST("/api/Post/ChangePostLikeState")
   Future changePostLikeState(@Query("postId") String postId);
+
+  @GET("/api/User/GetUser")
+  Future<User?> getUserById(@Query("userId") String userId);
 }

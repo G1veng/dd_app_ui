@@ -1,6 +1,8 @@
 import 'package:dd_app_ui/data/services/api_service.dart';
-import 'package:dd_app_ui/domain/models/post_model_response.dart';
-import 'package:dd_app_ui/domain/models/post_request.dart';
+import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/post.dart';
+import 'package:dd_app_ui/domain/models/post_like_state.dart';
+import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
@@ -15,22 +17,16 @@ class _HomeSate {
   final int counter;
   final bool isRuning;
   final User? user;
-  final int currentPageIndex;
-  final List<PostModelResponse>? subscriptionPosts;
   final Map<String, String>? headers;
-  final List<Column>? posts;
-  final List<bool>? likedPosts;
-  final List<PostRequest?>? postsInfo;
+  final List<Column>? postsWidgets;
+  final List<PostWithPostLikeState>? postsInfo;
 
   _HomeSate({
     this.counter = 0,
     this.isRuning = false,
     this.user,
-    this.currentPageIndex = 0,
     this.headers,
-    this.subscriptionPosts,
-    this.posts,
-    this.likedPosts,
+    this.postsWidgets,
     this.postsInfo,
   });
 
@@ -39,23 +35,21 @@ class _HomeSate {
     isRuning,
     user,
     currentPageIndex = 0,
-    subscriptionPosts,
     headers,
-    posts,
-    likedPosts,
-    postsInfo,
+    postsWidgets,
+    Iterable<PostWithPostLikeState>? postsInfo,
   }) {
-    List<PostModelResponse>? resSubscriptionsPosts;
+    List<PostWithPostLikeState>? expandedPostsInfo;
 
-    if (this.subscriptionPosts != null) {
-      resSubscriptionsPosts = this.subscriptionPosts;
+    if (this.postsInfo != null) {
+      expandedPostsInfo = this.postsInfo!;
     }
 
-    if (subscriptionPosts != null) {
-      if (resSubscriptionsPosts == null) {
-        resSubscriptionsPosts = subscriptionPosts;
+    if (postsInfo != null) {
+      if (expandedPostsInfo == null) {
+        expandedPostsInfo = postsInfo.toList();
       } else {
-        resSubscriptionsPosts.addAll(subscriptionPosts);
+        expandedPostsInfo.addAll(postsInfo);
       }
     }
 
@@ -65,22 +59,32 @@ class _HomeSate {
           headers != null ? {"Authorization": "Bearer $headers"} : this.headers,
       isRuning: isRuning ?? this.isRuning,
       user: user ?? this.user,
-      currentPageIndex: currentPageIndex ?? this.currentPageIndex,
-      subscriptionPosts: resSubscriptionsPosts,
-      posts: posts ?? this.posts,
-      likedPosts: likedPosts ?? this.likedPosts,
-      postsInfo: postsInfo ?? this.postsInfo,
+      postsWidgets: postsWidgets ?? this.postsWidgets,
+      postsInfo: expandedPostsInfo ?? this.postsInfo,
+    );
+  }
+
+  _HomeSate clearPostInfo() {
+    return _HomeSate(
+      counter: counter,
+      headers: headers,
+      isRuning: isRuning,
+      user: user,
+      postsWidgets: null,
+      postsInfo: null,
     );
   }
 }
 
-class _ViewModel extends ChangeNotifier {
+class _HomeViewModel extends ChangeNotifier {
   final BuildContext context;
   var _state = _HomeSate();
+  final _dataService = DataService();
   final _api = ApiService();
   int take = 10, skip = 0;
+  bool isUpdating = false;
 
-  _ViewModel({required this.context}) {
+  _HomeViewModel({required this.context}) {
     _asyncInit();
   }
 
@@ -104,7 +108,7 @@ class _ViewModel extends ChangeNotifier {
       state = state.copyWith(headers: headers);
     }
 
-    var posts = await _requestNextPosts(take, skip);
+    var posts = await requestNextPosts();
 
     if (posts == true || headers != null || user != null) {
       state = state.copyWith(isRuning: false);
@@ -114,33 +118,74 @@ class _ViewModel extends ChangeNotifier {
   void postPressed(String postId) {}
 
   void postLikePressed(String postId, int index) async {
-    var postsInfo = state.postsInfo;
-    var likedPosts = state.likedPosts;
+    var changeOn = state.postsInfo![index].postLikeState! == 1 ? 0 : 1;
+    Post? changedPost;
 
-    await _api.changePostLikeState(postId: postId);
+    await _dataService.cuPostLikeState(PostLikeState(
+      id: postId,
+      isLiked: changeOn,
+    ));
 
-    likedPosts![index] ? likedPosts[index] = false : likedPosts[index] = true;
+    changedPost = await _dataService.getPost(postId);
 
-    postsInfo![index] = await _api.getPost(postId: postId);
+    await _dataService.cuPost(Post(
+      id: changedPost!.id,
+      created: changedPost.created,
+      text: changedPost.text,
+      authorId: changedPost.authorId,
+      authorAvatar: changedPost.authorAvatar,
+      commentAmount: changedPost.commentAmount,
+      likesAmount: changeOn == 1
+          ? changedPost.likesAmount! + 1
+          : changedPost.likesAmount! - 1,
+    ));
 
-    state = state.copyWith(likedPosts: likedPosts, postsInfo: postsInfo);
-    _updateScreenPosts(0, isUpdate: true);
-  }
+    _api.changePostLikeState(postId: postId);
+    //Можно оставить без await, так как нам не нужно получать это изменения
+    //такие ситуация в дальнейшем буду оставлять без комментариев
 
-  void _updateScreenPosts(int startIndex, {bool isUpdate = false}) {
-    var posts = state.posts ?? [];
-    if (isUpdate) {
-      startIndex = 0;
-      posts.clear();
+    var post = await _dataService.getPostWithLikeStatePostFiles(postId);
+    if (post != null) {
+      var postInfo = state.postsInfo;
+
+      postInfo![index] = post;
+
+      state = state.clearPostInfo();
+
+      state = state.copyWith(postsInfo: postInfo);
     }
 
-    for (int i = startIndex; i < state.subscriptionPosts!.length; i++) {
-      if (state.subscriptionPosts![i].postFiles!.isEmpty) {
+    _updateScreenPosts(isUpdate: true);
+  }
+
+  Future _startDelay() async {
+    isUpdating = true;
+    await Future.delayed(const Duration(seconds: 3));
+    isUpdating = false;
+  }
+
+  void _updateScreenPosts({bool isUpdate = false}) {
+    var posts = state.postsWidgets ?? [];
+
+    if (isUpdate) {
+      _startDelay();
+      posts.clear();
+      take = 10;
+      skip = 0;
+    }
+
+    int length = posts.length;
+
+    if (state.postsInfo == null) {
+      return;
+    }
+
+    for (int i = length; i < state.postsInfo!.length; i++) {
+      if (state.postsInfo![i].postFiles!.isEmpty) {
         posts.add(Column(children: [
           GestureDetector(
-            onTap: () => postPressed(state.subscriptionPosts![i].id!),
-            onDoubleTap: () =>
-                postLikePressed(state.subscriptionPosts![i].id!, i),
+            onTap: () => postPressed(state.postsInfo![i].id!),
+            onDoubleTap: () => postLikePressed(state.postsInfo![i].id!, i),
             child: Expanded(
                 child: SizedBox(
                     height: MediaQuery.of(context).size.width / 4,
@@ -150,7 +195,7 @@ class _ViewModel extends ChangeNotifier {
                         color: const Color.fromARGB(255, 165, 165, 167),
                         child: Center(
                           child: Text(
-                            state.subscriptionPosts![i].text!,
+                            state.postsInfo![i].text!,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.clip,
                             style: const TextStyle(
@@ -167,31 +212,30 @@ class _ViewModel extends ChangeNotifier {
                     IconButton(
                       color: Colors.red,
                       onPressed: () =>
-                          postLikePressed(state.subscriptionPosts![i].id!, i),
-                      icon: state.likedPosts![i] == true
+                          postLikePressed(state.postsInfo![i].id!, i),
+                      icon: state.postsInfo![i].postLikeState == 1
                           ? const Icon(MyIcons.heartFilled)
                           : const Icon(MyIcons.heartEmpty),
                     ),
-                    Text("Likes ${state.postsInfo![i]!.likesAmount}")
+                    Text("Likes ${state.postsInfo![i].likesAmount}")
                   ],
                 )),
             Container(
                 margin: const EdgeInsets.fromLTRB(3.0, 0.0, 5.0, 0.0),
-                child: Text("Comments ${state.postsInfo![i]!.commentAmount}"))
+                child: Text("Comments ${state.postsInfo![i].commentAmount}"))
           ]),
         ]));
       } else {
         posts.add(Column(children: [
           GestureDetector(
-              onTap: () => postPressed(state.subscriptionPosts![i].id!),
-              onDoubleTap: () =>
-                  postLikePressed(state.subscriptionPosts![i].id!, i),
+              onTap: () => postPressed(state.postsInfo![i].id!),
+              onDoubleTap: () => postLikePressed(state.postsInfo![i].id!, i),
               child: GFAvatar(
                 backgroundImage: Image.network(
-                  "$baseUrl${state.subscriptionPosts![i].postFiles![0].link}",
+                  "$baseUrl${state.postsInfo![i].postFiles![0]!.link}",
                   headers: state.headers,
                 ).image,
-                radius: (MediaQuery.of(context).size.width - 1.0),
+                radius: ((MediaQuery.of(context).size.width / 2) - 1.0),
                 shape: GFAvatarShape.square,
               )),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -202,55 +246,74 @@ class _ViewModel extends ChangeNotifier {
                     IconButton(
                       color: Colors.red,
                       onPressed: () =>
-                          postLikePressed(state.subscriptionPosts![i].id!, i),
-                      icon: state.likedPosts![i] == true
+                          postLikePressed(state.postsInfo![i].id!, i),
+                      icon: state.postsInfo![i].postLikeState == 1
                           ? const Icon(MyIcons.heartFilled)
                           : const Icon(MyIcons.heartEmpty),
                     ),
-                    Text("Likes ${state.postsInfo![i]!.likesAmount}")
+                    Text("Likes ${state.postsInfo![i].likesAmount}")
                   ],
                 )),
             Container(
                 margin: const EdgeInsets.fromLTRB(3.0, 0.0, 5.0, 0.0),
-                child: Text("Comments ${state.postsInfo![i]!.commentAmount}"))
+                child: Text("Comments ${state.postsInfo![i].commentAmount}"))
           ]),
         ]));
       }
     }
 
-    state = state.copyWith(posts: posts);
+    state = state.copyWith(postsWidgets: posts);
   }
 
-  Future<bool> _requestNextPosts(int take, int skip) async {
+  Future<bool> requestNextPosts() async {
+    List<PostWithPostLikeState> dbPosts = [];
     var posts = await _api.getSubscriptionPosts(take, skip);
-    var likedPosts = state.likedPosts ?? [];
-    var postsInfo = state.postsInfo ?? [];
-
-    int startIndex = 0;
 
     if (posts != null) {
-      for (int i = 0; i < posts.length; i++) {
-        postsInfo.add(await _api.getPost(postId: posts[i].id!));
-        likedPosts.add(await _api.getPostLikeState(postId: posts[i].id!));
+      for (var post in posts) {
+        var author = await _api.getUserById(userId: post.authorId!);
+
+        if (author != null) {
+          await _dataService.cuUser(author);
+        }
+
+        if (post.postFiles != null) {
+          for (var file in post.postFiles!) {
+            await _dataService.cuPostFile(file!);
+          }
+        }
+
+        var postLikeState = await _api.getPostLikeState(postId: post.id!);
+        _dataService.cuPostLikeState(
+            PostLikeState(id: post.id!, isLiked: postLikeState ? 1 : 0));
+
+        await _dataService.cuPost(Post(
+          id: post.id,
+          created: post.created,
+          text: post.text,
+          authorId: post.authorId,
+          authorAvatar: post.authorAvatar,
+          commentAmount: post.commentAmount,
+          likesAmount: post.likesAmount,
+        ));
       }
 
-      if (state.subscriptionPosts != null) {
-        startIndex = state.subscriptionPosts!.length;
+      for (var post in posts) {
+        var dbPost = await _dataService.getPostWithLikeStatePostFiles(post.id!);
+        if (dbPost != null) {
+          dbPosts.add(dbPost);
+        }
+
+        take += 10;
+        skip += 10;
       }
 
-      state = state.copyWith(
-          subscriptionPosts: posts,
-          likedPosts: likedPosts,
-          postsInfo: postsInfo);
+      state = state.copyWith(postsInfo: dbPosts);
 
-      take += 10;
-      skip += 10;
-
-      _updateScreenPosts(startIndex);
+      _updateScreenPosts();
 
       return true;
     }
-
     return false;
   }
 }
@@ -260,7 +323,7 @@ class HomeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var viewModel = context.watch<_ViewModel>();
+    var viewModel = context.watch<_HomeViewModel>();
 
     return Scaffold(
         appBar: AppBar(
@@ -275,13 +338,28 @@ class HomeWidget extends StatelessWidget {
                 )
               : null,
         ),
-        body: Column(children: viewModel.state.posts ?? []),
+        body: NotificationListener<ScrollNotification>(
+            onNotification: (scrollNotification) {
+              if (scrollNotification is ScrollEndNotification) {
+                viewModel.requestNextPosts;
+                return true;
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+                child: GestureDetector(
+              child: Column(children: viewModel.state.postsWidgets ?? []),
+              onVerticalDragUpdate: (details) =>
+                  (details.delta.distance > 10.0 && !viewModel.isUpdating)
+                      ? viewModel._updateScreenPosts(isUpdate: true)
+                      : null,
+            ))),
         bottomNavigationBar:
             CustomBottomNavigationBar.create(context: context, isHome: true));
   }
 
-  static Widget create() => ChangeNotifierProvider<_ViewModel>(
-        create: (context) => _ViewModel(context: context),
+  static Widget create() => ChangeNotifierProvider<_HomeViewModel>(
+        create: (context) => _HomeViewModel(context: context),
         lazy: false,
         child: const HomeWidget(),
       );

@@ -1,13 +1,12 @@
-import 'package:dd_app_ui/domain/models/post_model_response.dart';
-import 'package:dd_app_ui/domain/models/post_request.dart';
-import 'package:dd_app_ui/domain/models/token_response.dart';
+import 'package:dd_app_ui/domain/models/post_model.dart';
+import 'package:dd_app_ui/domain/models/token_response_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 
 abstract class ApiRepository {
-  Future<TokenResponse?> getToken(
+  Future<TokenResponseModel?> getToken(
       {required String login, required String password});
 
-  Future<TokenResponse?> refreshToken({required String refreshToken});
+  Future<TokenResponseModel?> refreshToken({required String refreshToken});
 
   Future<User?> getUser();
 
@@ -17,11 +16,11 @@ abstract class ApiRepository {
 
   Future<int> getUserSubscriptionsAmount();
 
-  Future<List<PostModelResponse>?> getCurrentUserPosts(int take, int skip);
+  Future<List<PostModel>?> getCurrentUserPosts(int take, int skip);
 
   Future<List<User>?> getUsers();
 
-  Future<List<PostModelResponse>?> getSubscriptionsPosts(int take, int skip);
+  Future<List<PostModel>?> getSubscriptionsPosts(int take, int skip);
 
   Future createUser({
     required name,
@@ -31,9 +30,11 @@ abstract class ApiRepository {
     required birthDate,
   });
 
-  Future<PostRequest?> getPost({required String postId});
+  Future<PostModel?> getPost({required String postId});
 
   Future<bool> getPostLikeState({required String postId});
 
   Future changePostLikeState({required String postId});
+
+  Future<User?> getUserById({required String userId});
 }

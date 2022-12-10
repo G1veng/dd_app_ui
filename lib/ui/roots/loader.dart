@@ -1,13 +1,14 @@
 import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class _VoewModel extends ChangeNotifier {
+class _LoaderModel extends ChangeNotifier {
   BuildContext context;
   final _authService = AuthService();
 
-  _VoewModel({required this.context}) {
+  _LoaderModel({required this.context}) {
     _asyncInit();
   }
 
@@ -25,16 +26,24 @@ class LoaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _portraitModeOnly();
+
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
       ),
-      backgroundColor: Colors.transparent,
     );
   }
 
-  static Widget create() => ChangeNotifierProvider<_VoewModel>(
-        create: (context) => _VoewModel(context: context),
+  void _portraitModeOnly() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  static Widget create() => ChangeNotifierProvider<_LoaderModel>(
+        create: (context) => _LoaderModel(context: context),
         lazy: false,
         child: const LoaderWidget(),
       );

@@ -3,7 +3,7 @@ import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class _ViewModelState {
+class _RegistrationState {
   final String? name;
   final String? password;
   final String? email;
@@ -11,7 +11,7 @@ class _ViewModelState {
   final String? errorMessage;
   final String? birthDate;
 
-  _ViewModelState(
+  _RegistrationState(
       {this.password,
       this.errorMessage,
       this.name,
@@ -19,14 +19,14 @@ class _ViewModelState {
       this.birthDate,
       this.retryPassword});
 
-  _ViewModelState copyWith(
+  _RegistrationState copyWith(
       {String? email,
       String? password,
       String? errorMessage,
       String? name,
       String? birthDate,
       String? retryPassword}) {
-    return _ViewModelState(
+    return _RegistrationState(
       email: email ?? this.email,
       password: password ?? this.password,
       errorMessage: errorMessage,
@@ -37,7 +37,7 @@ class _ViewModelState {
   }
 }
 
-class _ViewModel extends ChangeNotifier {
+class _RegistrationViewModel extends ChangeNotifier {
   var emailTec = TextEditingController();
   var passwordTec = TextEditingController();
   var nameTec = TextEditingController();
@@ -45,15 +45,15 @@ class _ViewModel extends ChangeNotifier {
   var birthDateTec = TextEditingController();
   final _authService = AuthService();
 
-  var _state = _ViewModelState();
-  _ViewModelState get state => _state;
-  set state(_ViewModelState val) {
+  var _state = _RegistrationState();
+  _RegistrationState get state => _state;
+  set state(_RegistrationState val) {
     _state = val;
     notifyListeners();
   }
 
   BuildContext context;
-  _ViewModel({required this.context}) {
+  _RegistrationViewModel({required this.context}) {
     emailTec.addListener(() {
       state = state.copyWith(email: emailTec.text);
     });
@@ -97,7 +97,7 @@ class RegistrationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var viewModel = context.watch<_ViewModel>();
+    var viewModel = context.watch<_RegistrationViewModel>();
 
     return Scaffold(
         body: SafeArea(
@@ -217,8 +217,8 @@ class RegistrationWidget extends StatelessWidget {
                         ))))));
   }
 
-  static Widget create() => ChangeNotifierProvider<_ViewModel>(
-        create: (context) => _ViewModel(context: context),
+  static Widget create() => ChangeNotifierProvider<_RegistrationViewModel>(
+        create: (context) => _RegistrationViewModel(context: context),
         lazy: false,
         child: const RegistrationWidget(),
       );

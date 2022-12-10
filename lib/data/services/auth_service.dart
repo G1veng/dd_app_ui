@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dio/dio.dart';
 import '../../domain/repository/api_repository.dart';
@@ -9,6 +10,7 @@ import '../../internal/dependecies/repository_model.dart';
 
 class AuthService {
   final ApiRepository _api = RepositoryModule.apiRepository();
+  final DataService _dataService = DataService();
 
   Future createUser(
       {required name,
@@ -54,7 +56,20 @@ class AuthService {
   }
 
   Future<bool> checkAuth() async {
-    return (await TokenStorage.getAccessToken()) != null;
+    var res = false;
+
+    if (await TokenStorage.getAccessToken() != null) {
+      var user = await _api.getUser();
+
+      if (user != null) {
+        await SharedPrefs.setStoredUser(user);
+        await _dataService.cuUser(user);
+      }
+
+      res = true;
+    }
+
+    return res;
   }
 
   Future logout() async {

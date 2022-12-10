@@ -1,13 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'create_user_request.dart';
+part of 'create_user_request_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) =>
-    CreateUserRequest(
+CreateUserRequestModel _$CreateUserRequestModelFromJson(
+        Map<String, dynamic> json) =>
+    CreateUserRequestModel(
       name: json['name'] as String,
       email: json['email'] as String,
       password: json['password'] as String,
@@ -15,7 +16,8 @@ CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) =>
       birthDate: json['birthDate'] as String,
     );
 
-Map<String, dynamic> _$CreateUserRequestToJson(CreateUserRequest instance) =>
+Map<String, dynamic> _$CreateUserRequestModelToJson(
+        CreateUserRequestModel instance) =>
     <String, dynamic>{
       'name': instance.name,
       'email': instance.email,

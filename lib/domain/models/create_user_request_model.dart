@@ -1,16 +1,16 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'create_user_request.g.dart';
+part 'create_user_request_model.g.dart';
 
 @JsonSerializable()
-class CreateUserRequest {
+class CreateUserRequestModel {
   final String name;
   final String email;
   final String password;
   final String retryPassword;
   final String birthDate;
 
-  CreateUserRequest({
+  CreateUserRequestModel({
     required this.name,
     required this.email,
     required this.password,
@@ -18,8 +18,8 @@ class CreateUserRequest {
     required this.birthDate,
   });
 
-  factory CreateUserRequest.fromJson(Map<String, dynamic> json) =>
-      _$CreateUserRequestFromJson(json);
+  factory CreateUserRequestModel.fromJson(Map<String, dynamic> json) =>
+      _$CreateUserRequestModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CreateUserRequestToJson(this);
+  Map<String, dynamic> toJson() => _$CreateUserRequestModelToJson(this);
 }

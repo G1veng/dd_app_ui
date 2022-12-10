@@ -1,7 +1,12 @@
 import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
-import 'package:dd_app_ui/domain/models/post_model_response.dart';
+import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/post.dart';
+import 'package:dd_app_ui/domain/models/post_like_state.dart';
+import 'package:dd_app_ui/domain/models/post_model.dart';
+import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/domain/models/user_statistics.dart';
 import 'package:dd_app_ui/exceptions/nonetwork_exception.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
@@ -9,7 +14,6 @@ import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
@@ -18,17 +22,13 @@ import 'package:getwidget/getwidget.dart';
 class _UserProfileState {
   final User? user;
   final Map<String, String>? headers;
-  final int? userPostAmount;
-  final int? userSubscriptionsAmount;
-  final int? userSubscribersAmount;
-  final List<PostModelResponse>? userPosts;
+  final UserStatistics? userStatistics;
+  final List<PostWithPostLikeState>? userPosts;
 
   _UserProfileState({
-    this.userSubscriptionsAmount,
-    this.userSubscribersAmount,
     this.user,
     this.headers,
-    this.userPostAmount,
+    this.userStatistics,
     this.userPosts,
   });
 
@@ -36,9 +36,7 @@ class _UserProfileState {
     return _UserProfileState(
       user: user,
       headers: headers,
-      userPostAmount: userPostAmount,
-      userSubscribersAmount: userSubscribersAmount,
-      userSubscriptionsAmount: userSubscriptionsAmount,
+      userStatistics: null,
       userPosts: null,
     );
   }
@@ -46,37 +44,46 @@ class _UserProfileState {
   _UserProfileState copyWith({
     user,
     headers,
-    userPostAmount,
-    userSubscriptionsAmount,
-    userSubscribersAmount,
+    userStatistics,
     userPosts,
   }) {
+    List<PostWithPostLikeState>? extendeUserPosts;
+
+    if (this.userPosts == null) {
+      if (userPosts != null) {
+        extendeUserPosts = userPosts;
+      }
+    } else {
+      extendeUserPosts = this.userPosts;
+      if (userPosts != null) {
+        extendeUserPosts!.addAll(userPosts);
+      }
+    }
+
     return _UserProfileState(
       user: user ?? this.user,
       headers:
           headers != null ? {"Authorization": "Bearer $headers"} : this.headers,
-      userPostAmount: userPostAmount ?? this.userPostAmount,
-      userSubscribersAmount:
-          userSubscribersAmount ?? this.userSubscribersAmount,
-      userSubscriptionsAmount:
-          userSubscriptionsAmount ?? this.userSubscriptionsAmount,
-      userPosts: userPosts ?? this.userPosts,
+      userStatistics: userStatistics ?? this.userStatistics,
+      userPosts: extendeUserPosts,
     );
   }
 }
 
-class _ViewModel extends ChangeNotifier {
+class _UserProfileViewModel extends ChangeNotifier {
   final BuildContext context;
   final List<String> ids = [];
   final List<GestureDetector> _allImages = [];
   var _state = _UserProfileState();
   final _authService = AuthService();
   final _apiService = ApiService();
+  final _dataService = DataService();
   int take = 10, skip = 0;
   bool isLoading = true;
   bool isUpdating = false;
+  bool isDelay = false;
 
-  _ViewModel({required this.context}) {
+  _UserProfileViewModel({required this.context}) {
     _asyncInit();
   }
 
@@ -93,48 +100,83 @@ class _ViewModel extends ChangeNotifier {
     isLoading = true;
     User? user;
     String? headers;
-    List<PostModelResponse>? userPosts;
+    List<PostModel>? userPosts;
 
+    user = await SharedPrefs.getStoredUser();
+    headers = await TokenStorage.getAccessToken();
     try {
-      user = await SharedPrefs.getStoredUser();
-      headers = await TokenStorage.getAccessToken();
       userPosts = await _apiService.getCurrentUserPosts(take: take, skip: skip);
-
-      state = state.copyWith(
-        userPostAmount: await _apiService.getUserPostAmount(),
-        userSubscribersAmount: await _apiService.getUserSubscribersAmount(),
-        userSubscriptionsAmount: await _apiService.getUserSubscriptionsAmount(),
-      );
     } on NoNetworkException {
       _showDialog("Network error", "Network erorr, please try later");
     } on Exception {
       _showDialog("Error", "Happened unexpected error, please try later");
     }
 
-    if (user != null) {
-      state = state.copyWith(user: user);
+    if (userPosts != null) {
+      for (var post in userPosts) {
+        await _dataService.cuPost(Post(
+          id: post.id,
+          created: post.created,
+          text: post.text,
+          authorId: post.authorId,
+          authorAvatar: post.authorAvatar,
+          commentAmount: post.commentAmount,
+          likesAmount: post.likesAmount,
+        ));
+
+        if (post.postFiles != null) {
+          for (var file in post.postFiles!) {
+            await _dataService.cuPostFile(file!);
+          }
+        }
+
+        _dataService.cuPostLikeState(PostLikeState(
+            id: post.id!,
+            isLiked:
+                (await _apiService.getPostLikeState(postId: post.id!)) == true
+                    ? 1
+                    : 0));
+      }
     }
+
+    _dataService.cuUserStatistics(UserStatistics(
+        id: user!.id,
+        userPostAmount: await _apiService.getUserPostAmount(),
+        userSubscribersAmount: await _apiService.getUserSubscribersAmount(),
+        userSubscriptionsAmount:
+            await _apiService.getUserSubscriptionsAmount()));
+
+    state = state.copyWith(
+      userStatistics: await _dataService.getUserStatisctics(user.id),
+      userPosts: await _dataService.getPostsWithLikeStatePostFilesById(
+        user.id,
+        take: take,
+        skip: skip,
+        orderBy: "created",
+      ),
+    );
+
+    state = state.copyWith(user: user);
 
     if (headers != null) {
       state = state.copyWith(headers: headers);
     }
 
     if (userPosts != null) {
-      if (state.userPosts == null) {
-        state = state.copyWith(userPosts: userPosts);
-      } else {
-        state.userPosts!.addAll(userPosts);
-      }
-
-      addImages(userPosts.length);
+      addImages();
 
       skip += 10;
-      take += 10;
     }
 
-    if (user != null || headers != null || userPosts != null) {
+    if (userPosts != null) {
       isLoading = false;
     }
+  }
+
+  Future startDelay() async {
+    isDelay = true;
+    await Future.delayed(const Duration(seconds: 5));
+    isDelay = false;
   }
 
   void _showDialog(String title, String description) {
@@ -152,10 +194,10 @@ class _ViewModel extends ChangeNotifier {
             ));
   }
 
-  void addImages(int size) {
-    for (int i = state.userPosts!.length - size;
-        i < state.userPosts!.length;
-        i++) {
+  void addImages() {
+    var length = _allImages.length;
+
+    for (int i = length; i < state.userPosts!.length; i++) {
       if (state.userPosts![i].postFiles!.isEmpty) {
         _allImages.add(GestureDetector(
             onTap: () => postPressed(state.userPosts![i].id!),
@@ -180,7 +222,7 @@ class _ViewModel extends ChangeNotifier {
             onTap: () => postPressed(state.userPosts![i].id!),
             child: GFAvatar(
               backgroundImage: Image.network(
-                "$baseUrl${state.userPosts![i].postFiles![0].link}",
+                "$baseUrl${state.userPosts![i].postFiles![0]!.link}",
                 headers: state.headers,
               ).image,
               radius: (MediaQuery.of(context).size.width / 6) - 1,
@@ -219,18 +261,6 @@ class _ViewModel extends ChangeNotifier {
     AppNavigator.toLoader();
   }
 
-  String getUserPostsAmount() => state.userPostAmount == null
-      ? 0.toString()
-      : state.userPostAmount.toString();
-
-  String getUserSubscribersAmount() => state.userSubscribersAmount == null
-      ? 0.toString()
-      : state.userSubscribersAmount.toString();
-
-  String getUserSubscriptionsAmount() => state.userSubscriptionsAmount == null
-      ? 0.toString()
-      : state.userSubscriptionsAmount.toString();
-
   String getUserBirtDate() =>
       state.user == null ? '' : Jiffy(state.user!.birthDate, "yyyy-MM-dd").MMMd;
 
@@ -238,7 +268,8 @@ class _ViewModel extends ChangeNotifier {
       String postId) {} //TODO Добавить обработчик перехода на выбранный пост
 
   Future requestNextPosts() async {
-    List<PostModelResponse>? userPosts;
+    List<PostModel>? userPosts;
+    User? user = await SharedPrefs.getStoredUser();
 
     try {
       userPosts = await _apiService.getCurrentUserPosts(take: take, skip: skip);
@@ -249,16 +280,44 @@ class _ViewModel extends ChangeNotifier {
     }
 
     if (userPosts != null) {
-      if (state.userPosts == null) {
-        state = state.copyWith(userPosts: userPosts);
-      } else {
-        state.userPosts!.addAll(userPosts);
+      for (var post in userPosts) {
+        await _dataService.cuPost(Post(
+          id: post.id,
+          created: post.created,
+          text: post.text,
+          authorId: post.authorId,
+          authorAvatar: post.authorAvatar,
+          commentAmount: post.commentAmount,
+          likesAmount: post.likesAmount,
+        ));
+
+        if (post.postFiles != null) {
+          for (var file in post.postFiles!) {
+            await _dataService.cuPostFile(file!);
+          }
+        }
+
+        await _dataService.cuPostLikeState(PostLikeState(
+            id: post.id!,
+            isLiked:
+                (await _apiService.getPostLikeState(postId: post.id!)) == true
+                    ? 1
+                    : 0));
       }
 
-      addImages(userPosts.length);
+      state = state.copyWith(
+        userStatistics: await _dataService.getUserStatisctics(user!.id),
+        userPosts: await _dataService.getPostsWithLikeStatePostFilesById(
+          user.id,
+          take: take,
+          skip: skip,
+          orderBy: "created",
+        ),
+      );
+
+      addImages();
 
       skip += 10;
-      take += 10;
     }
   }
 }
@@ -270,9 +329,7 @@ class UserProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _portraitModeOnly();
-
-    var viewModel = context.watch<_ViewModel>();
+    var viewModel = context.watch<_UserProfileViewModel>();
 
     return Scaffold(
         appBar: AppBar(
@@ -341,7 +398,11 @@ class UserProfileWidget extends StatelessWidget {
                                     Container(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          viewModel.getUserPostsAmount(),
+                                          viewModel.state.userStatistics == null
+                                              ? 0.toString()
+                                              : viewModel.state.userStatistics!
+                                                  .userPostAmount
+                                                  .toString(),
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             fontSize: fontSize + 10,
@@ -365,7 +426,11 @@ class UserProfileWidget extends StatelessWidget {
                                     Container(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          viewModel.getUserSubscribersAmount(),
+                                          viewModel.state.userStatistics == null
+                                              ? 0.toString()
+                                              : viewModel.state.userStatistics!
+                                                  .userSubscribersAmount
+                                                  .toString(),
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             fontSize: fontSize + 10,
@@ -389,8 +454,11 @@ class UserProfileWidget extends StatelessWidget {
                                     Container(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          viewModel
-                                              .getUserSubscriptionsAmount(),
+                                          viewModel.state.userStatistics == null
+                                              ? 0.toString()
+                                              : viewModel.state.userStatistics!
+                                                  .userSubscriptionsAmount
+                                                  .toString(),
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             fontSize: fontSize + 10,
@@ -410,7 +478,10 @@ class UserProfileWidget extends StatelessWidget {
                     child: NotificationListener<ScrollNotification>(
                         onNotification: (scrollNotification) {
                           if (scrollNotification is ScrollEndNotification) {
-                            viewModel.requestNextPosts();
+                            if (!viewModel.isDelay) {
+                              viewModel.startDelay();
+                              viewModel.requestNextPosts();
+                            }
                             return true;
                           }
                           return false;
@@ -433,15 +504,8 @@ class UserProfileWidget extends StatelessWidget {
             context: context, isUserProfile: true));
   }
 
-  void _portraitModeOnly() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-  }
-
-  static Widget create() => ChangeNotifierProvider<_ViewModel>(
-        create: (context) => _ViewModel(context: context),
+  static Widget create() => ChangeNotifierProvider<_UserProfileViewModel>(
+        create: (context) => _UserProfileViewModel(context: context),
         lazy: false,
         child: const UserProfileWidget(),
       );

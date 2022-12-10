@@ -1,12 +1,11 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
-import 'package:dd_app_ui/domain/models/create_user_request.dart';
-import 'package:dd_app_ui/domain/models/post_model_response.dart';
-import 'package:dd_app_ui/domain/models/post_request.dart';
-import 'package:dd_app_ui/domain/models/refresh_token_request.dart';
+import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
+import 'package:dd_app_ui/domain/models/post_model.dart';
+import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 
-import '../../domain/models/token_request.dart';
-import '../../domain/models/token_response.dart';
+import '../../domain/models/token_request_model.dart';
+import '../../domain/models/token_response_model.dart';
 import '../../domain/repository/api_repository.dart';
 import '../clients/auth_client.dart';
 
@@ -16,21 +15,21 @@ class ApiDataRepository extends ApiRepository {
   ApiDataRepository(this._auth, this._api);
 
   @override
-  Future<TokenResponse?> getToken({
+  Future<TokenResponseModel?> getToken({
     required String login,
     required String password,
   }) async {
-    return await _auth.getToken(TokenRequest(
+    return await _auth.getToken(TokenRequestModel(
       login: login,
       password: password,
     ));
   }
 
   @override
-  Future<TokenResponse?> refreshToken({
+  Future<TokenResponseModel?> refreshToken({
     required String refreshToken,
   }) async {
-    return await _auth.getRefreshToken(RefreshTokenRequest(
+    return await _auth.getRefreshToken(RefreshTokenRequestModel(
       refreshToken: refreshToken,
     ));
   }
@@ -56,8 +55,7 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<PostModelResponse>?> getCurrentUserPosts(
-      int take, int skip) async {
+  Future<List<PostModel>?> getCurrentUserPosts(int take, int skip) async {
     return await _api.getCurrentUserPosts(take, skip);
   }
 
@@ -67,8 +65,7 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<PostModelResponse>?> getSubscriptionsPosts(
-      int take, int skip) async {
+  Future<List<PostModel>?> getSubscriptionsPosts(int take, int skip) async {
     return await _api.getSubscriptionPosts(take, skip);
   }
 
@@ -79,7 +76,7 @@ class ApiDataRepository extends ApiRepository {
       required password,
       required retryPassword,
       required birthDate}) async {
-    return await _auth.createUser(CreateUserRequest(
+    return await _auth.createUser(CreateUserRequestModel(
       name: name,
       email: email,
       password: password,
@@ -89,7 +86,7 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<PostRequest?> getPost({required String postId}) async {
+  Future<PostModel?> getPost({required String postId}) async {
     return await _api.getPost(postId);
   }
 
@@ -101,5 +98,10 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future changePostLikeState({required String postId}) async {
     return await _api.changePostLikeState(postId);
+  }
+
+  @override
+  Future<User?> getUserById({required String userId}) async {
+    return await _api.getUserById(userId);
   }
 }

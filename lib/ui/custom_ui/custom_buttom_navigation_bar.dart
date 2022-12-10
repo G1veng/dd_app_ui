@@ -3,10 +3,14 @@ import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavigationBar {
-  static SizedBox create(
-      {required BuildContext context,
-      bool isHome = false,
-      bool isUserProfile = false}) {
+  static const int elementsCount = 2;
+
+  static SizedBox create({
+    required BuildContext context,
+    bool isHome = false,
+    bool isUserProfile = false,
+    bool isUsers = false,
+  }) {
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height * 0.09,
@@ -18,13 +22,13 @@ class CustomBottomNavigationBar {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
+                  width: MediaQuery.of(context).size.width / elementsCount,
                   child: IconButton(
                     onPressed: isHome ? () => {} : () => AppNavigator.toHome(),
                     icon: Icon(isHome ? MyIcons.home : MyIcons.homeOutline),
                   )),
               SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
+                  width: MediaQuery.of(context).size.width / elementsCount,
                   child: IconButton(
                       onPressed: isUserProfile
                           ? () => {}

@@ -6,16 +6,15 @@ import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class _ViewModelState {
+class _AuthState {
   final String? password;
   final String? login;
   final String? errorMessage;
 
-  _ViewModelState({this.password, this.login, this.errorMessage});
+  _AuthState({this.password, this.login, this.errorMessage});
 
-  _ViewModelState copyWith(
-      {String? login, String? password, String? errorMessage}) {
-    return _ViewModelState(
+  _AuthState copyWith({String? login, String? password, String? errorMessage}) {
+    return _AuthState(
       login: login ?? this.login,
       password: password ?? this.password,
       errorMessage: errorMessage,
@@ -23,20 +22,20 @@ class _ViewModelState {
   }
 }
 
-class _ViewModel extends ChangeNotifier {
+class _AuthViewModel extends ChangeNotifier {
   var loginTec = TextEditingController();
   var passwordTec = TextEditingController();
   final _authService = AuthService();
 
-  var _state = _ViewModelState();
-  _ViewModelState get state => _state;
-  set state(_ViewModelState val) {
+  var _state = _AuthState();
+  _AuthState get state => _state;
+  set state(_AuthState val) {
     _state = val;
     notifyListeners();
   }
 
   BuildContext context;
-  _ViewModel({required this.context}) {
+  _AuthViewModel({required this.context}) {
     loginTec.addListener(() {
       state = state.copyWith(login: loginTec.text);
     });
@@ -72,7 +71,7 @@ class AuthWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var viewModel = context.watch<_ViewModel>();
+    var viewModel = context.watch<_AuthViewModel>();
 
     return Scaffold(
         body: Center(
@@ -137,8 +136,8 @@ class AuthWidget extends StatelessWidget {
                 ))));
   }
 
-  Widget create() => ChangeNotifierProvider<_ViewModel>(
-        create: (context) => _ViewModel(context: context),
+  Widget create() => ChangeNotifierProvider<_AuthViewModel>(
+        create: (context) => _AuthViewModel(context: context),
         lazy: false,
         child: const AuthWidget(),
       );
