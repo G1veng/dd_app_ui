@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/data/services/database.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
+import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
@@ -9,6 +10,25 @@ import 'package:dd_app_ui/domain/models/user_statistics.dart';
 class DataService {
   Future cuUser(User user) async {
     await DB.instance.createUpdate(user);
+  }
+
+  Future cuUsers(List<User> users) async {
+    await DB.instance.createUpdateRange(users);
+  }
+
+  Future<Iterable<User>?> getUsers(
+      {String? id,
+      int? take,
+      int? skip,
+      String? orderBy,
+      bool? notEqual}) async {
+    return await DB.instance.getAll(
+      take: take,
+      skip: skip,
+      orderBy: orderBy,
+      whereMap: id != null ? {"id": id} : null,
+      notEqual: notEqual,
+    );
   }
 
   Future<Post?> getPost(String id) async {
@@ -115,5 +135,15 @@ class DataService {
 
   Future<PostLikeState?> getPostLikeState(String postId) async {
     return await DB.instance.get(postId);
+  }
+
+  Future cuPostComments(List<PostComment> postComments) async {
+    return await DB.instance.createUpdateRange(postComments);
+  }
+
+  Future<Iterable<PostComment>?> getPostComments(
+      String postId, int take, int skip, String? orderBy) async {
+    return await DB.instance.getAll(
+        whereMap: {"postId": postId}, take: take, skip: skip, orderBy: orderBy);
   }
 }

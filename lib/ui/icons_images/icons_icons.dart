@@ -24,6 +24,10 @@
 ///         Author:    Just Be Nice studio
 ///         License:   SIL (http://scripts.sil.org/OFL)
 ///         Homepage:  http://www.justbenicestudio.com/
+/// * Material Design Icons, Copyright (C) Google, Inc
+///         Author:    Google
+///         License:   Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+///         Homepage:  https://design.google.com/icons/
 /// * MFG Labs, Copyright (C) 2012 by Daniel Bruce
 ///         Author:    MFG Labs
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -65,6 +69,12 @@ class MyIcons {
       IconData(0xe80c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData heartEmpty =
       IconData(0xe80d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData groupAdd =
+      IconData(0xe80e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData userAddOutline =
+      IconData(0xe80f, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData userAdd =
+      IconData(0xe810, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData logout =
       IconData(0xf02d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

@@ -139,13 +139,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<User>?> getUsers() async {
+  Future<List<UserModel>?> getUsers() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
-        await _dio.fetch<List<dynamic>>(_setStreamType<List<User>>(Options(
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<UserModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -158,7 +158,7 @@ class _ApiClient implements ApiClient {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     var value = _result.data
-        ?.map((dynamic i) => User.fromJson(i as Map<String, dynamic>))
+        ?.map((dynamic i) => UserModel.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
   }
@@ -263,13 +263,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<User?> getUserById(userId) async {
+  Future<UserModel?> getUserById(userId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'userId': userId};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result =
-        await _dio.fetch<Map<String, dynamic>?>(_setStreamType<User>(Options(
+    final _result = await _dio
+        .fetch<Map<String, dynamic>?>(_setStreamType<UserModel>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -281,7 +281,33 @@ class _ApiClient implements ApiClient {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = _result.data == null ? null : User.fromJson(_result.data!);
+    final value =
+        _result.data == null ? null : UserModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<List<PostComment>?> getPostComments(postId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'postId': postId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio
+        .fetch<List<dynamic>>(_setStreamType<List<PostComment>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/api/PostComment/GetPostComments',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    var value = _result.data
+        ?.map((dynamic i) => PostComment.fromJson(i as Map<String, dynamic>))
+        .toList();
     return value;
   }
 

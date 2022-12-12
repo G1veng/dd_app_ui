@@ -165,7 +165,7 @@ class _UserProfileViewModel extends ChangeNotifier {
     if (userPosts != null) {
       addImages();
 
-      skip += 10;
+      skip += take;
     }
 
     if (userPosts != null) {
@@ -317,7 +317,7 @@ class _UserProfileViewModel extends ChangeNotifier {
 
       addImages();
 
-      skip += 10;
+      skip += take;
     }
   }
 }

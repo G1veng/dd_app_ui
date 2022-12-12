@@ -3,7 +3,7 @@ import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavigationBar {
-  static const int elementsCount = 2;
+  static const int elementsCount = 3;
 
   static SizedBox create({
     required BuildContext context,
@@ -35,6 +35,13 @@ class CustomBottomNavigationBar {
                           : () => AppNavigator.toUserProfile(),
                       icon: Icon(
                           isUserProfile ? MyIcons.user : MyIcons.userOutline))),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width / elementsCount,
+                  child: IconButton(
+                      onPressed:
+                          isUsers ? () => {} : () => AppNavigator.toUsers(),
+                      icon: Icon(
+                          isUsers ? MyIcons.userAdd : MyIcons.userAddOutline))),
             ],
           ),
         ]));

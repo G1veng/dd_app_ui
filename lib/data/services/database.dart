@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/domain/db_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
+import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
@@ -19,7 +20,7 @@ class DB {
   Future init() async {
     if (!_initialized) {
       var databasePath = await getDatabasesPath();
-      var path = join(databasePath, "db_v1.0.7.db");
+      var path = join(databasePath, "db_v1.0.8.db");
 
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
@@ -42,6 +43,7 @@ class DB {
     PostLikeState: (map) => PostLikeState.fromMap(map),
     PostWithPostLikeState: (map) => PostWithPostLikeState.fromMap(map),
     UserStatistics: (map) => UserStatistics.fromMap(map),
+    PostComment: (map) => PostComment.fromMap(map),
   };
 
   String _dbName(Type type) {
@@ -55,7 +57,8 @@ class DB {
       {Map<String, dynamic>? whereMap,
       int? take,
       int? skip,
-      String? orderBy}) async {
+      String? orderBy,
+      bool? notEqual}) async {
     Iterable<Map<String, dynamic>> query;
 
     if (whereMap != null) {
@@ -67,7 +70,15 @@ class DB {
               .add("$key IN (${List.filled(value.length, '?').join(',')})");
           whereArgs.addAll(value.map((e) => "$e"));
         } else {
-          whereBuilder.add("$key = ?");
+          if (notEqual != null) {
+            if (notEqual) {
+              whereBuilder.add("$key != ?");
+            } else {
+              whereBuilder.add("$key = ?");
+            }
+          } else {
+            whereBuilder.add("$key = ?");
+          }
           whereArgs.add(value);
         }
       });
@@ -76,9 +87,10 @@ class DB {
           limit: take,
           where: whereBuilder.join(' and '),
           whereArgs: whereArgs,
-          orderBy: "$orderBy DESC");
+          orderBy: orderBy);
     } else {
-      query = await _db.query(_dbName(T), offset: skip, limit: take);
+      query = await _db.query(_dbName(T),
+          offset: skip, limit: take, orderBy: orderBy);
     }
     var resList = query.map((e) => _factories[T]!(e)).cast<T>();
 

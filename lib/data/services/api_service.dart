@@ -1,5 +1,7 @@
+import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/domain/models/user_model.dart';
 import 'package:dd_app_ui/domain/repository/api_repository.dart';
 import 'package:dd_app_ui/internal/dependecies/repository_model.dart';
 
@@ -27,7 +29,7 @@ class ApiService {
     }
   }
 
-  Future<List<User>?> getUsers() async {
+  Future<List<UserModel>?> getUsers() async {
     return await _api.getUsers();
   }
 
@@ -47,7 +49,11 @@ class ApiService {
     return await _api.changePostLikeState(postId: postId);
   }
 
-  Future<User?> getUserById({required String userId}) async {
+  Future<UserModel?> getUserById({required String userId}) async {
     return await _api.getUserById(userId: userId);
+  }
+
+  Future<List<PostComment>?> getPostComments({required String postId}) async {
+    return await _api.getPostComments(postId: postId);
   }
 }

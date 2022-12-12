@@ -1,5 +1,7 @@
+import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/domain/models/user_model.dart';
 import "package:dio/dio.dart";
 import 'package:retrofit/retrofit.dart';
 
@@ -28,7 +30,7 @@ abstract class ApiClient {
   );
 
   @GET("/api/User/GetUsers")
-  Future<List<User>?> getUsers();
+  Future<List<UserModel>?> getUsers();
 
   @GET("/api/Post/GetSubscriptionPosts")
   Future<List<PostModel>?> getSubscriptionPosts(
@@ -46,5 +48,8 @@ abstract class ApiClient {
   Future changePostLikeState(@Query("postId") String postId);
 
   @GET("/api/User/GetUser")
-  Future<User?> getUserById(@Query("userId") String userId);
+  Future<UserModel?> getUserById(@Query("userId") String userId);
+
+  @GET("/api/PostComment/GetPostComments")
+  Future<List<PostComment>?> getPostComments(@Query("postId") String postId);
 }

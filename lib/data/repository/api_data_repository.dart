@@ -1,8 +1,10 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
+import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/domain/models/user_model.dart';
 
 import '../../domain/models/token_request_model.dart';
 import '../../domain/models/token_response_model.dart';
@@ -60,7 +62,7 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<User>?> getUsers() async {
+  Future<List<UserModel>?> getUsers() async {
     return await _api.getUsers();
   }
 
@@ -101,7 +103,12 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<User?> getUserById({required String userId}) async {
+  Future<UserModel?> getUserById({required String userId}) async {
     return await _api.getUserById(userId);
+  }
+
+  @override
+  Future<List<PostComment>?> getPostComments({required String postId}) async {
+    return await _api.getPostComments(postId);
   }
 }

@@ -34,3 +34,13 @@ CREATE TABLE t_UserStatistics(
         ,userSubscribersAmount          INTEGER NOT NULL DEFAULT 0
         ,userSubscriptionsAmount        INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE t_PostComment(
+        id                      TEXT NOT NULL PRIMARY KEY
+        ,[text]                 TEXT NOT NULL
+        ,created                TEXT NOT NULL
+        ,likes                  INTEGER NOT NULL
+        ,authorId               TEXT NOT NULL
+        ,postId                 TEXT NOT NULL
+        ,FOREIGN KEY(postId) REFERENCES t_Post(id)
+        ,FOREIGN KEY(authorId) REFERENCES t_User(id)
+);

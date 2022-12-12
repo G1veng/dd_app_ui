@@ -3,9 +3,11 @@ import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:dd_app_ui/data/services/data_service.dart';
 
 class _UsersState {
   final List<User>? users;
@@ -48,6 +50,7 @@ class _UsersState {
 class _UsersViewModel extends ChangeNotifier {
   var _state = _UsersState();
   final _api = ApiService();
+  final _dataService = DataService();
   final BuildContext context;
   int take = 10;
   int skip = 0;
@@ -63,31 +66,45 @@ class _UsersViewModel extends ChangeNotifier {
   }
 
   Future _asyncInit() async {
+    Iterable<User>? dbUsers;
     state = state.copyWith(isLoading: true);
     var users = await _api.getUsers();
     var currentUser = await SharedPrefs.getStoredUser();
-    var headers = await TokenStorage.getAccessToken();
 
     if (users != null && currentUser != null) {
-      users.remove(currentUser);
+      for (var user in users) {
+        await _dataService.cuUser(
+          User(
+              id: user.id!,
+              name: user.name!,
+              email: user.email!,
+              birthDate: user.birthDate!,
+              avatar: user.avatar),
+        );
+      }
 
-      state = state.copyWith(users: users);
-
-      createUsersWidgets();
+      dbUsers = await _dataService.getUsers(
+          orderBy: "'name' ASC", notEqual: true, id: currentUser.id);
     }
 
+    var headers = await TokenStorage.getAccessToken();
     if (headers != null) {
       state = state.copyWith(headers: headers);
     }
 
-    if (headers != null || users != null) {
+    if (dbUsers != null && currentUser != null) {
+      state = state.copyWith(users: dbUsers.toList().reversed.toList());
+
+      createUsersWidgets();
+    }
+
+    if (dbUsers != null) {
       state = state.copyWith(isLoading: false);
     }
   }
 
-  void pressedGoToProfile(String userId) {
-    var some = userId;
-  }
+  void pressedGoToProfile(String userId) {}
+  //TODO добавить обработчик перехода в пользовательский профиль
 
   void createUsersWidgets() {
     var users = state.users;
@@ -101,23 +118,41 @@ class _UsersViewModel extends ChangeNotifier {
     startIndex = usersWidgets.length;
 
     for (int i = startIndex; i < users.length; i++) {
-      usersWidgets.add(Row(children: [
-        users[i].avatar == ""
-            ? CircleAvatar(
-                backgroundImage: NetworkImage(
-                  "$baseUrl${users[i].avatar}",
-                  headers: state.headers,
-                ),
-              )
-            : const CircleAvatar(
-                backgroundColor: Colors.grey,
-              ),
-        Text(users[i].name),
-        ElevatedButton(
-          onPressed: () => pressedGoToProfile(users[i].id),
-          child: const Text("Profile"),
-        ),
-      ]));
+      usersWidgets.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(children: [
+            users[i].avatar != null
+                ? Container(
+                    margin: const EdgeInsets.all(2.0),
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(
+                        "$baseUrl${users[i].avatar}",
+                        headers: state.headers,
+                      ),
+                      radius: (MediaQuery.of(context).size.width / 15),
+                    ))
+                : Container(
+                    margin: const EdgeInsets.all(2.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: (MediaQuery.of(context).size.width / 15),
+                    )),
+            Container(
+                margin: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
+                child: Text(
+                  users[i].name,
+                  overflow: TextOverflow.ellipsis,
+                ))
+          ]),
+          Container(
+              margin: const EdgeInsets.fromLTRB(0, 0, 2.0, 0),
+              child: ElevatedButton(
+                onPressed: () => pressedGoToProfile(users[i].id),
+                child: const Text("Profile"),
+              )),
+        ],
+      ));
     }
 
     state = state.copyWith(usersWidgets: usersWidgets);
@@ -133,22 +168,17 @@ class UsersWidget extends StatelessWidget {
     var viewModel = context.watch<_UsersViewModel>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("NotInstagram"),
-        leading: viewModel.state.isLoading!
-            ? const CircularProgressIndicator(
-                color: Colors.red,
-              )
-            : null,
-      ),
-      body: Column(
-          children: viewModel.state.usersWidgets ??
-              [
-                const Text(
-                  "Users not found",
-                  textAlign: TextAlign.center,
-                )
-              ]),
+      body: SafeArea(
+          child: Column(
+              children: viewModel.state.usersWidgets ??
+                  [
+                    const Center(
+                        child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    )),
+                  ])),
+      bottomNavigationBar:
+          CustomBottomNavigationBar.create(context: context, isUsers: true),
     );
   }
 

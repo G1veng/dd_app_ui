@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
+import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dio/dio.dart';
 import '../../domain/repository/api_repository.dart';
 import '../../exceptions/nonetwork_exception.dart';
@@ -57,9 +59,16 @@ class AuthService {
 
   Future<bool> checkAuth() async {
     var res = false;
+    User? user;
 
     if (await TokenStorage.getAccessToken() != null) {
-      var user = await _api.getUser();
+      try {
+        user = await _api.getUser();
+      } on DioError {
+        await SharedPrefs.setStoredUser(null);
+        await AuthService().logout();
+        AppNavigator.toLoader();
+      }
 
       if (user != null) {
         await SharedPrefs.setStoredUser(user);

@@ -10,7 +10,7 @@ class User implements DbModel {
   final String name;
   final String email;
   final String birthDate;
-  final String avatar;
+  final String? avatar;
 
   User({
     required this.id,

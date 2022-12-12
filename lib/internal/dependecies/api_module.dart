@@ -4,6 +4,7 @@ import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dio/dio.dart';
 
 class ApiModule {

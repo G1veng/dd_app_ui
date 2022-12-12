@@ -274,7 +274,13 @@ class _HomeViewModel extends ChangeNotifier {
         var author = await _api.getUserById(userId: post.authorId!);
 
         if (author != null) {
-          await _dataService.cuUser(author);
+          await _dataService.cuUser(User(
+            id: author.id!,
+            name: author.name!,
+            email: author.email!,
+            birthDate: author.birthDate!,
+            avatar: author.avatar!,
+          ));
         }
 
         if (post.postFiles != null) {
@@ -304,8 +310,7 @@ class _HomeViewModel extends ChangeNotifier {
           dbPosts.add(dbPost);
         }
 
-        take += 10;
-        skip += 10;
+        skip += take;
       }
 
       state = state.copyWith(postsInfo: dbPosts);
