@@ -1,6 +1,6 @@
+import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
-import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
 import 'package:dd_app_ui/domain/repository/api_repository.dart';
 import 'package:dd_app_ui/internal/dependecies/repository_model.dart';
@@ -53,7 +53,12 @@ class ApiService {
     return await _api.getUserById(userId: userId);
   }
 
-  Future<List<PostComment>?> getPostComments({required String postId}) async {
-    return await _api.getPostComments(postId: postId);
+  Future<List<PostComment>?> getPostComments(
+      {required String postId, required int take, required int skip}) async {
+    return await _api.getPostComments(postId: postId, take: take, skip: skip);
+  }
+
+  Future createPostComment({required CreatePostCommentModel model}) async {
+    return await _api.createPostComment(model: model);
   }
 }

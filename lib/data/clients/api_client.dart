@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
@@ -51,5 +52,12 @@ abstract class ApiClient {
   Future<UserModel?> getUserById(@Query("userId") String userId);
 
   @GET("/api/PostComment/GetPostComments")
-  Future<List<PostComment>?> getPostComments(@Query("postId") String postId);
+  Future<List<PostComment>?> getPostComments(
+    @Query("postId") String postId,
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
+
+  @POST("/api/PostComment/CreatePostComment")
+  Future createPostComment(@Body() CreatePostCommentModel body);
 }

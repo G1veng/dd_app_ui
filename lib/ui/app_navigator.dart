@@ -1,6 +1,7 @@
 import 'package:dd_app_ui/ui/roots/auth.dart';
 import 'package:dd_app_ui/ui/roots/home.dart';
 import 'package:dd_app_ui/ui/roots/loader.dart';
+import 'package:dd_app_ui/ui/roots/post.dart';
 import 'package:dd_app_ui/ui/roots/registration.dart';
 import 'package:dd_app_ui/ui/roots/user_profile.dart';
 import 'package:dd_app_ui/ui/roots/users.dart';
@@ -13,6 +14,7 @@ class NavigationRoutes {
   static const userProfile = "/user_profile";
   static const registration = "/registration";
   static const users = "/users";
+  static const post = "/post";
 }
 
 class AppNavigator {
@@ -45,6 +47,10 @@ class AppNavigator {
     key.currentState?.pushNamed(NavigationRoutes.userProfile);
   }
 
+  static void toPost({required String postId}) {
+    key.currentState?.pushNamed(NavigationRoutes.post, arguments: postId);
+  }
+
   static Route<dynamic>? onGeneratedRoutes(RouteSettings settings, context) {
     switch (settings.name) {
       case NavigationRoutes.loader:
@@ -69,6 +75,10 @@ class AppNavigator {
       case NavigationRoutes.users:
         return PageRouteBuilder(
             pageBuilder: (_, __, ___) => UsersWidget.create());
+      case NavigationRoutes.post:
+        return PageRouteBuilder(
+            pageBuilder: (_, __, ___) =>
+                PostWidget.create(postId: settings.arguments as String));
       default:
         return null;
     }

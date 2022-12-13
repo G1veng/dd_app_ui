@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
@@ -10,8 +11,8 @@ import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class _PostState {
   final Map<String, String>? headers;
@@ -20,40 +21,45 @@ class _PostState {
   final List<PostComment>? postComments;
   final List<PostFile>? postFiles;
   final List<Row>? postCommentsWidget;
-  final List<User>? postCreators;
+  final List<User?>? postCommentsCreators;
   final String? createCommentText;
   final User? currentUser;
+  final bool isLoading;
 
-  _PostState({
-    this.headers,
-    this.post,
-    this.postComments,
-    this.postFiles,
-    this.postCommentsWidget,
-    this.postCreators,
-    this.createCommentText,
-    this.currentUser,
-  });
+  _PostState(
+      {this.headers,
+      this.post,
+      this.postComments,
+      this.postFiles,
+      this.postCommentsWidget,
+      this.postCommentsCreators,
+      this.createCommentText,
+      this.currentUser,
+      this.isLoading = true});
 
-  _PostState copyWith(
-      {headers,
-      post,
-      postComments,
-      postFiles,
-      postCommentsWidget,
-      postCreators,
-      createCommentText,
-      currentUser}) {
+  _PostState copyWith({
+    headers,
+    post,
+    postComments,
+    postFiles,
+    postCommentsWidget,
+    postCommentsCreators,
+    createCommentText,
+    currentUser,
+    isLoading,
+  }) {
     return _PostState(
-      headers: headers ?? this.headers,
-      post: post ?? this.post,
-      postComments: postComments ?? this.postComments,
-      postFiles: postFiles ?? postFiles,
-      postCommentsWidget: postCommentsWidget ?? this.postCommentsWidget,
-      postCreators: postCreators ?? this.postCreators,
-      createCommentText: createCommentText ?? this.createCommentText,
-      currentUser: currentUser ?? this.currentUser,
-    );
+        headers: headers != null
+            ? {"Authorization": "Bearer $headers"}
+            : this.headers,
+        post: post ?? this.post,
+        postComments: postComments ?? this.postComments,
+        postFiles: postFiles ?? this.postFiles,
+        postCommentsWidget: postCommentsWidget ?? this.postCommentsWidget,
+        postCommentsCreators: postCommentsCreators ?? this.postCommentsCreators,
+        createCommentText: createCommentText ?? this.createCommentText,
+        currentUser: currentUser ?? this.currentUser,
+        isLoading: isLoading ?? this.isLoading);
   }
 }
 
@@ -63,7 +69,7 @@ class _PostViewModel extends ChangeNotifier {
   final String postId;
   final _api = ApiService();
   final _dataService = DataService();
-  int take = 10, skip = 0;
+  int take = 2, skip = 0;
   var createCommentTec = TextEditingController();
 
   _PostViewModel({required this.context, required this.postId}) {
@@ -81,6 +87,8 @@ class _PostViewModel extends ChangeNotifier {
   _PostState get state => _state;
 
   void _asyncInit() async {
+    state = state.copyWith(isLoading: true);
+
     var headers = await TokenStorage.getAccessToken();
     if (headers != null) {
       state = state.copyWith(headers: headers);
@@ -88,6 +96,17 @@ class _PostViewModel extends ChangeNotifier {
 
     var post = await _api.getPost(postId: postId);
     if (post != null) {
+      var postAuthor = await _api.getUserById(userId: post.authorId!);
+      // await _dataService.cuUser(User(
+      //   id: postAuthor!.id!,
+      //   name: postAuthor.name!,
+      //   email: postAuthor.email!,
+      //   birthDate: postAuthor.birthDate!,
+      //   avatar: postAuthor.avatar,
+      // ));
+      var test = User.fromJson(postAuthor!.toJson());
+      await _dataService.cuUser(test);
+
       await _dataService.cuPost(Post(
         id: post.id,
         created: post.created,
@@ -98,19 +117,23 @@ class _PostViewModel extends ChangeNotifier {
         likesAmount: post.likesAmount,
       ));
 
-      if (post.postFiles != null) {
+      if (post.postFiles != null && post.postFiles!.isNotEmpty) {
         for (var file in post.postFiles!) {
           await _dataService.cuPostFile(file!);
         }
       }
 
-      _dataService.cuPostLikeState(PostLikeState(
+      await _dataService.cuPostLikeState(PostLikeState(
           id: post.id!,
           isLiked:
               (await _api.getPostLikeState(postId: post.id!)) == true ? 1 : 0));
 
-      var comments = await _api.getPostComments(postId: postId);
-      if (comments != null) {
+      var comments = await _api.getPostComments(
+        postId: postId,
+        take: take,
+        skip: skip,
+      );
+      if (comments != null && comments.isNotEmpty) {
         for (var comment in comments) {
           var user = await _api.getUserById(userId: comment.authorId);
           if (user != null) {
@@ -131,8 +154,9 @@ class _PostViewModel extends ChangeNotifier {
     List<User?> dbPostCommentCreators = [];
     var dbPost = await _dataService.getPost(postId);
     var dbPostFiles = await _dataService.getPostFiles(postId);
-    var dbPostComments =
-        await _dataService.getPostComments(postId, take, skip, "created ASC");
+    var dbPostComments = (await _dataService.getPostComments(
+        postId, take, skip, '"Created" DESC'));
+
     if (dbPostComments != null) {
       for (var postComment in dbPostComments) {
         dbPostCommentCreators
@@ -140,29 +164,87 @@ class _PostViewModel extends ChangeNotifier {
       }
     }
 
-    state.copyWith(
+    state = state.copyWith(
         post: dbPost,
-        postComments: dbPostComments,
-        postFiles: dbPostFiles,
-        postCreators: dbPostCommentCreators,
-        currentUser: await SharedPrefs.getStoredUser());
+        postComments: dbPostComments == null || dbPostComments.isEmpty
+            ? null
+            : dbPostComments.toList(),
+        postFiles: dbPostFiles == null || dbPostFiles.isEmpty
+            ? null
+            : dbPostFiles.toList(),
+        postCommentsCreators: dbPostCommentCreators.isEmpty
+            ? null
+            : dbPostCommentCreators.toList(),
+        currentUser: await SharedPrefs.getStoredUser(),
+        isLoading: false);
 
     skip += take;
+    addCommentWidgets();
+  }
+
+  void addCreatedComment(PostComment postComment) {
+    var currentWidgets = state.postCommentsWidget ?? [];
+
+    List<Row> tempRow = [];
+    tempRow.add(Row(
+      children: [
+        state.currentUser!.avatar != null
+            ? Container(
+                margin: const EdgeInsets.all(2.0),
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    "$baseUrl${state.currentUser!.avatar}",
+                    headers: state.headers,
+                  ),
+                  radius: (MediaQuery.of(context).size.width / 15),
+                ))
+            : Container(
+                margin: const EdgeInsets.all(2.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey,
+                  radius: (MediaQuery.of(context).size.width / 15),
+                )),
+        Expanded(
+            child: RichText(
+          maxLines: null,
+          text: TextSpan(
+            style: const TextStyle(
+              fontSize: 14.0,
+              color: Colors.black,
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                  text: "${state.currentUser!.name} ",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  )),
+              TextSpan(
+                text: postComment.text,
+              ),
+            ],
+          ),
+        ))
+      ],
+    ));
+
+    tempRow.addAll(currentWidgets);
+
+    state = state.copyWith(postCommentsWidget: tempRow);
   }
 
   void addCommentWidgets() {
-    var currentWidgets = state.postCommentsWidget;
-    var startIndex = currentWidgets!.length;
+    var currentWidgets = state.postCommentsWidget ?? [];
+    var startIndex = currentWidgets.length;
 
     for (int i = startIndex; i < state.postComments!.length; i++) {
       currentWidgets.add(Row(
         children: [
-          state.postCreators![i].avatar != null
+          state.postCommentsCreators![i]!.avatar != null
               ? Container(
                   margin: const EdgeInsets.all(2.0),
                   child: CircleAvatar(
                     backgroundImage: NetworkImage(
-                      "$baseUrl${state.postCreators![i].avatar}",
+                      "$baseUrl${state.postCommentsCreators![i]!.avatar}",
                       headers: state.headers,
                     ),
                     radius: (MediaQuery.of(context).size.width / 15),
@@ -173,12 +255,26 @@ class _PostViewModel extends ChangeNotifier {
                     backgroundColor: Colors.grey,
                     radius: (MediaQuery.of(context).size.width / 15),
                   )),
-          Column(
-            children: [
-              Text(state.postCreators![i].name),
-              Text(state.postComments![i].text),
-            ],
-          ),
+          Expanded(
+              child: RichText(
+            maxLines: null,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 14.0,
+                color: Colors.black,
+              ),
+              children: <TextSpan>[
+                TextSpan(
+                    text: "${state.postCommentsCreators![i]!.name} ",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )),
+                TextSpan(
+                  text: state.postComments![i].text,
+                ),
+              ],
+            ),
+          ))
         ],
       ));
     }
@@ -186,8 +282,56 @@ class _PostViewModel extends ChangeNotifier {
     state = state.copyWith(postCommentsWidget: currentWidgets);
   }
 
-  void requestNextComments() {
-    //TODO сделать запрос следующих комментариев
+  Future requestNextComments() async {
+    var postCommentsCreators = state.postCommentsCreators ?? [];
+    var postComments = state.postComments ?? [];
+    var comments =
+        await _api.getPostComments(postId: postId, take: take, skip: skip);
+
+    if (comments != null) {
+      for (var comment in comments) {
+        var author = await _api.getUserById(userId: comment.authorId);
+        await _dataService.cuUser(User(
+          id: author!.id!,
+          name: author.name!,
+          email: author.email!,
+          birthDate: author.birthDate!,
+          avatar: author.avatar,
+        ));
+        postCommentsCreators.add(await _dataService.getUser(author.id!));
+
+        await _dataService.cuPostComment(comment);
+        postComments.add((await _dataService.getPostComment(comment.id))!);
+      }
+    }
+
+    state = state.copyWith(
+      postCommentsCreators: postCommentsCreators,
+      postComments: postComments,
+    );
+  }
+
+  void createPostComment() async {
+    var postComment = PostComment(
+        id: const Uuid().v4(),
+        text: state.createCommentText!,
+        created: DateTime.now().toUtc().toString().replaceAll(r' ', 'T'),
+        likes: 0,
+        authorId: state.currentUser!.id,
+        postId: postId);
+
+    await _dataService.cuPostComment(postComment);
+
+    await _api.createPostComment(
+        model: CreatePostCommentModel(
+            created: postComment.created,
+            id: postComment.id,
+            postId: postComment.postId,
+            text: postComment.text));
+
+    addCreatedComment(postComment);
+
+    createCommentTec.clear();
   }
 }
 
@@ -199,58 +343,100 @@ class PostWidget extends StatelessWidget {
     var viewModel = context.watch<_PostViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("NotInstagram")),
-      body: Row(
-        children: [
-          viewModel.state.postFiles != null
-              ? Container(
-                  margin: const EdgeInsets.all(2.0),
-                  child: GestureDetector(
-                    child: GFAvatar(
-                      backgroundImage: Image.network(
-                        "$baseUrl${viewModel.state.postFiles![0].link}",
-                        headers: viewModel.state.headers,
-                      ).image,
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+          title: const Text(
+        "NotInstagram",
+        textAlign: TextAlign.center,
+      )),
+      body: viewModel.state.isLoading
+          ? const SafeArea(
+              child: Center(
+                  child: SizedBox(
+              child: CircularProgressIndicator(),
+            )))
+          : SingleChildScrollView(
+              child: Column(children: [
+              SafeArea(
+                child: viewModel.state.postFiles != null &&
+                        viewModel.state.postFiles!.isNotEmpty
+                    ? Container(
+                        margin: const EdgeInsets.all(2.0),
+                        child: Container(
+                          height: (MediaQuery.of(context).size.width),
+                          width: (MediaQuery.of(context).size.width),
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: Image.network(
+                                  "$baseUrl${viewModel.state.postFiles![0].link}",
+                                  headers: viewModel.state.headers,
+                                ).image,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center),
+                          ),
+                        ))
+                    : SizedBox(
+                        width: (MediaQuery.of(context).size.width),
+                        child: Container(
+                            margin: const EdgeInsets.all(5.0),
+                            color: Colors.grey,
+                            child: Text("${viewModel.state.post!.text}")),
+                      ),
+              ),
+              Row(children: [
+                viewModel.state.currentUser!.avatar != null
+                    ? Container(
+                        margin: const EdgeInsets.all(5.0),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            "$baseUrl${viewModel.state.currentUser!.avatar}",
+                            headers: viewModel.state.headers,
+                          ),
+                          radius: (MediaQuery.of(context).size.width / 13),
+                        ))
+                    : Container(
+                        margin: const EdgeInsets.all(5.0),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          radius: (MediaQuery.of(context).size.width / 13),
+                        )),
+                Flexible(
+                    child: Container(
+                        margin: const EdgeInsets.all(10.0),
+                        child: TextField(
+                          maxLength: 100,
+                          textCapitalization: TextCapitalization.sentences,
+                          textAlignVertical: TextAlignVertical.bottom,
+                          controller: viewModel.createCommentTec,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              hintText: "Enter comment"),
+                          textAlign: TextAlign.start,
+                        ))),
+                Container(
+                    margin: const EdgeInsets.all(5.0),
+                    child: ElevatedButton(
+                        onPressed: viewModel.state.createCommentText != null &&
+                                viewModel.state.createCommentText!.isNotEmpty
+                            ? () => viewModel.createPostComment()
+                            : null,
+                        child: const Icon(Icons.send)))
+              ]),
+              NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollEndNotification) {
+                      viewModel.requestNextComments();
+                      return true;
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: viewModel.state.postCommentsWidget ?? [],
                     ),
                   ))
-              : Container(
-                  margin: const EdgeInsets.all(3),
-                  color: const Color.fromARGB(255, 165, 165, 167),
-                  child: Center(
-                    child: Text(
-                      viewModel.state.post!.text!,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.clip,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  )),
-          Row(children: [
-            viewModel.state.currentUser != null
-                ? CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      "$baseUrl${viewModel.state.currentUser!.avatar}",
-                      headers: viewModel.state.headers,
-                    ),
-                    radius: (MediaQuery.of(context).size.width / 15),
-                  )
-                : CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: (MediaQuery.of(context).size.width / 15),
-                  ),
-            TextField(
-              controller: viewModel.createCommentTec,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Enter comment text"),
-              textAlign: TextAlign.start,
-            ),
-          ]),
-          Row(
-            children: viewModel.state.postCommentsWidget ?? [],
-          ),
-        ],
-      ),
+            ])),
       bottomNavigationBar: CustomBottomNavigationBar.create(context: context),
     );
   }

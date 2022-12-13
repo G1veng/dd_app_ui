@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/token_response_model.dart';
@@ -40,5 +41,8 @@ abstract class ApiRepository {
 
   Future<UserModel?> getUserById({required String userId});
 
-  Future<List<PostComment>?> getPostComments({required String postId});
+  Future<List<PostComment>?> getPostComments(
+      {required String postId, required int take, required int skip});
+
+  Future createPostComment({required CreatePostCommentModel model});
 }

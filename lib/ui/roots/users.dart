@@ -83,8 +83,13 @@ class _UsersViewModel extends ChangeNotifier {
         );
       }
 
-      dbUsers = await _dataService.getUsers(
-          orderBy: "'name' ASC", notEqual: true, id: currentUser.id);
+      dbUsers = (await _dataService.getUsers(
+              orderBy: '[Name] DESC',
+              notEqual: true,
+              id: currentUser.id,
+              take: 8,
+              skip: 0))!
+          .toList();
     }
 
     var headers = await TokenStorage.getAccessToken();
@@ -93,7 +98,7 @@ class _UsersViewModel extends ChangeNotifier {
     }
 
     if (dbUsers != null && currentUser != null) {
-      state = state.copyWith(users: dbUsers.toList().reversed.toList());
+      state = state.copyWith(users: dbUsers);
 
       createUsersWidgets();
     }

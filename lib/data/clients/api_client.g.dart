@@ -287,9 +287,17 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<PostComment>?> getPostComments(postId) async {
+  Future<List<PostComment>?> getPostComments(
+    postId,
+    take,
+    skip,
+  ) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'postId': postId};
+    final queryParameters = <String, dynamic>{
+      r'postId': postId,
+      r'take': take,
+      r'skip': skip,
+    };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio
@@ -308,6 +316,29 @@ class _ApiClient implements ApiClient {
     var value = _result.data
         ?.map((dynamic i) => PostComment.fromJson(i as Map<String, dynamic>))
         .toList();
+    return value;
+  }
+
+  @override
+  Future<dynamic> createPostComment(body) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _result = await _dio.fetch(_setStreamType<dynamic>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/PostComment/CreatePostComment',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data;
     return value;
   }
 

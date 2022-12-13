@@ -146,4 +146,12 @@ class DataService {
     return await DB.instance.getAll(
         whereMap: {"postId": postId}, take: take, skip: skip, orderBy: orderBy);
   }
+
+  Future cuPostComment(PostComment postComment) async {
+    return await DB.instance.createUpdate(postComment);
+  }
+
+  Future<PostComment?> getPostComment(String postCommentId) async {
+    return await DB.instance.get(postCommentId);
+  }
 }

@@ -10,7 +10,6 @@ import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:provider/provider.dart';
 
 class _HomeSate {
@@ -230,14 +229,28 @@ class _HomeViewModel extends ChangeNotifier {
           GestureDetector(
               onTap: () => postPressed(state.postsInfo![i].id!),
               onDoubleTap: () => postLikePressed(state.postsInfo![i].id!, i),
-              child: GFAvatar(
-                backgroundImage: Image.network(
-                  "$baseUrl${state.postsInfo![i].postFiles![0]!.link}",
-                  headers: state.headers,
-                ).image,
-                radius: ((MediaQuery.of(context).size.width / 2) - 1.0),
-                shape: GFAvatarShape.square,
-              )),
+              child: Container(
+                height: (MediaQuery.of(context).size.width),
+                width: (MediaQuery.of(context).size.width),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: Image.network(
+                        "$baseUrl${state.postsInfo![i].postFiles![0]!.link}",
+                        headers: state.headers,
+                      ).image,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center),
+                ),
+              )
+              // child: GFAvatar(
+              //   backgroundImage: Image.network(
+              //     "$baseUrl${state.postsInfo![i].postFiles![0]!.link}",
+              //     headers: state.headers,
+              //   ).image,
+              //   radius: ((MediaQuery.of(context).size.width / 2) - 1.0),
+              //   shape: GFAvatarShape.square,
+              // )
+              ),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Container(
                 margin: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),

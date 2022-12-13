@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
-import 'package:getwidget/getwidget.dart';
 
 class _UserProfileState {
   final User? user;
@@ -220,13 +219,18 @@ class _UserProfileViewModel extends ChangeNotifier {
       } else {
         _allImages.add(GestureDetector(
             onTap: () => postPressed(state.userPosts![i].id!),
-            child: GFAvatar(
-              backgroundImage: Image.network(
-                "$baseUrl${state.userPosts![i].postFiles![0]!.link}",
-                headers: state.headers,
-              ).image,
-              radius: (MediaQuery.of(context).size.width / 6) - 1,
-              shape: GFAvatarShape.square,
+            child: Container(
+              height: (MediaQuery.of(context).size.width / 3) - 2,
+              width: (MediaQuery.of(context).size.width / 3) - 2,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: Image.network(
+                      "$baseUrl${state.userPosts![i].postFiles![0]!.link}",
+                      headers: state.headers,
+                    ).image,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center),
+              ),
             )));
       }
     }
@@ -264,8 +268,7 @@ class _UserProfileViewModel extends ChangeNotifier {
   String getUserBirtDate() =>
       state.user == null ? '' : Jiffy(state.user!.birthDate, "yyyy-MM-dd").MMMd;
 
-  void postPressed(
-      String postId) {} //TODO Добавить обработчик перехода на выбранный пост
+  void postPressed(String postId) => AppNavigator.toPost(postId: postId);
 
   Future requestNextPosts() async {
     List<PostModel>? userPosts;

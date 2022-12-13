@@ -34,6 +34,11 @@ CREATE TABLE t_UserStatistics(
         ,userSubscribersAmount          INTEGER NOT NULL DEFAULT 0
         ,userSubscriptionsAmount        INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE t_PostCommentLikes(
+        postCommentId                   TEXT NOT NULL
+        ,userId                         TEXT NOT NULL
+        ,PRIMARY KEY (postCommentId, userId)
+);
 CREATE TABLE t_PostComment(
         id                      TEXT NOT NULL PRIMARY KEY
         ,[text]                 TEXT NOT NULL

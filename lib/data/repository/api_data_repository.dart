@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
+import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -108,7 +109,13 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<PostComment>?> getPostComments({required String postId}) async {
-    return await _api.getPostComments(postId);
+  Future<List<PostComment>?> getPostComments(
+      {required String postId, required int take, required int skip}) async {
+    return await _api.getPostComments(postId, take, skip);
+  }
+
+  @override
+  Future createPostComment({required CreatePostCommentModel model}) async {
+    return await _api.createPostComment(model);
   }
 }
