@@ -7,12 +7,10 @@ import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
-import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-class _HomeSate {
+class HomeSate {
   final int counter;
   final bool isRuning;
   final User? user;
@@ -20,7 +18,7 @@ class _HomeSate {
   final List<Column>? postsWidgets;
   final List<PostWithPostLikeState>? postsInfo;
 
-  _HomeSate({
+  HomeSate({
     this.counter = 0,
     this.isRuning = false,
     this.user,
@@ -29,7 +27,7 @@ class _HomeSate {
     this.postsInfo,
   });
 
-  _HomeSate copyWith({
+  HomeSate copyWith({
     counter = 0,
     isRuning,
     user,
@@ -52,7 +50,7 @@ class _HomeSate {
       }
     }
 
-    return _HomeSate(
+    return HomeSate(
       counter: counter ?? this.counter,
       headers:
           headers != null ? {"Authorization": "Bearer $headers"} : this.headers,
@@ -63,8 +61,8 @@ class _HomeSate {
     );
   }
 
-  _HomeSate clearPostInfo() {
-    return _HomeSate(
+  HomeSate clearPostInfo() {
+    return HomeSate(
       counter: counter,
       headers: headers,
       isRuning: isRuning,
@@ -75,20 +73,20 @@ class _HomeSate {
   }
 }
 
-class _HomeViewModel extends ChangeNotifier {
+class HomeViewModel extends ChangeNotifier {
   final BuildContext context;
-  var _state = _HomeSate();
+  var _state = HomeSate();
   final _dataService = DataService();
   final _api = ApiService();
   int take = 10, skip = 0;
   bool isUpdating = false;
 
-  _HomeViewModel({required this.context}) {
+  HomeViewModel({required this.context}) {
     _asyncInit();
   }
 
-  _HomeSate get state => _state;
-  set state(_HomeSate val) {
+  HomeSate get state => _state;
+  set state(HomeSate val) {
     _state = val;
     notifyListeners();
   }
@@ -154,7 +152,7 @@ class _HomeViewModel extends ChangeNotifier {
       state = state.copyWith(postsInfo: postInfo);
     }
 
-    _updateScreenPosts(isUpdate: true);
+    updateScreenPosts(isUpdate: true);
   }
 
   Future _startDelay() async {
@@ -163,7 +161,7 @@ class _HomeViewModel extends ChangeNotifier {
     isUpdating = false;
   }
 
-  void _updateScreenPosts({bool isUpdate = false}) {
+  void updateScreenPosts({bool isUpdate = false}) {
     var posts = state.postsWidgets ?? [];
 
     if (isUpdate) {
@@ -241,16 +239,7 @@ class _HomeViewModel extends ChangeNotifier {
                       fit: BoxFit.cover,
                       alignment: Alignment.center),
                 ),
-              )
-              // child: GFAvatar(
-              //   backgroundImage: Image.network(
-              //     "$baseUrl${state.postsInfo![i].postFiles![0]!.link}",
-              //     headers: state.headers,
-              //   ).image,
-              //   radius: ((MediaQuery.of(context).size.width / 2) - 1.0),
-              //   shape: GFAvatarShape.square,
-              // )
-              ),
+              )),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Container(
                 margin: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
@@ -328,57 +317,10 @@ class _HomeViewModel extends ChangeNotifier {
 
       state = state.copyWith(postsInfo: dbPosts);
 
-      _updateScreenPosts();
+      updateScreenPosts();
 
       return true;
     }
     return false;
   }
-}
-
-class HomeWidget extends StatelessWidget {
-  const HomeWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var viewModel = context.watch<_HomeViewModel>();
-
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            "NotInstagram",
-          ),
-          leading: viewModel.state.isRuning
-              ? const CircularProgressIndicator(
-                  color: Colors.red,
-                  strokeWidth: 4.0,
-                )
-              : null,
-        ),
-        body: NotificationListener<ScrollNotification>(
-            onNotification: (scrollNotification) {
-              if (scrollNotification is ScrollEndNotification) {
-                viewModel.requestNextPosts;
-                return true;
-              }
-              return false;
-            },
-            child: SingleChildScrollView(
-                child: GestureDetector(
-              child: Column(children: viewModel.state.postsWidgets ?? []),
-              onVerticalDragUpdate: (details) =>
-                  (details.delta.distance > 10.0 && !viewModel.isUpdating)
-                      ? viewModel._updateScreenPosts(isUpdate: true)
-                      : null,
-            ))),
-        bottomNavigationBar:
-            CustomBottomNavigationBar.create(context: context, isHome: true));
-  }
-
-  static Widget create() => ChangeNotifierProvider<_HomeViewModel>(
-        create: (context) => _HomeViewModel(context: context),
-        lazy: false,
-        child: const HomeWidget(),
-      );
 }

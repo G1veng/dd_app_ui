@@ -1,13 +1,6 @@
+import 'package:dd_app_ui/ui/user_profile/user_profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-class _OtherUserProfileState {}
-
-class _OtherUserProfileViewModel extends ChangeNotifier {
-  BuildContext context;
-
-  _OtherUserProfileViewModel({required this.context});
-}
 
 class OtherUserProfileWidget extends StatelessWidget {
   const OtherUserProfileWidget({Key? key}) : super(key: key);
@@ -17,8 +10,8 @@ class OtherUserProfileWidget extends StatelessWidget {
     return Scaffold();
   }
 
-  static Widget create() => ChangeNotifierProvider<_OtherUserProfileViewModel>(
-        create: (context) => _OtherUserProfileViewModel(context: context),
+  static Widget create() => ChangeNotifierProvider<OtherUserProfileViewModel>(
+        create: (context) => OtherUserProfileViewModel(context: context),
         lazy: false,
         child: const OtherUserProfileWidget(),
       );

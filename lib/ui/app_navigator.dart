@@ -1,20 +1,20 @@
-import 'package:dd_app_ui/ui/roots/auth.dart';
-import 'package:dd_app_ui/ui/roots/home.dart';
-import 'package:dd_app_ui/ui/roots/loader.dart';
-import 'package:dd_app_ui/ui/roots/post.dart';
-import 'package:dd_app_ui/ui/roots/registration.dart';
-import 'package:dd_app_ui/ui/roots/user_profile.dart';
-import 'package:dd_app_ui/ui/roots/users.dart';
+import 'package:dd_app_ui/ui/current_user_profile/current_user_profile.dart';
+import 'package:dd_app_ui/ui/roots/auth/auth.dart';
+import 'package:dd_app_ui/ui/roots/home/home.dart';
+import 'package:dd_app_ui/ui/roots/loader/loader.dart';
+import 'package:dd_app_ui/ui/post/post.dart';
+import 'package:dd_app_ui/ui/roots/registration/registration.dart';
+import 'package:dd_app_ui/ui/users/users.dart';
 import 'package:flutter/cupertino.dart';
 
 class NavigationRoutes {
   static const loader = "/";
   static const auth = "/auth";
   static const home = "/home";
-  static const userProfile = "/user_profile";
+  static const userProfile = "/app/user_profile";
   static const registration = "/registration";
-  static const users = "/users";
-  static const post = "/post";
+  static const users = "/app/users";
+  static const post = "/app/post";
 }
 
 class AppNavigator {
@@ -67,7 +67,7 @@ class AppNavigator {
         );
       case NavigationRoutes.userProfile:
         return PageRouteBuilder(
-          pageBuilder: (_, __, ___) => UserProfileWidget.create(),
+          pageBuilder: (_, __, ___) => CurrentUserProfileWidget.create(),
         );
       case NavigationRoutes.registration:
         return PageRouteBuilder(

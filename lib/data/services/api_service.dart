@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
+import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
@@ -60,5 +63,13 @@ class ApiService {
 
   Future createPostComment({required CreatePostCommentModel model}) async {
     return await _api.createPostComment(model: model);
+  }
+
+  Future<List<MetaDataModel>?> uploadFiles({required List<File> files}) async {
+    return await _api.uploadFiles(files: files);
+  }
+
+  Future addUserAvatar({required MetaDataModel model}) async {
+    return await _api.addUserAvatar(model: model);
   }
 }

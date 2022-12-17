@@ -9,7 +9,7 @@ class User implements DbModel {
   final String id;
   final String name;
   final String email;
-  final String birthDate;
+  final DateTime birthDate;
   final String? avatar;
 
   User({

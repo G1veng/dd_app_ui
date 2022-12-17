@@ -9,12 +9,10 @@ import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
-import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-class _PostState {
+class PostState {
   final Map<String, String>? headers;
   final int pageCount = 0;
   final Post? post;
@@ -26,7 +24,7 @@ class _PostState {
   final User? currentUser;
   final bool isLoading;
 
-  _PostState(
+  PostState(
       {this.headers,
       this.post,
       this.postComments,
@@ -37,7 +35,7 @@ class _PostState {
       this.currentUser,
       this.isLoading = true});
 
-  _PostState copyWith({
+  PostState copyWith({
     headers,
     post,
     postComments,
@@ -48,7 +46,7 @@ class _PostState {
     currentUser,
     isLoading,
   }) {
-    return _PostState(
+    return PostState(
         headers: headers != null
             ? {"Authorization": "Bearer $headers"}
             : this.headers,
@@ -63,28 +61,28 @@ class _PostState {
   }
 }
 
-class _PostViewModel extends ChangeNotifier {
+class PostViewModel extends ChangeNotifier {
   BuildContext context;
-  _PostState _state = _PostState();
+  PostState _state = PostState();
   final String postId;
   final _api = ApiService();
   final _dataService = DataService();
   int take = 2, skip = 0;
   var createCommentTec = TextEditingController();
 
-  _PostViewModel({required this.context, required this.postId}) {
+  PostViewModel({required this.context, required this.postId}) {
     createCommentTec.addListener(() {
       state = state.copyWith(createCommentText: createCommentTec.text);
     });
     _asyncInit();
   }
 
-  set state(_PostState val) {
+  set state(PostState val) {
     _state = val;
     notifyListeners();
   }
 
-  _PostState get state => _state;
+  PostState get state => _state;
 
   void _asyncInit() async {
     state = state.copyWith(isLoading: true);
@@ -333,118 +331,4 @@ class _PostViewModel extends ChangeNotifier {
 
     createCommentTec.clear();
   }
-}
-
-class PostWidget extends StatelessWidget {
-  const PostWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var viewModel = context.watch<_PostViewModel>();
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-          title: const Text(
-        "NotInstagram",
-        textAlign: TextAlign.center,
-      )),
-      body: viewModel.state.isLoading
-          ? const SafeArea(
-              child: Center(
-                  child: SizedBox(
-              child: CircularProgressIndicator(),
-            )))
-          : SingleChildScrollView(
-              child: Column(children: [
-              SafeArea(
-                child: viewModel.state.postFiles != null &&
-                        viewModel.state.postFiles!.isNotEmpty
-                    ? Container(
-                        margin: const EdgeInsets.all(2.0),
-                        child: Container(
-                          height: (MediaQuery.of(context).size.width),
-                          width: (MediaQuery.of(context).size.width),
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: Image.network(
-                                  "$baseUrl${viewModel.state.postFiles![0].link}",
-                                  headers: viewModel.state.headers,
-                                ).image,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.center),
-                          ),
-                        ))
-                    : SizedBox(
-                        width: (MediaQuery.of(context).size.width),
-                        child: Container(
-                            margin: const EdgeInsets.all(5.0),
-                            color: Colors.grey,
-                            child: Text("${viewModel.state.post!.text}")),
-                      ),
-              ),
-              Row(children: [
-                viewModel.state.currentUser!.avatar != null
-                    ? Container(
-                        margin: const EdgeInsets.all(5.0),
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            "$baseUrl${viewModel.state.currentUser!.avatar}",
-                            headers: viewModel.state.headers,
-                          ),
-                          radius: (MediaQuery.of(context).size.width / 13),
-                        ))
-                    : Container(
-                        margin: const EdgeInsets.all(5.0),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.grey,
-                          radius: (MediaQuery.of(context).size.width / 13),
-                        )),
-                Flexible(
-                    child: Container(
-                        margin: const EdgeInsets.all(10.0),
-                        child: TextField(
-                          maxLength: 100,
-                          textCapitalization: TextCapitalization.sentences,
-                          textAlignVertical: TextAlignVertical.bottom,
-                          controller: viewModel.createCommentTec,
-                          maxLines: null,
-                          decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              hintText: "Enter comment"),
-                          textAlign: TextAlign.start,
-                        ))),
-                Container(
-                    margin: const EdgeInsets.all(5.0),
-                    child: ElevatedButton(
-                        onPressed: viewModel.state.createCommentText != null &&
-                                viewModel.state.createCommentText!.isNotEmpty
-                            ? () => viewModel.createPostComment()
-                            : null,
-                        child: const Icon(Icons.send)))
-              ]),
-              NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification is ScrollEndNotification) {
-                      viewModel.requestNextComments();
-                      return true;
-                    }
-                    return false;
-                  },
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: viewModel.state.postCommentsWidget ?? [],
-                    ),
-                  ))
-            ])),
-      bottomNavigationBar: CustomBottomNavigationBar.create(context: context),
-    );
-  }
-
-  static Widget create({required String postId}) =>
-      ChangeNotifierProvider<_PostViewModel>(
-        create: (context) => _PostViewModel(context: context, postId: postId),
-        lazy: false,
-        child: const PostWidget(),
-      );
 }

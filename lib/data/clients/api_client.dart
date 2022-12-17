@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
+import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
@@ -60,4 +63,11 @@ abstract class ApiClient {
 
   @POST("/api/PostComment/CreatePostComment")
   Future createPostComment(@Body() CreatePostCommentModel body);
+
+  @POST("/api/Attach/UploadFiles")
+  Future<List<MetaDataModel>?> uploadFiles(
+      {@Part(name: "files") required List<File> files});
+
+  @POST("/api/User/AddAvatarToUser")
+  Future addUserAvatar(@Body() MetaDataModel model);
 }

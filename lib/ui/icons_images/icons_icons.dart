@@ -69,12 +69,12 @@ class MyIcons {
       IconData(0xe80c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData heartEmpty =
       IconData(0xe80d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData groupAdd =
-      IconData(0xe80e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData userAddOutline =
       IconData(0xe80f, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData userAdd =
       IconData(0xe810, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData addAPhoto =
+      IconData(0xe811, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData logout =
       IconData(0xf02d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
