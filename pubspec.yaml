@@ -42,7 +42,6 @@ dependencies:
   retrofit: ^3.3.1
   json_annotation: ^4.7.0
   flutter_secure_storage: ^6.1.0
-  jiffy: ^5.0.0
   getwidget: ^3.0.1
   sqflite: ^2.2.2
   path: ^1.8.0
@@ -50,7 +49,6 @@ dependencies:
   uuid: ^3.0.5
   intl: ^0.17.0
   camera: ^0.10.0+5
-  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
@@ -17,7 +16,6 @@ import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dd_app_ui/ui/common/cam_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jiffy/jiffy.dart';
 
 class CurrentUserProfileState {
   final User? user;
@@ -158,7 +156,7 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
         user.id,
         take: take,
         skip: skip,
-        orderBy: "created",
+        orderBy: "created DESC",
       ),
     );
 
@@ -275,9 +273,6 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
     }
     AppNavigator.toLoader();
   }
-
-  String getUserBirtDate() =>
-      state.user == null ? '' : Jiffy(state.user!.birthDate, "yyyy-MM-dd").MMMd;
 
   void postPressed(String postId) => AppNavigator.toPost(postId: postId);
 

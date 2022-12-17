@@ -69,6 +69,7 @@ class PostViewModel extends ChangeNotifier {
   final _dataService = DataService();
   int take = 2, skip = 0;
   var createCommentTec = TextEditingController();
+  Map<int, int> pager = <int, int>{};
 
   PostViewModel({required this.context, required this.postId}) {
     createCommentTec.addListener(() {
@@ -330,5 +331,10 @@ class PostViewModel extends ChangeNotifier {
     addCreatedComment(postComment);
 
     createCommentTec.clear();
+  }
+
+  void onPageChanged(int listIndex, int pageIndex) {
+    pager[listIndex] = pageIndex;
+    notifyListeners();
   }
 }

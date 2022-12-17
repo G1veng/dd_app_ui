@@ -1,4 +1,3 @@
-import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/current_user_profile/current_user_profile_view_model.dart';
 import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
 import 'package:flutter/material.dart';

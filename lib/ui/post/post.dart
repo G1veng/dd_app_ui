@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/custom_ui/custom_buttom_navigation_bar.dart';
+import 'package:dd_app_ui/ui/custom_ui/custom_page_indicator.dart';
 import 'package:dd_app_ui/ui/post/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ class PostWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var viewModel = context.watch<PostViewModel>();
+    var size = MediaQuery.of(context).size;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -24,33 +26,32 @@ class PostWidget extends StatelessWidget {
                   child: SizedBox(
               child: CircularProgressIndicator(),
             )))
-          : SingleChildScrollView(
-              child: Column(children: [
-              SafeArea(
-                child: viewModel.state.postFiles != null &&
-                        viewModel.state.postFiles!.isNotEmpty
-                    ? Container(
-                        margin: const EdgeInsets.all(2.0),
-                        child: Container(
-                          height: (MediaQuery.of(context).size.width),
-                          width: (MediaQuery.of(context).size.width),
+          : Column(children: [
+              SizedBox(
+                  width: size.width,
+                  height: size.width,
+                  child: PageView.builder(
+                      onPageChanged: (value) =>
+                          viewModel.onPageChanged(0, value),
+                      itemCount: viewModel.state.postFiles!.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.all(2.0),
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                                image: Image.network(
-                                  "$baseUrl${viewModel.state.postFiles![0].link}",
-                                  headers: viewModel.state.headers,
-                                ).image,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.center),
+                              image: Image.network(
+                                "$baseUrl${viewModel.state.postFiles![index].link}",
+                                headers: viewModel.state.headers,
+                              ).image,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                            ),
                           ),
-                        ))
-                    : SizedBox(
-                        width: (MediaQuery.of(context).size.width),
-                        child: Container(
-                            margin: const EdgeInsets.all(5.0),
-                            color: Colors.grey,
-                            child: Text("${viewModel.state.post!.text}")),
-                      ),
+                        );
+                      })),
+              CustomPageIndicator(
+                count: viewModel.state.postFiles!.length,
+                current: viewModel.pager[0],
               ),
               Row(children: [
                 viewModel.state.currentUser!.avatar != null
@@ -105,7 +106,7 @@ class PostWidget extends StatelessWidget {
                       children: viewModel.state.postCommentsWidget ?? [],
                     ),
                   ))
-            ])),
+            ]),
       bottomNavigationBar: CustomBottomNavigationBar.create(context: context),
     );
   }
