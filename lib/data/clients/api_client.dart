@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
+import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -70,4 +71,7 @@ abstract class ApiClient {
 
   @POST("/api/User/AddAvatarToUser")
   Future addUserAvatar(@Body() MetaDataModel model);
+
+  @POST("/api/Post/CreatePost")
+  Future createPost(@Body() CreatePostModel model);
 }

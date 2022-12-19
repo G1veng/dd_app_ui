@@ -70,6 +70,7 @@ class PostViewModel extends ChangeNotifier {
   int take = 2, skip = 0;
   var createCommentTec = TextEditingController();
   Map<int, int> pager = <int, int>{};
+  final lvc = ScrollController();
 
   PostViewModel({required this.context, required this.postId}) {
     createCommentTec.addListener(() {
@@ -88,6 +89,24 @@ class PostViewModel extends ChangeNotifier {
   void _asyncInit() async {
     state = state.copyWith(isLoading: true);
 
+    lvc.addListener(() async {
+      var max = lvc.position.maxScrollExtent;
+      var current = lvc.offset;
+      var percent = (current / max * 100);
+      if (percent > 80) {
+        if (!state.isLoading) {
+          //state.isLoading = true;
+          Future.delayed(const Duration(seconds: 1)).then((value) {
+            //TODO запрос на получение новых комментариев
+          });
+
+          //isLoading = false;
+
+          addCommentWidgets();
+        }
+      }
+    });
+
     var headers = await TokenStorage.getAccessToken();
     if (headers != null) {
       state = state.copyWith(headers: headers);
@@ -96,13 +115,6 @@ class PostViewModel extends ChangeNotifier {
     var post = await _api.getPost(postId: postId);
     if (post != null) {
       var postAuthor = await _api.getUserById(userId: post.authorId!);
-      // await _dataService.cuUser(User(
-      //   id: postAuthor!.id!,
-      //   name: postAuthor.name!,
-      //   email: postAuthor.email!,
-      //   birthDate: postAuthor.birthDate!,
-      //   avatar: postAuthor.avatar,
-      // ));
       var test = User.fromJson(postAuthor!.toJson());
       await _dataService.cuUser(test);
 

@@ -7,6 +7,7 @@ import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:dd_app_ui/ui/icons_images/icons_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -80,6 +81,7 @@ class HomeViewModel extends ChangeNotifier {
   final _api = ApiService();
   int take = 10, skip = 0;
   bool isUpdating = false;
+  Map<int, int> pager = <int, int>{};
 
   HomeViewModel({required this.context}) {
     _asyncInit();
@@ -112,7 +114,7 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  void postPressed(String postId) {}
+  void postPressed(String postId) => AppNavigator.toPost(postId: postId);
 
   void postLikePressed(String postId, int index) async {
     var changeOn = state.postsInfo![index].postLikeState! == 1 ? 0 : 1;
@@ -322,5 +324,10 @@ class HomeViewModel extends ChangeNotifier {
       return true;
     }
     return false;
+  }
+
+  void onPageChanged(int listIndex, int pageIndex) {
+    pager[listIndex] = pageIndex;
+    notifyListeners();
   }
 }

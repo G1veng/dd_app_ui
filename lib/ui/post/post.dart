@@ -26,7 +26,7 @@ class PostWidget extends StatelessWidget {
                   child: SizedBox(
               child: CircularProgressIndicator(),
             )))
-          : Column(children: [
+          : ListView(controller: viewModel.lvc, children: [
               SizedBox(
                   width: size.width,
                   height: size.width,

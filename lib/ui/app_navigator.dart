@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/ui/create_post/create_post.dart';
 import 'package:dd_app_ui/ui/current_user_profile/current_user_profile.dart';
 import 'package:dd_app_ui/ui/roots/auth/auth.dart';
 import 'package:dd_app_ui/ui/roots/home/home.dart';
@@ -15,40 +16,46 @@ class NavigationRoutes {
   static const registration = "/registration";
   static const users = "/app/users";
   static const post = "/app/post";
+  static const createPost = "/app/create_post";
 }
 
 class AppNavigator {
   static final key = GlobalKey<NavigatorState>();
 
-  static void toLoader() {
-    key.currentState
+  static Future toLoader() async {
+    return await key.currentState
         ?.pushNamedAndRemoveUntil(NavigationRoutes.loader, (route) => false);
   }
 
-  static void toRegistration() {
-    key.currentState?.pushNamed(NavigationRoutes.registration);
+  static Future toRegistration() async {
+    return await key.currentState?.pushNamed(NavigationRoutes.registration);
   }
 
-  static void toHome() {
-    key.currentState
+  static Future toHome() async {
+    return await key.currentState
         ?.pushNamedAndRemoveUntil(NavigationRoutes.home, (route) => false);
   }
 
-  static void toAuth() {
-    key.currentState
+  static Future toAuth() async {
+    return await key.currentState
         ?.pushNamedAndRemoveUntil(NavigationRoutes.auth, (route) => false);
   }
 
-  static void toUsers() {
-    key.currentState?.pushNamed(NavigationRoutes.users);
+  static Future toUsers() async {
+    return await key.currentState?.pushNamed(NavigationRoutes.users);
   }
 
-  static void toUserProfile() {
-    key.currentState?.pushNamed(NavigationRoutes.userProfile);
+  static Future toUserProfile() async {
+    return await key.currentState?.pushNamed(NavigationRoutes.userProfile);
   }
 
-  static void toPost({required String postId}) {
-    key.currentState?.pushNamed(NavigationRoutes.post, arguments: postId);
+  static Future toPost({required String postId}) async {
+    return await key.currentState
+        ?.pushNamed(NavigationRoutes.post, arguments: postId);
+  }
+
+  static Future toCreatePost() async {
+    return await key.currentState?.pushNamed(NavigationRoutes.createPost);
   }
 
   static Route<dynamic>? onGeneratedRoutes(RouteSettings settings, context) {
@@ -79,6 +86,9 @@ class AppNavigator {
         return PageRouteBuilder(
             pageBuilder: (_, __, ___) =>
                 PostWidget.create(postId: settings.arguments as String));
+      case NavigationRoutes.createPost:
+        return PageRouteBuilder(
+            pageBuilder: (_, __, ___) => CreatePostWidget.create());
       default:
         return null;
     }
