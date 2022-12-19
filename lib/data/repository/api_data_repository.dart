@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
+import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
@@ -130,5 +131,10 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future addUserAvatar({required MetaDataModel model}) async {
     return await _api.addUserAvatar(model);
+  }
+
+  @override
+  Future createPost({required CreatePostModel model}) async {
+    return await _api.createPost(model);
   }
 }

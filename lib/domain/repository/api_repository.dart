@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
+import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -52,4 +53,6 @@ abstract class ApiRepository {
   Future<List<MetaDataModel>?> uploadFiles({required List<File> files});
 
   Future addUserAvatar({required MetaDataModel model});
+
+  Future createPost({required CreatePostModel model});
 }
