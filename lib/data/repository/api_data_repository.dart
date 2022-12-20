@@ -77,18 +77,23 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future createUser(
-      {required name,
-      required email,
-      required password,
-      required retryPassword,
-      required birthDate}) async {
+  Future createUser({
+    required name,
+    required email,
+    required password,
+    required retryPassword,
+    required birthDate,
+    required created,
+    required id,
+  }) async {
     return await _auth.createUser(CreateUserRequestModel(
       name: name,
       email: email,
       password: password,
       retryPassword: retryPassword,
       birthDate: birthDate,
+      created: created,
+      id: id,
     ));
   }
 

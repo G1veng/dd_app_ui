@@ -14,18 +14,23 @@ class AuthService {
   final ApiRepository _api = RepositoryModule.apiRepository();
   final DataService _dataService = DataService();
 
-  Future createUser(
-      {required name,
-      required email,
-      required password,
-      required retryPassword,
-      required birthDate}) async {
+  Future createUser({
+    required name,
+    required email,
+    required password,
+    required retryPassword,
+    required birthDate,
+    required created,
+    required id,
+  }) async {
     await _api.createUser(
       name: name,
       email: email,
       password: password,
       retryPassword: retryPassword,
       birthDate: birthDate,
+      created: created,
+      id: id,
     );
   }
 

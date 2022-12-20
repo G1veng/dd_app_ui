@@ -35,6 +35,8 @@ abstract class ApiRepository {
     required password,
     required retryPassword,
     required birthDate,
+    required created,
+    required id,
   });
 
   Future<PostModel?> getPost({required String postId});

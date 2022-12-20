@@ -1,6 +1,9 @@
 import 'package:dd_app_ui/data/services/auth_service.dart';
+import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/ui/app_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class RegistrationState {
   final String? name;
@@ -43,6 +46,7 @@ class RegistrationViewModel extends ChangeNotifier {
   var retryPasswordTec = TextEditingController();
   var birthDateTec = TextEditingController();
   final _authService = AuthService();
+  final _dataService = DataService();
 
   var _state = RegistrationState();
   RegistrationState get state => _state;
@@ -81,14 +85,26 @@ class RegistrationViewModel extends ChangeNotifier {
   }
 
   void register() async {
-    var r = state.birthDate.toString();
+    String userId = const Uuid().v4().toString();
+    String created = DateTime.now().toUtc().toString();
+
+    await _dataService.cuUser(User(
+      avatar: null,
+      id: userId,
+      name: state.name!,
+      email: state.email!,
+      birthDate: state.birthDate!,
+    ));
 
     await _authService.createUser(
-        name: state.name,
-        email: state.email,
-        password: state.password,
-        retryPassword: state.retryPassword,
-        birthDate: state.birthDate.toString().replaceAll(r" ", "T"));
+      id: userId,
+      name: state.name,
+      email: state.email,
+      password: state.password,
+      retryPassword: state.retryPassword,
+      birthDate: state.birthDate.toString().replaceAll(r" ", "T"),
+      created: created.toString().replaceAll(r" ", "T"),
+    );
 
     AppNavigator.toAuth();
   }
