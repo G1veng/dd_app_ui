@@ -13,6 +13,7 @@ CreatePostModel _$CreatePostModelFromJson(Map<String, dynamic> json) =>
       files: (json['files'] as List<dynamic>)
           .map((e) => MetaDataModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      created: json['created'] as String,
     );
 
 Map<String, dynamic> _$CreatePostModelToJson(CreatePostModel instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$CreatePostModelToJson(CreatePostModel instance) =>
       'id': instance.id,
       'text': instance.text,
       'files': instance.files,
+      'created': instance.created,
     };

@@ -1,6 +1,7 @@
 import 'package:dd_app_ui/ui/create_post/create_post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui' as ui;
 
 class CreatePostWidget extends StatelessWidget {
   const CreatePostWidget({
@@ -38,20 +39,28 @@ class CreatePostWidget extends StatelessWidget {
                         height: size.width,
                         child: ListView(
                           children: [
-                            Wrap(children: viewModel.state.images!),
+                            Wrap(children: viewModel.state.imagesWidgets!),
                           ],
                         )),
-                    TextFormField(
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      controller: viewModel.postText,
-                      decoration: InputDecoration(
-                          errorText: viewModel.postText.text.isEmpty
-                              ? "Minimum is one symbol"
-                              : null,
-                          border: const OutlineInputBorder(),
-                          hintText: "Enter post description"),
-                      textAlign: TextAlign.start,
+                    Container(
+                      margin: const EdgeInsets.all(5.0),
+                      child: TextFormField(
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLength: 300,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        controller: viewModel.postText,
+                        decoration: InputDecoration(
+                            errorText: viewModel.postText.text.isEmpty
+                                ? "Minimum is one symbol"
+                                : null,
+                            border: const OutlineInputBorder(),
+                            hintText: "Enter post description"),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ],
                 )

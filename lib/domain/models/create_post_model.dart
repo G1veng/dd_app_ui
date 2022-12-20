@@ -8,11 +8,13 @@ class CreatePostModel {
   final String id;
   final String text;
   final List<MetaDataModel> files;
+  final String created;
 
   CreatePostModel({
     required this.id,
     required this.text,
     required this.files,
+    required this.created,
   });
 
   factory CreatePostModel.fromJson(Map<String, dynamic> json) =>

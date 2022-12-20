@@ -154,7 +154,7 @@ class CreatePostViewModel extends ChangeNotifier {
 
     for (int i = startIndex; i < endIndex; i++) {
       imagesWidgets.add(GestureDetector(
-          onTap: () {}, //TODO
+          onTap: () {}, //TODO сделать показ картинки в полный экран
           child: Container(
             margin: const EdgeInsets.all(0.5),
             height: (MediaQuery.of(context).size.width / 3) - 1,
@@ -192,7 +192,10 @@ class CreatePostViewModel extends ChangeNotifier {
 
       await _api.createPost(
           model: CreatePostModel(
-              id: postId, text: state.postText!, files: metaData!));
+              id: postId,
+              text: state.postText!,
+              files: metaData!,
+              created: created.replaceAll(r' ', 'T')));
 
       _goToProfile();
     }
