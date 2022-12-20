@@ -81,12 +81,14 @@ class RegistrationViewModel extends ChangeNotifier {
   }
 
   void register() async {
+    var r = state.birthDate.toString();
+
     await _authService.createUser(
         name: state.name,
         email: state.email,
         password: state.password,
         retryPassword: state.retryPassword,
-        birthDate: state.birthDate);
+        birthDate: state.birthDate.toString().replaceAll(r" ", "T"));
 
     AppNavigator.toAuth();
   }
@@ -96,7 +98,7 @@ class RegistrationViewModel extends ChangeNotifier {
       context: context,
       initialDate: state.birthDate!,
       firstDate: DateTime(1922),
-      lastDate: DateTime(2025),
+      lastDate: DateTime.now(),
     );
     if (picked != null && picked != state.birthDate) {
       birthDateTec.text = picked.toString();

@@ -22,14 +22,33 @@ class RegistrationWidget extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            createTextField("This field is required",
-                                "Enter login", viewModel.emailTec),
-                            createTextField("This field is required",
-                                "Enter password", viewModel.passwordTec),
-                            createTextField("This field is required",
-                                "Retry password", viewModel.retryPasswordTec),
-                            createTextField("This field is required",
-                                "Enter name", viewModel.nameTec),
+                            createTextField(
+                              "This field is required",
+                              "Enter login",
+                              viewModel.emailTec,
+                              check: () => viewModel.emailTec.text.isNotEmpty,
+                            ),
+                            createTextField(
+                              "This field is required",
+                              "Enter password",
+                              viewModel.passwordTec,
+                              isObscure: true,
+                              check: () =>
+                                  viewModel.passwordTec.text.isNotEmpty,
+                            ),
+                            createTextField("Passwods must be the same",
+                                "Retry password", viewModel.retryPasswordTec,
+                                isObscure: true,
+                                check: () =>
+                                    viewModel.passwordTec.text ==
+                                        viewModel.retryPasswordTec.text &&
+                                    viewModel.retryPasswordTec.text.isNotEmpty),
+                            createTextField(
+                              "This field is required",
+                              "Enter name",
+                              viewModel.nameTec,
+                              check: () => viewModel.nameTec.text.isNotEmpty,
+                            ),
                             Wrap(
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 spacing: 10.0,
@@ -67,17 +86,19 @@ class RegistrationWidget extends StatelessWidget {
   }
 
   Widget createTextField(
-          String errorText, String hintText, TextEditingController tec) =>
+          String errorText, String hintText, TextEditingController tec,
+          {bool isObscure = false, required bool Function() check}) =>
       Container(
           margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 10.0),
           alignment: Alignment.center,
           child: TextField(
+            obscureText: isObscure,
             keyboardType: TextInputType.emailAddress,
             controller: tec,
             decoration: InputDecoration(
-                errorText: tec.text.isEmpty ? "This field is required" : null,
+                errorText: !check() ? errorText : null,
                 border: const OutlineInputBorder(),
-                hintText: "Enter login"),
+                hintText: hintText),
             textAlign: TextAlign.start,
           ));
 
