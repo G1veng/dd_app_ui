@@ -7,8 +7,8 @@ import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
-import 'package:dd_app_ui/ui/app_navigator.dart';
-import 'package:dd_app_ui/ui/common/cam_widget.dart';
+import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
+import 'package:dd_app_ui/ui/widgets/common/cam_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
@@ -203,7 +203,7 @@ class CreatePostViewModel extends ChangeNotifier {
 
   void _goToProfile() {
     Navigator.of(context)
-        .pushNamedAndRemoveUntil(NavigationRoutes.userProfile, (___) => false);
+        .pushNamedAndRemoveUntil(TabNavigatorRoutes.root, (___) => false);
   }
 
   void close() {

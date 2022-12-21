@@ -1,4 +1,4 @@
-import 'package:dd_app_ui/ui/roots/loader/loader_view_model.dart';
+import 'package:dd_app_ui/ui/widgets/roots/loader/loader_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';

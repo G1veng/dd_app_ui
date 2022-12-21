@@ -1,5 +1,5 @@
-import 'package:dd_app_ui/ui/app_navigator.dart';
-import 'package:dd_app_ui/ui/roots/registration/registration_view_model.dart';
+import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
+import 'package:dd_app_ui/ui/widgets/roots/registration/registration_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
