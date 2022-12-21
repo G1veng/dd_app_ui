@@ -1,6 +1,6 @@
 import 'package:dd_app_ui/data/services/database.dart';
-import 'package:dd_app_ui/ui/app_navigator.dart';
-import 'package:dd_app_ui/ui/roots/loader/loader.dart';
+import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
+import 'package:dd_app_ui/ui/widgets/roots/loader/loader_widget.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
