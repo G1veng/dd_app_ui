@@ -23,11 +23,13 @@ abstract class ApiRepository {
 
   Future<int> getUserSubscriptionsAmount();
 
-  Future<List<PostModel>?> getCurrentUserPosts(int take, int skip);
+  Future<List<PostModel>?> getCurrentUserPosts(
+      String? lastPostCreated, int take, int skip);
 
   Future<List<UserModel>?> getUsers();
 
-  Future<List<PostModel>?> getSubscriptionsPosts(int take, int skip);
+  Future<List<PostModel>?> getSubscriptionsPosts(
+      String? lastPostCreated, int take, int skip);
 
   Future createUser({
     required name,
@@ -48,7 +50,10 @@ abstract class ApiRepository {
   Future<UserModel?> getUserById({required String userId});
 
   Future<List<PostComment>?> getPostComments(
-      {required String postId, required int take, required int skip});
+      {required String? lastPostCreated,
+      required String postId,
+      required int take,
+      required int skip});
 
   Future createPostComment({required CreatePostCommentModel model});
 

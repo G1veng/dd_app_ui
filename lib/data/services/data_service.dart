@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/data/services/database.dart';
+import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
@@ -27,7 +28,6 @@ class DataService {
       skip: skip,
       orderBy: orderBy,
       whereMap: id != null ? {"id": id} : null,
-      notEqual: notEqual,
     );
   }
 
@@ -58,15 +58,16 @@ class DataService {
   }
 
   Future<PostWithPostLikeState?> getPostWithLikeStatePostFiles(
-      String postid) async {
-    Post? post = await DB.instance.get(postid);
+      String postId) async {
+    Post? post = await DB.instance.get(postId);
 
-    List<PostFile>? postFiles = (await getPostFiles(postid))!.toList();
+    List<PostFile>? postFiles = (await getPostFiles(postId))!.toList();
 
-    PostLikeState? postLikeState = await getPostLikeState(postid);
+    PostLikeState? postLikeState =
+        await getPostLikeState(postId) ?? PostLikeState(id: postId, isLiked: 0);
 
     return PostWithPostLikeState(
-      id: postid,
+      id: postId,
       created: post!.created,
       text: post.text,
       authorId: post.authorId,
@@ -74,25 +75,30 @@ class DataService {
       authorAvatar: post.authorAvatar,
       commentAmount: post.commentAmount,
       likesAmount: post.likesAmount,
-      postLikeState: postLikeState!.isLiked,
+      postLikeState: postLikeState.isLiked,
     );
   }
 
   Future<Iterable<PostWithPostLikeState>?> getPostsWithLikeStatePostFilesById(
-      String authorId,
-      {int? take,
-      int? skip,
-      String? orderBy}) async {
+    Map<String, dynamic>? where, {
+    int? take,
+    int? skip,
+    List<DbQueryEnum>? conds,
+  }) async {
     List<PostWithPostLikeState>? res = [];
-    var posts = await getPostsByAuthorId(authorId,
-        orderBy: orderBy, take: take, skip: skip);
 
-    if (posts != null) {
-      for (var post in posts) {
-        var postLikeState = await getPostLikeState(post.id!) ??
-            PostLikeState(id: post.id!, isLiked: 0);
+    List<Post> posts = (await DB.instance.getAll<Post>(
+            take: take,
+            skip: skip,
+            whereMap: where,
+            orderBy: "created DESC",
+            conditions: conds))
+        .toList();
 
-        res.add(PostWithPostLikeState(
+    for (var post in posts) {
+      var postLikeState = (await DB.instance.get<PostLikeState>(post.id));
+
+      res.add(PostWithPostLikeState(
           id: post.id,
           created: post.created,
           text: post.text,
@@ -101,9 +107,7 @@ class DataService {
           authorAvatar: post.authorAvatar,
           commentAmount: post.commentAmount,
           likesAmount: post.likesAmount,
-          postLikeState: postLikeState.isLiked,
-        ));
-      }
+          postLikeState: postLikeState == null ? 0 : postLikeState.isLiked));
     }
 
     return res;
@@ -121,6 +125,10 @@ class DataService {
     return await DB.instance.createUpdate(postFile);
   }
 
+  Future cuPostFiles(List<PostFile> postFiles) async {
+    return await DB.instance.createUpdateRange(postFiles);
+  }
+
   Future<PostFile?> getPostFile(String id) async {
     return await DB.instance.get(id);
   }
@@ -130,7 +138,35 @@ class DataService {
   }
 
   Future cuPostLikeState(PostLikeState postLikeState) async {
-    return await DB.instance.createUpdate(postLikeState);
+    var post = await DB.instance.get<Post>(postLikeState.id);
+
+    if (postLikeState.isLiked == 0) {
+      if ((await DB.instance.get<PostLikeState>(postLikeState.id)) != null) {
+        await DB.instance.createUpdate<Post>(Post(
+            id: post!.id,
+            created: post.created,
+            text: post.text,
+            authorId: post.authorId,
+            authorAvatar: post.authorAvatar,
+            commentAmount: post.commentAmount,
+            likesAmount: post.likesAmount! - 1));
+      }
+      return await DB.instance.createUpdate(postLikeState);
+    } else {
+      await DB.instance.createUpdate<Post>(Post(
+          id: post!.id,
+          created: post.created,
+          text: post.text,
+          authorId: post.authorId,
+          authorAvatar: post.authorAvatar,
+          commentAmount: post.commentAmount,
+          likesAmount: post.likesAmount! + 1));
+      return await DB.instance.createUpdate(postLikeState);
+    }
+  }
+
+  Future dPostLikeState(PostLikeState postLikeState) async {
+    return await DB.instance.delete<PostLikeState>(postLikeState);
   }
 
   Future<PostLikeState?> getPostLikeState(String postId) async {
@@ -141,10 +177,21 @@ class DataService {
     return await DB.instance.createUpdateRange(postComments);
   }
 
-  Future<Iterable<PostComment>?> getPostComments(
-      String postId, int take, int skip, String? orderBy) async {
-    return await DB.instance.getAll(
-        whereMap: {"postId": postId}, take: take, skip: skip, orderBy: orderBy);
+  Future<List<PostComment>?> getPostComments(
+    Map<String, dynamic>? where, {
+    int? take,
+    int? skip,
+    List<DbQueryEnum>? conds,
+  }) async {
+    List<PostComment> postsComments = (await DB.instance.getAll<PostComment>(
+            take: take,
+            skip: skip,
+            whereMap: where,
+            orderBy: "created DESC",
+            conditions: conds))
+        .toList();
+
+    return postsComments;
   }
 
   Future cuPostComment(PostComment postComment) async {

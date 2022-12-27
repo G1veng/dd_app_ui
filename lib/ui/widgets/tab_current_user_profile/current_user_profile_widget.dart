@@ -1,6 +1,4 @@
 import 'package:dd_app_ui/ui/widgets/tab_current_user_profile/current_user_profile_view_model.dart';
-import 'package:dd_app_ui/ui/widgets/roots/app/app_view_model.dart';
-import 'package:dd_app_ui/ui/widgets/tab_home/home/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
@@ -13,7 +11,6 @@ class CurrentUserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var viewModel = context.watch<CurrentUserProfileViewModel>();
-    var homeViewModel = context.read<AppViewModel>();
 
     return Scaffold(
         appBar: AppBar(

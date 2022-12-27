@@ -25,11 +25,12 @@ class ApiService {
   }
 
   Future<List<PostModel>?> getCurrentUserPosts({
+    String? lastPostCreated,
     int take = 10,
     int skip = 0,
   }) async {
     {
-      return await _api.getCurrentUserPosts(take, skip);
+      return await _api.getCurrentUserPosts(lastPostCreated, take, skip);
     }
   }
 
@@ -37,8 +38,9 @@ class ApiService {
     return await _api.getUsers();
   }
 
-  Future<List<PostModel>?> getSubscriptionPosts(int take, int skip) async {
-    return await _api.getSubscriptionsPosts(take, skip);
+  Future<List<PostModel>?> getSubscriptionPosts(
+      String? lastPostCreated, int take, int skip) async {
+    return await _api.getSubscriptionsPosts(lastPostCreated, take, skip);
   }
 
   Future<PostModel?> getPost({required String postId}) async {
@@ -58,8 +60,15 @@ class ApiService {
   }
 
   Future<List<PostComment>?> getPostComments(
-      {required String postId, required int take, required int skip}) async {
-    return await _api.getPostComments(postId: postId, take: take, skip: skip);
+      {required String? lastPostCreated,
+      required String postId,
+      required int take,
+      required int skip}) async {
+    return await _api.getPostComments(
+        lastPostCreated: lastPostCreated,
+        postId: postId,
+        take: take,
+        skip: skip);
   }
 
   Future createPostComment({required CreatePostCommentModel model}) async {

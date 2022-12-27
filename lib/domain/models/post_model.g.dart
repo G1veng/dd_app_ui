@@ -12,8 +12,7 @@ PostModel _$PostModelFromJson(Map<String, dynamic> json) => PostModel(
       text: json['text'] as String?,
       authorId: json['authorId'] as String?,
       postFiles: (json['postFiles'] as List<dynamic>?)
-          ?.map((e) =>
-              e == null ? null : PostFile.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => PostFile.fromJson(e as Map<String, dynamic>))
           .toList(),
       authorAvatar: json['authorAvatar'] as String?,
       commentAmount: json['commentAmount'] as int?,

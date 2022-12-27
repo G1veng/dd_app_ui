@@ -36,6 +36,8 @@
 import 'package:flutter/widgets.dart';
 
 class MyIcons {
+  //Понимаю, что авторские права, но пока можно, я решил добавить другие иконки
+
   MyIcons._();
 
   static const _kFontFam = 'Icons';

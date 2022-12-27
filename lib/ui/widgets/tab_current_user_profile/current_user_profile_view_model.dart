@@ -132,7 +132,7 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
 
         if (post.postFiles != null) {
           for (var file in post.postFiles!) {
-            await _dataService.cuPostFile(file!);
+            await _dataService.cuPostFile(file);
           }
         }
 
@@ -156,10 +156,11 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
       headers: headers,
       userStatistics: await _dataService.getUserStatisctics(user.id),
       userPosts: await _dataService.getPostsWithLikeStatePostFilesById(
-        user.id,
+        state.userPosts?.last.created == null
+            ? null
+            : {"created": state.userPosts?.last.created},
         take: take,
         skip: skip,
-        orderBy: "created DESC",
       ),
     );
 
@@ -177,7 +178,7 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
     if (userPosts != null) {
       addImages();
 
-      skip += take;
+      //skip += take;
     }
 
     if (userPosts != null) {
@@ -287,7 +288,10 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
     User? user = await SharedPrefs.getStoredUser();
 
     try {
-      userPosts = await _apiService.getCurrentUserPosts(take: take, skip: skip);
+      userPosts = await _apiService.getCurrentUserPosts(
+          lastPostCreated: state.userPosts?.last.created,
+          take: take,
+          skip: skip);
     } on NoNetworkException {
       _showDialog("Network error", "Network erorr, please try later");
     } on Exception {
@@ -308,7 +312,7 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
 
         if (post.postFiles != null) {
           for (var file in post.postFiles!) {
-            await _dataService.cuPostFile(file!);
+            await _dataService.cuPostFile(file);
           }
         }
 
@@ -323,16 +327,17 @@ class CurrentUserProfileViewModel extends ChangeNotifier {
       state = state.copyWith(
         userStatistics: await _dataService.getUserStatisctics(user!.id),
         userPosts: await _dataService.getPostsWithLikeStatePostFilesById(
-          user.id,
+          state.userPosts?.last.created == null
+              ? null
+              : {"created": state.userPosts?.last.created},
           take: take,
           skip: skip,
-          orderBy: "created",
         ),
       );
 
       addImages();
 
-      skip += take;
+      //skip += take;
     }
   }
 

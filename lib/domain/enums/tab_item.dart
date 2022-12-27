@@ -1,6 +1,6 @@
-import 'package:dd_app_ui/ui/widgets/tab_current_user_profile/current_user_profile.dart';
+import 'package:dd_app_ui/ui/widgets/tab_current_user_profile/current_user_profile_widget.dart';
 import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
-import 'package:dd_app_ui/ui/widgets/tab_home/home/tab_home_widget.dart';
+import 'package:dd_app_ui/ui/widgets/tab_home/home/home_widget.dart';
 import 'package:dd_app_ui/ui/widgets/tab_users/users/users_widget.dart';
 import 'package:flutter/material.dart';
 

@@ -62,8 +62,9 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<PostModel>?> getCurrentUserPosts(int take, int skip) async {
-    return await _api.getCurrentUserPosts(take, skip);
+  Future<List<PostModel>?> getCurrentUserPosts(
+      String? lastPostCreated, int take, int skip) async {
+    return await _api.getCurrentUserPosts(lastPostCreated, take, skip);
   }
 
   @override
@@ -72,8 +73,9 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<PostModel>?> getSubscriptionsPosts(int take, int skip) async {
-    return await _api.getSubscriptionPosts(take, skip);
+  Future<List<PostModel>?> getSubscriptionsPosts(
+      String? lastPostCreated, int take, int skip) async {
+    return await _api.getSubscriptionPosts(lastPostCreated, take, skip);
   }
 
   @override
@@ -119,8 +121,11 @@ class ApiDataRepository extends ApiRepository {
 
   @override
   Future<List<PostComment>?> getPostComments(
-      {required String postId, required int take, required int skip}) async {
-    return await _api.getPostComments(postId, take, skip);
+      {required String? lastPostCreated,
+      required String postId,
+      required int take,
+      required int skip}) async {
+    return await _api.getPostComments(lastPostCreated, postId, take, skip);
   }
 
   @override

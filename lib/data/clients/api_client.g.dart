@@ -109,14 +109,17 @@ class _ApiClient implements ApiClient {
 
   @override
   Future<List<PostModel>?> getCurrentUserPosts(
+    lastPostCreated,
     take,
     skip,
   ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
+      r'lastPostCreated': lastPostCreated,
       r'take': take,
       r'skip': skip,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
@@ -165,14 +168,17 @@ class _ApiClient implements ApiClient {
 
   @override
   Future<List<PostModel>?> getSubscriptionPosts(
+    lastPostCreated,
     take,
     skip,
   ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
+      r'lastPostCreated': lastPostCreated,
       r'take': take,
       r'skip': skip,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
@@ -288,16 +294,19 @@ class _ApiClient implements ApiClient {
 
   @override
   Future<List<PostComment>?> getPostComments(
+    lastPostCreated,
     postId,
     take,
     skip,
   ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
+      r'lastPostCreated': lastPostCreated,
       r'postId': postId,
       r'take': take,
       r'skip': skip,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio

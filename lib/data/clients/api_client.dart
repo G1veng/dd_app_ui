@@ -30,6 +30,7 @@ abstract class ApiClient {
 
   @GET("/api/Post/GetCurrentUserPosts")
   Future<List<PostModel>?> getCurrentUserPosts(
+    @Query("lastPostCreated") String? lastPostCreated,
     @Query("take") int take,
     @Query("skip") int skip,
   );
@@ -39,6 +40,7 @@ abstract class ApiClient {
 
   @GET("/api/Post/GetSubscriptionPosts")
   Future<List<PostModel>?> getSubscriptionPosts(
+    @Query("lastPostCreated") String? lastPostCreated,
     @Query("take") int take,
     @Query("skip") int skip,
   );
@@ -57,6 +59,7 @@ abstract class ApiClient {
 
   @GET("/api/PostComment/GetPostComments")
   Future<List<PostComment>?> getPostComments(
+    @Query("lastPostCreated") String? lastPostCreated,
     @Query("postId") String postId,
     @Query("take") int take,
     @Query("skip") int skip,

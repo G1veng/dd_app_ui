@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/domain/db_model.dart';
+import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
@@ -20,7 +21,7 @@ class DB {
   Future init() async {
     if (!_initialized) {
       var databasePath = await getDatabasesPath();
-      var path = join(databasePath, "db_v1.0.12.db");
+      var path = join(databasePath, "db_v1.0.13.db");
 
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
@@ -58,10 +59,11 @@ class DB {
       int? take,
       int? skip,
       String? orderBy,
-      bool? notEqual}) async {
+      List<DbQueryEnum>? conditions}) async {
     Iterable<Map<String, dynamic>> query;
 
     if (whereMap != null) {
+      int counter = 0;
       var whereBuilder = <String>[];
       var whereArgs = <dynamic>[];
       whereMap.forEach((key, value) {
@@ -70,17 +72,16 @@ class DB {
               .add("$key IN (${List.filled(value.length, '?').join(',')})");
           whereArgs.addAll(value.map((e) => "$e"));
         } else {
-          if (notEqual != null) {
-            if (notEqual) {
-              whereBuilder.add("$key != ?");
-            } else {
-              whereBuilder.add("$key = ?");
-            }
-          } else {
+          if (conditions == null || conditions[counter] == DbQueryEnum.equal) {
             whereBuilder.add("$key = ?");
+          } else if (conditions[counter] == DbQueryEnum.isLess) {
+            whereBuilder.add("$key < ?");
+          } else if (conditions[counter] == DbQueryEnum.notEqual) {
+            whereBuilder.add("$key != ?");
           }
           whereArgs.add(value);
         }
+        counter++;
       });
       query = await _db.query(_dbName(T),
           offset: skip,

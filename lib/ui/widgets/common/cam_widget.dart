@@ -45,7 +45,7 @@ class CamWidgetState extends State<CamWidget> {
     if (!(controller?.value.isInitialized ?? false)) {
       return const Center(
           child: Text(
-        "Camera initialize",
+        "Camera is initializing",
         style: TextStyle(color: Colors.white),
       ));
     }

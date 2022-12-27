@@ -9,7 +9,7 @@ class PostModel {
   final String? created;
   final String? text;
   final String? authorId;
-  final List<PostFile?>? postFiles;
+  final List<PostFile>? postFiles;
   final String? authorAvatar;
   final int? commentAmount;
   final int? likesAmount;

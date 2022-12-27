@@ -6,15 +6,15 @@ import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
 
-class _UsersState {
+class UsersState {
   final List<User>? users;
   final Map<String, String>? headers;
   final List<Row>? usersWidgets;
   final bool? isLoading;
 
-  _UsersState({this.users, this.usersWidgets, this.headers, this.isLoading});
+  UsersState({this.users, this.usersWidgets, this.headers, this.isLoading});
 
-  _UsersState copyWith({users, usersWidgets, headers, isLoading}) {
+  UsersState copyWith({users, usersWidgets, headers, isLoading}) {
     List<User>? addedUsers;
     List<Row>? addedUserWidgets;
 
@@ -34,7 +34,7 @@ class _UsersState {
       usersWidgets = addedUserWidgets;
     }
 
-    return _UsersState(
+    return UsersState(
       users: users ?? this.users,
       usersWidgets: usersWidgets ?? this.usersWidgets,
       headers:
@@ -45,7 +45,7 @@ class _UsersState {
 }
 
 class UsersViewModel extends ChangeNotifier {
-  var _state = _UsersState();
+  var _state = UsersState();
   final _api = ApiService();
   final _dataService = DataService();
   final BuildContext context;
@@ -56,8 +56,8 @@ class UsersViewModel extends ChangeNotifier {
     _asyncInit();
   }
 
-  _UsersState get state => _state;
-  set state(_UsersState val) {
+  UsersState get state => _state;
+  set state(UsersState val) {
     _state = val;
     notifyListeners();
   }
