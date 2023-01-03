@@ -20,13 +20,13 @@ abstract class ApiClient {
   Future<User?> getUser();
 
   @GET("/api/Post/GetUserPostAmount")
-  Future<int> getUserPostAmount();
+  Future<int> getUserPostAmount(@Query("userId") String? userId);
 
   @GET("/api/Subscription/GetUserSubscriptionsAmount")
-  Future<int> getUserSubscriptionsAmount();
+  Future<int> getUserSubscriptionsAmount(@Query("userId") String? userId);
 
   @GET("/api/Subscription/GetUserSubscribersAmount")
-  Future<int> getUserSubscribersAmount();
+  Future<int> getUserSubscribersAmount(@Query("userId") String? userId);
 
   @GET("/api/Post/GetCurrentUserPosts")
   Future<List<PostModel>?> getCurrentUserPosts(
@@ -36,7 +36,10 @@ abstract class ApiClient {
   );
 
   @GET("/api/User/GetUsers")
-  Future<List<UserModel>?> getUsers();
+  Future<List<UserModel>?> getUsers(
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
 
   @GET("/api/Post/GetSubscriptionPosts")
   Future<List<PostModel>?> getSubscriptionPosts(
@@ -77,4 +80,10 @@ abstract class ApiClient {
 
   @POST("/api/Post/CreatePost")
   Future createPost(@Body() CreatePostModel model);
+
+  @POST("/api/Subscription/ChangeSubscriptionStateOnUser")
+  Future changeSubscriptionStateOnUser(@Query("userId") String userId);
+
+  @GET("/api/Subscription/IsSubscribedOn")
+  Future<bool> isSubscribedOn(@Query("userId") String userId);
 }

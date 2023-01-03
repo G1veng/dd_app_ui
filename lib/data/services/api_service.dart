@@ -12,16 +12,16 @@ import 'package:dd_app_ui/internal/dependecies/repository_model.dart';
 class ApiService {
   final ApiRepository _api = RepositoryModule.apiRepository();
 
-  Future<int> getUserPostAmount() async {
-    return _api.getUserPostAmount();
+  Future<int> getUserPostAmount({String? userId}) async {
+    return _api.getUserPostAmount(userId);
   }
 
-  Future<int> getUserSubscribersAmount() async {
-    return await _api.getUserSubscribersAmount();
+  Future<int> getUserSubscribersAmount({String? userId}) async {
+    return await _api.getUserSubscribersAmount(userId);
   }
 
-  Future<int> getUserSubscriptionsAmount() async {
-    return await _api.getUserSubscriptionsAmount();
+  Future<int> getUserSubscriptionsAmount({String? userId}) async {
+    return await _api.getUserSubscriptionsAmount(userId);
   }
 
   Future<List<PostModel>?> getCurrentUserPosts({
@@ -34,8 +34,8 @@ class ApiService {
     }
   }
 
-  Future<List<UserModel>?> getUsers() async {
-    return await _api.getUsers();
+  Future<List<UserModel>?> getUsers(int take, int skip) async {
+    return await _api.getUsers(take, skip);
   }
 
   Future<List<PostModel>?> getSubscriptionPosts(
@@ -85,5 +85,13 @@ class ApiService {
 
   Future createPost({required CreatePostModel model}) async {
     return await _api.createPost(model: model);
+  }
+
+  Future changeSubscriptionStateOnUser({required String userId}) async {
+    return await _api.changeSubscriptionStateOnUser(userId: userId);
+  }
+
+  Future<bool> isSubscribedOn({required String userId}) async {
+    return await _api.isSubscribedOn(userId: userId);
   }
 }

@@ -17,16 +17,16 @@ abstract class ApiRepository {
 
   Future<User?> getUser();
 
-  Future<int> getUserPostAmount();
+  Future<int> getUserPostAmount(String? userId);
 
-  Future<int> getUserSubscribersAmount();
+  Future<int> getUserSubscribersAmount(String? userId);
 
-  Future<int> getUserSubscriptionsAmount();
+  Future<int> getUserSubscriptionsAmount(String? userId);
 
   Future<List<PostModel>?> getCurrentUserPosts(
       String? lastPostCreated, int take, int skip);
 
-  Future<List<UserModel>?> getUsers();
+  Future<List<UserModel>?> getUsers(int take, int skip);
 
   Future<List<PostModel>?> getSubscriptionsPosts(
       String? lastPostCreated, int take, int skip);
@@ -62,4 +62,8 @@ abstract class ApiRepository {
   Future addUserAvatar({required MetaDataModel model});
 
   Future createPost({required CreatePostModel model});
+
+  Future changeSubscriptionStateOnUser({required String userId});
+
+  Future<bool> isSubscribedOn({required String userId});
 }

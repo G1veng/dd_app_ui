@@ -41,7 +41,11 @@ class NavigationBar extends StatelessWidget {
     if (tabItem == TabItemEnum.profile) {
       icon = CircleAvatar(
         radius: 14,
-        foregroundImage: appmodel.avatar?.image,
+        foregroundImage: appmodel.avatar != null
+            ? appmodel.avatar!.image
+            : Image.asset(
+                "images/empty_image.png",
+              ).image,
         backgroundColor: Colors.grey,
       );
     }

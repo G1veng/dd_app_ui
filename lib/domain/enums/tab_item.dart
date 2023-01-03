@@ -1,4 +1,4 @@
-import 'package:dd_app_ui/ui/widgets/tab_current_user_profile/current_user_profile_widget.dart';
+import 'package:dd_app_ui/ui/widgets/tab_user_profile/user_profile_widget.dart';
 import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/home/home_widget.dart';
 import 'package:dd_app_ui/ui/widgets/tab_users/users/users_widget.dart';
@@ -25,9 +25,14 @@ class TabEnums {
     TabItemEnum.profile: MyIcons.user,
   };
 
-  static Map<TabItemEnum, Widget> tabRoots = {
-    TabItemEnum.home: TabHomeWidget.create(),
-    TabItemEnum.search: UsersWidget.create(),
-    TabItemEnum.profile: CurrentUserProfileWidget.create(),
-  };
+  static Widget? tabRoots(TabItemEnum tabItem, {Object? arg}) {
+    if (tabItem == TabItemEnum.home) {
+      return TabHomeWidget.create();
+    } else if (tabItem == TabItemEnum.search) {
+      return UsersWidget.create();
+    } else if (tabItem == TabItemEnum.profile) {
+      return UserProfileWidget.create(arg);
+    }
+    return null;
+  }
 }

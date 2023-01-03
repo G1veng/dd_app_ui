@@ -8,6 +8,7 @@ import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -63,7 +64,7 @@ class PostState {
 
 class PostViewModel extends ChangeNotifier {
   final BuildContext context;
-  final String postId;
+  final String? postId;
   final _api = ApiService();
   final _dataService = DataService();
   final lvc = ScrollController();
@@ -106,7 +107,7 @@ class PostViewModel extends ChangeNotifier {
         created: DateTime.now().toUtc().toString().replaceAll(r' ', 'T'),
         likes: 0,
         authorId: state.currentUser!.id,
-        postId: postId);
+        postId: postId!);
 
     await _dataService.cuPostComment(postComment);
 
@@ -122,6 +123,13 @@ class PostViewModel extends ChangeNotifier {
     createCommentTec.clear();
   }
 
+  Future pressedGoToProfile({String? userId}) async {
+    return await Navigator.of(context).pushNamed(
+      TabNavigatorRoutes.userProfile,
+      arguments: userId,
+    );
+  }
+
   void onPageChanged(int listIndex, int pageIndex) {
     pager[listIndex] = pageIndex;
     notifyListeners();
@@ -135,7 +143,7 @@ class PostViewModel extends ChangeNotifier {
 
     var headers = await TokenStorage.getAccessToken();
 
-    var post = await _api.getPost(postId: postId);
+    var post = await _api.getPost(postId: postId!);
     if (post != null) {
       await _dataService.cuPost(Post.fromJson(post.toJson()));
 
@@ -144,7 +152,7 @@ class PostViewModel extends ChangeNotifier {
         await _dataService.cuUser(User.fromJson(postAuthor.toJson()));
       }
 
-      var postFiles = (await _dataService.getPostFiles(postId))!.toList();
+      var postFiles = (await _dataService.getPostFiles(postId!))!.toList();
       var currentUser = await _dataService.getUser(post.authorId!);
 
       state = state.copyWith(
@@ -163,7 +171,7 @@ class PostViewModel extends ChangeNotifier {
   Future _requestNextComments() async {
     List<User> postCommentsCreators = state.postCommentsCreators ?? [];
 
-    await _syncService.syncPostComments(take, postId: postId);
+    await _syncService.syncPostComments(take, postId: postId!);
 
     List<PostComment> postComments = state.postComments ?? [];
     var newComments = await _dataService.getPostComments(

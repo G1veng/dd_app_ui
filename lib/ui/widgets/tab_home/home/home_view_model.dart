@@ -91,6 +91,11 @@ class HomeViewModel extends ChangeNotifier {
             .pushNamed(TabNavigatorRoutes.postDetails, arguments: postId)
       };
 
+  Future pressedGoToProfile(String userId) async {
+    return await Navigator.of(context)
+        .pushNamed(TabNavigatorRoutes.userProfile, arguments: userId);
+  }
+
   void postLikePressed(String postId, int index) async {
     var newLikeState = state.postsInfo![index].postLikeState! == 0 ? 1 : 0;
 
@@ -133,7 +138,7 @@ class HomeViewModel extends ChangeNotifier {
     List<String> postAuthors = [];
 
     await _syncService.syncPosts(take,
-        lastPostCreated: state.postsInfo?.last.created);
+        lastPostCreated: state.postsInfo?.last.created, skip: skip);
 
     var posts = (await _dataService.getPostsWithLikeStatePostFilesById(
       state.postsInfo?.last.created == null
@@ -167,6 +172,8 @@ class HomeViewModel extends ChangeNotifier {
           postsInfo: extPostsInfo,
           postAuthors: extPostAuthors,
           isLoading: false);
+
+      //skip += take;
     }
   }
 

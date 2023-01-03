@@ -45,7 +45,6 @@ class AppWidget extends StatelessWidget {
 
   static Widget create() => ChangeNotifierProvider<AppViewModel>(
         create: (context) => AppViewModel(context: context),
-        lazy: false,
         child: const AppWidget(),
       );
 

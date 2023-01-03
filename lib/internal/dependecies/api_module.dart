@@ -5,6 +5,7 @@ import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 
 class ApiModule {
   static AuthClient? _authClient;
@@ -47,8 +48,9 @@ class ApiModule {
             }
           } catch (e) {
             var service = AuthService();
-            await service.logout();
-            //AppNavigator.toLoader();
+            //await service.logout();
+            await service.cleanToken();
+            AppNavigator.toLoader();
             return handler
                 .resolve(Response(statusCode: 400, requestOptions: options));
           } finally {

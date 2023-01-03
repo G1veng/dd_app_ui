@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/widgets/common/page_indicator_widget.dart';
+import 'package:dd_app_ui/ui/widgets/roots/app/app_view_model.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/post_details/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,65 +25,84 @@ class PostWidget extends StatelessWidget {
                   child: SizedBox(
               child: CircularProgressIndicator(),
             )))
-          : ListView.separated(
-              controller: viewModel.lvc,
-              itemBuilder: (_, index) {
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      _createPostImages(context),
-                      CustomPageIndicator(
-                        count: viewModel.state.postFiles!.length,
-                        current: viewModel.pager[0],
-                      ),
-                      _createPostStatistics(context),
-                      _createFieldAddComment(context),
-                    ],
-                  );
-                } else {
-                  if (index == viewModel.state.postComments!.length &&
-                      viewModel.state.isUpdating) {
-                    return Column(children: [
-                      _cretePostComment(context, index),
-                      const LinearProgressIndicator()
-                    ]);
-                  }
-                  return _cretePostComment(context, index);
-                }
-              },
-              itemCount: viewModel.state.postComments!.length + 1,
-              separatorBuilder: (context, index) => const Divider(),
+          : Column(
+              children: [
+                _createPostComments(context),
+                _createFieldAddComment(context),
+              ],
             ),
     );
   }
 
-  static Widget create({required Object? postId}) =>
-      ChangeNotifierProvider<PostViewModel>(
-        create: (context) =>
-            PostViewModel(context: context, postId: postId as String),
-        lazy: false,
-        child: const PostWidget(),
-      );
+  static Widget create({required Object? arg}) {
+    String? postId;
+    if (arg != null && arg is String) postId = arg;
 
-  Row _createPostStatistics(BuildContext context) {
+    return ChangeNotifierProvider<PostViewModel>(
+      create: (context) => PostViewModel(context: context, postId: postId),
+      lazy: false,
+      child: const PostWidget(),
+    );
+  }
+
+  Widget _createPostComments(BuildContext context) {
+    var viewModel = context.read<PostViewModel>();
+
+    return Expanded(
+        child: ListView.separated(
+      controller: viewModel.lvc,
+      itemBuilder: (_, index) {
+        if (index == viewModel.state.postComments!.length &&
+            viewModel.state.isUpdating) {
+          return Column(children: [
+            _cretePostComment(context, index - 1),
+            const LinearProgressIndicator()
+          ]);
+        }
+        if (index == 0) {
+          return Column(
+            children: [
+              _createPostImages(context),
+              CustomPageIndicator(
+                count: viewModel.state.postFiles!.length,
+                current: viewModel.pager[0],
+              ),
+              _createPostStatistics(context),
+            ],
+          );
+        } else {
+          return _cretePostComment(context, index - 1);
+        }
+      },
+      itemCount: viewModel.state.postComments == null
+          ? 1
+          : viewModel.state.postComments!.length + 1,
+      separatorBuilder: (context, index) => const Divider(),
+    ));
+  }
+
+  Widget _createPostStatistics(BuildContext context) {
     return Row();
   }
 
-  Row _cretePostComment(BuildContext context, int index) {
+  Widget _cretePostComment(BuildContext context, int index) {
     var viewModel = context.read<PostViewModel>();
 
     return Row(
       children: [
-        Container(
-            margin: const EdgeInsets.all(2.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey,
-              backgroundImage: Image.network(
-                "$baseUrl${viewModel.state.postCommentsCreators![index - 1].avatar}",
-                headers: viewModel.state.headers,
-              ).image,
-              radius: (MediaQuery.of(context).size.width / 15),
-            )),
+        GestureDetector(
+            onTap: () => viewModel.pressedGoToProfile(
+                userId: viewModel.state.postCommentsCreators![index].id),
+            child: Container(
+                margin: const EdgeInsets.all(2.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey,
+                  backgroundImage: Image.network(
+                    "$baseUrl${viewModel.state.postCommentsCreators![index].avatar}",
+                    headers: viewModel.state.headers,
+                  ).image,
+                  radius: (MediaQuery.of(context).size.width / 15),
+                ))),
         Expanded(
             child: RichText(
           maxLines: null,
@@ -98,7 +118,7 @@ class PostWidget extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   )),
               TextSpan(
-                text: viewModel.state.postComments![index - 1].text,
+                text: viewModel.state.postComments![index].text,
               ),
             ],
           ),
@@ -107,20 +127,20 @@ class PostWidget extends StatelessWidget {
     );
   }
 
-  Row _createFieldAddComment(BuildContext context) {
+  Widget _createFieldAddComment(BuildContext context) {
     var viewModel = context.read<PostViewModel>();
+    var appViewModel = context.read<AppViewModel>();
 
     return Row(children: [
-      Container(
-          margin: const EdgeInsets.all(5.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.grey,
-            backgroundImage: Image.network(
-              "$baseUrl${viewModel.state.currentUser?.avatar}",
-              headers: viewModel.state.headers,
-            ).image,
-            radius: (MediaQuery.of(context).size.width / 13),
-          )),
+      GestureDetector(
+          onTap: () => viewModel.pressedGoToProfile(),
+          child: Container(
+              margin: const EdgeInsets.all(5.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.grey,
+                backgroundImage: appViewModel.avatar!.image,
+                radius: (MediaQuery.of(context).size.width / 13),
+              ))),
       Flexible(
           child: Container(
               margin: const EdgeInsets.all(10.0),
@@ -145,7 +165,7 @@ class PostWidget extends StatelessWidget {
     ]);
   }
 
-  SizedBox _createPostImages(BuildContext context) {
+  Widget _createPostImages(BuildContext context) {
     var viewModel = context.read<PostViewModel>();
     var size = MediaQuery.of(context).size;
 

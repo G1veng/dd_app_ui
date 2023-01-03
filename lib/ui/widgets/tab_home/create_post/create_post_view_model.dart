@@ -7,6 +7,7 @@ import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
+import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:dd_app_ui/ui/widgets/common/cam_widget.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class CreatePostState {
   final User? user;
   final List<String>? imagesPaths;
   final List<Image>? images;
-  final List<Widget>? imagesWidgets;
   final bool isLoading;
   final String? postText;
 
@@ -26,7 +26,6 @@ class CreatePostState {
     this.postText,
     this.user,
     this.images,
-    this.imagesWidgets,
     this.isLoading = true,
   });
 
@@ -42,7 +41,6 @@ class CreatePostState {
       imagesPaths: imagesPaths ?? this.imagesPaths,
       user: user ?? this.user,
       images: images ?? this.images,
-      imagesWidgets: imagesWidgets ?? this.imagesWidgets,
       isLoading: isLoading ?? this.isLoading,
       postText: postText ?? this.postText,
     );
@@ -78,13 +76,14 @@ class CreatePostViewModel extends ChangeNotifier {
       state = state.copyWith(user: user);
     }
 
-    state = state.copyWith(imagesWidgets: _createPlus(), isLoading: false);
+    state = state.copyWith(isLoading: false);
   }
 
-  Future _takePicture() async {
+  Future takePicture() async {
     String? imagePath;
 
-    await Navigator.of(context).push(MaterialPageRoute(
+    await Navigator.of(AppNavigator.key.currentState!.context)
+        .push(MaterialPageRoute(
       builder: (newContext) => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(backgroundColor: Colors.black),
@@ -110,8 +109,6 @@ class CreatePostViewModel extends ChangeNotifier {
         images: images,
         imagesPaths: imagesPaths,
       );
-
-      _showImages();
     }
   }
 
@@ -121,52 +118,6 @@ class CreatePostViewModel extends ChangeNotifier {
     Uint8List uint8list = base64.decode(imageAsString);
     Image image = Image.memory(uint8list);
     return image;
-  }
-
-  List<Widget> _createPlus() {
-    var imagesWidgets = <Widget>[];
-    var size = MediaQuery.of(context).size;
-
-    imagesWidgets.add(GestureDetector(
-        onTap: _takePicture,
-        child: Container(
-          margin: const EdgeInsets.all(0.5),
-          height: size.width / 3 - 1,
-          width: size.width / 3 - 1,
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          child: Container(
-            padding: const EdgeInsets.all(10.0),
-            child: Icon(
-              Icons.add,
-              size: size.width / 10,
-            ),
-          ),
-        )));
-
-    return imagesWidgets;
-  }
-
-  Future _showImages() async {
-    var imagesWidgets = state.imagesWidgets;
-    var startIndex = imagesWidgets!.length - 1;
-    var endIndex = state.images!.length;
-
-    for (int i = startIndex; i < endIndex; i++) {
-      imagesWidgets.add(GestureDetector(
-          onTap: () {}, //TODO сделать показ картинки в полный экран
-          child: Container(
-            margin: const EdgeInsets.all(0.5),
-            height: (MediaQuery.of(context).size.width / 3) - 1,
-            width: (MediaQuery.of(context).size.width / 3) - 1,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: state.images![i].image,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center),
-            ),
-          )));
-    }
   }
 
   Future createPost() async {

@@ -78,7 +78,7 @@ class AuthService {
         user = await _api.getUser();
       } on DioError {
         await SharedPrefs.setStoredUser(null);
-        await AuthService().logout();
+        await AuthService().cleanToken();
         AppNavigator.toLoader();
       }
 
@@ -93,7 +93,7 @@ class AuthService {
     return res;
   }
 
-  Future logout() async {
+  Future cleanToken() async {
     await TokenStorage.setStoredToken(null);
   }
 }

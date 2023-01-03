@@ -42,9 +42,10 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<int> getUserPostAmount() async {
+  Future<int> getUserPostAmount(userId) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<int>(_setStreamType<int>(Options(
@@ -64,9 +65,10 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<int> getUserSubscriptionsAmount() async {
+  Future<int> getUserSubscriptionsAmount(userId) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<int>(_setStreamType<int>(Options(
@@ -86,9 +88,10 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<int> getUserSubscribersAmount() async {
+  Future<int> getUserSubscribersAmount(userId) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<int>(_setStreamType<int>(Options(
@@ -142,9 +145,15 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<UserModel>?> getUsers() async {
+  Future<List<UserModel>?> getUsers(
+    take,
+    skip,
+  ) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'take': take,
+      r'skip': skip,
+    };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
@@ -425,6 +434,50 @@ class _ApiClient implements ApiClient {
         )
         .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = _result.data;
+    return value;
+  }
+
+  @override
+  Future<dynamic> changeSubscriptionStateOnUser(userId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch(_setStreamType<dynamic>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/Subscription/ChangeSubscriptionStateOnUser',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data;
+    return value;
+  }
+
+  @override
+  Future<bool> isSubscribedOn(userId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'userId': userId};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<bool>(_setStreamType<bool>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/Subscription/IsSubscribedOn',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
     return value;
   }
 

@@ -58,7 +58,7 @@ class TabHomeWidget extends StatelessWidget {
         child: const TabHomeWidget(),
       );
 
-  GestureDetector _createPostPictures(
+  Widget _createPostPictures(
     PostWithPostLikeState post,
     int listIndex,
     BuildContext context,
@@ -97,7 +97,7 @@ class TabHomeWidget extends StatelessWidget {
         ));
   }
 
-  Container _createPostStatistics(
+  Widget _createPostStatistics(
       PostWithPostLikeState post, int listIndex, BuildContext context) {
     var viewModel = context.read<HomeViewModel>();
 
@@ -138,21 +138,28 @@ class TabHomeWidget extends StatelessWidget {
     );
   }
 
-  Row _createPostDescription(
+  Widget _createPostDescription(
       PostWithPostLikeState post, int listIndex, BuildContext context) {
     var viewModel = context.read<HomeViewModel>();
 
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
-          margin: const EdgeInsets.all(2),
-          child: CircleAvatar(
-            backgroundColor: Colors.grey,
-            foregroundImage: Image.network(
-              "$baseUrl${post.authorAvatar}",
-              headers: viewModel.state.headers,
-            ).image,
-            radius: MediaQuery.of(context).size.width / 20,
-          )),
+        margin: const EdgeInsets.all(2),
+        child: GestureDetector(
+            onTap: () => viewModel.pressedGoToProfile(post.authorId!),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              foregroundImage: post.authorAvatar != null
+                  ? Image.network(
+                      "$baseUrl${post.authorAvatar}",
+                      headers: viewModel.state.headers,
+                    ).image
+                  : Image.asset(
+                      "images/empty_image.png",
+                    ).image,
+              radius: MediaQuery.of(context).size.width / 20,
+            )),
+      ),
       Expanded(
           child: Container(
               margin: const EdgeInsets.only(right: 5, left: 5),

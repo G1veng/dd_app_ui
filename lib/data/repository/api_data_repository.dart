@@ -47,18 +47,18 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<int> getUserPostAmount() async {
-    return await _api.getUserPostAmount();
+  Future<int> getUserPostAmount(String? userId) async {
+    return await _api.getUserPostAmount(userId);
   }
 
   @override
-  Future<int> getUserSubscribersAmount() async {
-    return await _api.getUserSubscribersAmount();
+  Future<int> getUserSubscribersAmount(String? userId) async {
+    return await _api.getUserSubscribersAmount(userId);
   }
 
   @override
-  Future<int> getUserSubscriptionsAmount() async {
-    return await _api.getUserSubscriptionsAmount();
+  Future<int> getUserSubscriptionsAmount(String? userId) async {
+    return await _api.getUserSubscriptionsAmount(userId);
   }
 
   @override
@@ -68,8 +68,8 @@ class ApiDataRepository extends ApiRepository {
   }
 
   @override
-  Future<List<UserModel>?> getUsers() async {
-    return await _api.getUsers();
+  Future<List<UserModel>?> getUsers(int take, int skip) async {
+    return await _api.getUsers(take, skip);
   }
 
   @override
@@ -146,5 +146,15 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future createPost({required CreatePostModel model}) async {
     return await _api.createPost(model);
+  }
+
+  @override
+  Future changeSubscriptionStateOnUser({required String userId}) async {
+    return await _api.changeSubscriptionStateOnUser(userId);
+  }
+
+  @override
+  Future<bool> isSubscribedOn({required String userId}) async {
+    return await _api.isSubscribedOn(userId);
   }
 }
