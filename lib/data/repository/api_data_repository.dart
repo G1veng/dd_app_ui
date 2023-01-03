@@ -7,6 +7,7 @@ import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
+import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
@@ -156,5 +157,15 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future<bool> isSubscribedOn({required String userId}) async {
     return await _api.isSubscribedOn(userId);
+  }
+
+  @override
+  Future subscribe({required PushTokenModel model}) async {
+    return await _api.subscribe(model);
+  }
+
+  @override
+  Future unsubscribe() async {
+    return await _api.unsubscribe();
   }
 }

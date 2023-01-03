@@ -131,7 +131,7 @@ class UserProfileViewModel extends ChangeNotifier {
 
   void logout() async {
     try {
-      await _authService.cleanToken();
+      await _authService.logout();
     } on NoNetworkException {
       _showDialog("Network error", "No network, please try later");
     } on Exception {

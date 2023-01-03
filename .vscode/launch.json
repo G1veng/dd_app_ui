@@ -5,21 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "program": "lib/internal/main.dart",
             "name": "dd_app_ui (debug)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug"
         },
         {
-            "program": "lib/internal/main.dart",
             "name": "dd_app_ui (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "program": "lib/internal/main.dart",
             "name": "dd_app_ui (release mode)",
             "request": "launch",
             "type": "dart",

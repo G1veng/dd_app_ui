@@ -5,6 +5,7 @@ import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
+import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
 import 'package:dd_app_ui/domain/repository/api_repository.dart';
 import 'package:dd_app_ui/internal/dependecies/repository_model.dart';
@@ -93,5 +94,13 @@ class ApiService {
 
   Future<bool> isSubscribedOn({required String userId}) async {
     return await _api.isSubscribedOn(userId: userId);
+  }
+
+  Future subscribe({required PushTokenModel model}) async {
+    return await _api.subscribe(model: model);
+  }
+
+  Future unsubscribe() async {
+    return await _api.unsubscribe();
   }
 }
