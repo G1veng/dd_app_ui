@@ -17,16 +17,18 @@ class UsersWidget extends StatelessWidget {
           child: viewModel.state.isLoading == true
               ? const Center(child: CircularProgressIndicator())
               : ListView.separated(
+                  controller: viewModel.lvc,
                   itemBuilder: (context, index) {
-                    return Container(
-                        margin: const EdgeInsets.only(right: 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _createUserInfo(context, index),
-                            _createProfileButton(context, index),
-                          ],
-                        ));
+                    if (viewModel.state.users!.length - 1 == index &&
+                        viewModel.state.isUpdating == true) {
+                      return Column(
+                        children: [
+                          _createUserRow(context, index),
+                          const LinearProgressIndicator(),
+                        ],
+                      );
+                    }
+                    return _createUserRow(context, index);
                   },
                   separatorBuilder: (context, index) => const Divider(),
                   itemCount: viewModel.state.users == null
@@ -46,6 +48,18 @@ class UsersWidget extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+  Widget _createUserRow(BuildContext context, int index) {
+    return Container(
+        margin: const EdgeInsets.only(right: 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _createUserInfo(context, index),
+            _createProfileButton(context, index),
+          ],
+        ));
   }
 
   Widget _createUserInfo(BuildContext context, int index) {

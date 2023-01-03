@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "735931681573",
+    "project_id": "dd-app-ui",
+    "storage_bucket": "dd-app-ui.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735931681573:android:030fe58e866af90c0268cc",
+        "android_client_info": {
+          "package_name": "com.example.dd_app_ui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "735931681573-0qkr6io6oq2ftsa26jdfbgs8c3tavlm9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQpZP2EaUhuwvSL2NgI6J0kTzQMeSMSbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "735931681573-0qkr6io6oq2ftsa26jdfbgs8c3tavlm9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "735931681573-kjhn2qsv9n1escv7hl2gcnjn8rqi72lh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ddAppUi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

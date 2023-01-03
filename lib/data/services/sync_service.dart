@@ -121,10 +121,6 @@ class SyncService {
   }) async {
     await syncUser(userId: userId);
 
-    var one = await _api.getUserPostAmount(userId: userId);
-    var two = await _api.getUserSubscribersAmount(userId: userId);
-    var three = await _api.getUserSubscriptionsAmount(userId: userId);
-
     await _dataService.cuUserStatistics(UserStatistics(
         id: userId,
         userPostAmount: await _api.getUserPostAmount(userId: userId),
