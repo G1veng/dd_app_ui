@@ -14,10 +14,13 @@ class UsersWidget extends StatelessWidget {
     var viewModel = context.watch<UsersViewModel>();
 
     return Scaffold(
-      body: SafeArea(
-          child: viewModel.state.isLoading == true
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.separated(
+        body: SafeArea(
+      child: viewModel.state.isLoading == true
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: viewModel.refresh,
+              child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   controller: viewModel.lvc,
                   itemBuilder: (context, index) {
                     if (viewModel.state.users!.length - 1 == index &&
@@ -35,7 +38,7 @@ class UsersWidget extends StatelessWidget {
                   itemCount: viewModel.state.users == null
                       ? 0
                       : viewModel.state.users!.length)),
-    );
+    ));
   }
 
   static Widget create() => ChangeNotifierProvider<UsersViewModel>(
@@ -106,7 +109,7 @@ class UsersWidget extends StatelessWidget {
 
     return IconButton(
         onPressed: () {
-          //TODO сделать переход в директ
+          //TODO переход в директ
         },
         icon: const Icon(MyIcons.chat));
   }

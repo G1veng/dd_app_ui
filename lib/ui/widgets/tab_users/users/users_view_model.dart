@@ -35,6 +35,13 @@ class UsersState {
       isFollowed: isFollowed ?? this.isFollowed,
     );
   }
+
+  UsersState clear() => UsersState(
+      users: null,
+      headers: headers,
+      isFollowed: null,
+      isLoading: false,
+      isUpdating: false);
 }
 
 class UsersViewModel extends ChangeNotifier {
@@ -72,6 +79,13 @@ class UsersViewModel extends ChangeNotifier {
   Future pressedGoToProfile(String userId) async {
     return await Navigator.of(context)
         .pushNamed(TabNavigatorRoutes.userProfile, arguments: userId);
+  }
+
+  Future refresh() async {
+    state = state.clear();
+    skip = 0;
+
+    _asyncInit();
   }
 
   Future _asyncInit() async {

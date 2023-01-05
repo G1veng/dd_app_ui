@@ -15,6 +15,7 @@ class AppViewModel extends ChangeNotifier {
     TabItemEnum.home: GlobalKey<NavigatorState>(),
     TabItemEnum.search: GlobalKey<NavigatorState>(),
     TabItemEnum.profile: GlobalKey<NavigatorState>(),
+    TabItemEnum.direct: GlobalKey<NavigatorState>(),
   };
 
   var _currentTab = TabEnums.defTab;

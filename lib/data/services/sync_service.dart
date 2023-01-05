@@ -2,8 +2,10 @@ import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
+import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_statistics.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 
 class SyncService {
   final _api = ApiService();
@@ -13,6 +15,40 @@ class SyncService {
     var postLikeState = await _api.getPostLikeState(postId: postId);
     await _dataService.cuPostLikeState(
         PostLikeState(id: postId, isLiked: postLikeState == true ? 1 : 0));
+  }
+
+  Future syncSubscriptionsPosts(
+    int take, {
+    required String userId,
+    String? lastPostCreated,
+    int skip = 0,
+  }) async {
+    var curUser = await SharedPrefs.getStoredUser();
+
+    var posts = await _api.getSubscriptionPosts(
+      lastPostCreated,
+      take,
+      skip,
+    );
+    if (posts == null) {
+      return;
+    }
+
+    for (var post in posts) {
+      await syncUser(userId: post.authorId!);
+
+      await _dataService.cuSubscription(Subscription(
+        id: post.authorId!,
+        subscriberId: curUser!.id,
+      ));
+
+      await _dataService.cuPostFiles(post.postFiles!);
+
+      await syncPostLikeState(postId: post.id!);
+    }
+
+    await _dataService
+        .cuPosts(posts.map((e) => Post.fromJson(e.toJson())).toList());
   }
 
   Future syncUserPosts(

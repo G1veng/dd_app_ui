@@ -43,13 +43,13 @@ class UserProfileState {
     this.isSubscribed = false,
   });
 
-  UserProfileState clearUserPosts() {
+  UserProfileState clear() {
     return UserProfileState(
       user: user,
       headers: headers,
       userStatistics: null,
       userPosts: null,
-      avatar: avatar,
+      avatar: null,
     );
   }
 
@@ -164,6 +164,12 @@ class UserProfileViewModel extends ChangeNotifier {
       userStatistics: await _dataService.getUserStatisctics(state.user!.id),
       isSubscribed: state.isSubscribed == true ? false : true,
     );
+  }
+
+  Future refresh() async {
+    state = state.clear();
+
+    await _asyncInit();
   }
 
   Future changePhoto() async {

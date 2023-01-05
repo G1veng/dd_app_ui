@@ -148,6 +148,7 @@ class CreatePostViewModel extends ChangeNotifier {
               files: metaData!,
               created: created.replaceAll(r' ', 'T')));
 
+      //TODO отправку уведомлений подписчикам
       _goToProfile();
     }
   }

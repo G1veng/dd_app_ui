@@ -67,19 +67,24 @@ class UserProfileWidget extends StatelessWidget {
     var viewModel = context.watch<UserProfileViewModel>();
 
     return Expanded(
+      child: RefreshIndicator(
+        onRefresh: viewModel.refresh,
         child: GridView.builder(
-      padding: const EdgeInsets.all(1.0),
-      controller: viewModel.lvc,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisSpacing: 1.0,
-        mainAxisSpacing: 1.0,
-        crossAxisCount: 3,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(1.0),
+          controller: viewModel.lvc,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisSpacing: 1.0,
+            mainAxisSpacing: 1.0,
+            crossAxisCount: 3,
+          ),
+          itemCount: viewModel.state.userPosts!.length,
+          itemBuilder: (_, index) {
+            return _createPost(context, index);
+          },
+        ),
       ),
-      itemCount: viewModel.state.userPosts!.length,
-      itemBuilder: (_, index) {
-        return _createPost(context, index);
-      },
-    ));
+    );
   }
 
   Widget _createFollowMessageButtons(BuildContext context) {
@@ -147,7 +152,6 @@ class UserProfileWidget extends StatelessWidget {
 
   Widget _createUserInformation(BuildContext context) {
     var viewModel = context.watch<UserProfileViewModel>();
-    //var appViewModel = context.read<AppViewModel>();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,

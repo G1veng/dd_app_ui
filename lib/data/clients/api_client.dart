@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
+import 'package:dd_app_ui/domain/models/direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/direct_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -98,6 +100,20 @@ abstract class ApiClient {
   Future<List<PostModel>?> getPosts(
     @Query("lastPostCreated") String? lastPostCreated,
     @Query("userId") String userId,
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
+
+  @GET("/api/Direct/GetUserDirects")
+  Future<List<DirectModel>?> getUserDirects(
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
+
+  @GET("/api/Direct/GetDirectMessage")
+  Future<List<DirectMessageModel>?> getDirectMessages(
+    @Query("lastDirectMessageCreated") String? lastDirectMessageCreated,
+    @Query("directId") String directId,
     @Query("take") int take,
     @Query("skip") int skip,
   );

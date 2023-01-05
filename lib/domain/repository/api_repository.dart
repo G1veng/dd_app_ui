@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
+import 'package:dd_app_ui/domain/models/direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/direct_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -52,6 +54,16 @@ abstract class ApiRepository {
   Future<List<PostModel>?> getPosts({
     required String? lastPostCreated,
     required String userId,
+    required int take,
+    required int skip,
+  });
+  Future<List<DirectModel>?> getUserDirects({
+    required int take,
+    required int skip,
+  });
+  Future<List<DirectMessageModel>?> getDirectMessages({
+    required String? lastDirectMessageCreated,
+    required String directId,
     required int take,
     required int skip,
   });

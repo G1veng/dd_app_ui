@@ -4,6 +4,8 @@ import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
+import 'package:dd_app_ui/domain/models/direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/direct_model.dart';
 import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
@@ -176,5 +178,24 @@ class ApiDataRepository extends ApiRepository {
       required int take,
       required int skip}) async {
     return await _api.getPosts(lastPostCreated, userId, take, skip);
+  }
+
+  @override
+  Future<List<DirectModel>?> getUserDirects(
+      {required int take, required int skip}) async {
+    return await _api.getUserDirects(
+      take,
+      skip,
+    );
+  }
+
+  @override
+  Future<List<DirectMessageModel>?> getDirectMessages(
+      {required String? lastDirectMessageCreated,
+      required String directId,
+      required int take,
+      required int skip}) async {
+    return await _api.getDirectMessages(
+        lastDirectMessageCreated, directId, take, skip);
   }
 }
