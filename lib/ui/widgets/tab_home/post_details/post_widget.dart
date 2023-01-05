@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/widgets/common/page_indicator_widget.dart';
 import 'package:dd_app_ui/ui/widgets/roots/app/app_view_model.dart';
@@ -82,7 +83,40 @@ class PostWidget extends StatelessWidget {
   }
 
   Widget _createPostStatistics(BuildContext context) {
-    return Row();
+    var viewModel = context.watch<PostViewModel>();
+
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => viewModel.postLikePressed(viewModel.state.post!.id!),
+            child: Row(
+              children: [
+                viewModel.state.postLikeState == false
+                    ? const Icon(
+                        MyIcons.heartEmpty,
+                        color: Colors.red,
+                      )
+                    : const Icon(
+                        MyIcons.heartFilled,
+                        color: Colors.red,
+                      ),
+                Text(" ${viewModel.state.post!.likesAmount} Likes")
+              ],
+            ),
+          ),
+          Row(children: [
+            Text("${viewModel.state.postComments?.length ?? 0} Comments "),
+            const Icon(
+              MyIcons.comment,
+              color: Colors.blue,
+            ),
+          ]),
+        ],
+      ),
+    );
   }
 
   Widget _cretePostComment(BuildContext context, int index) {
@@ -113,7 +147,7 @@ class PostWidget extends StatelessWidget {
             ),
             children: <TextSpan>[
               TextSpan(
-                  text: "${viewModel.state.currentUser!.name} ",
+                  text: "${viewModel.state.postCommentsCreators![index].name} ",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   )),

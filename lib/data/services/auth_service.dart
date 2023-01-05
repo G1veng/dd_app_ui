@@ -8,6 +8,7 @@ import 'package:dd_app_ui/internal/utils.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../domain/repository/api_repository.dart';
 import '../../domain/exceptions/nonetwork_exception.dart';
 import '../../domain/exceptions/wrong_credential_exception.dart';
@@ -105,6 +106,12 @@ class AuthService {
     await TokenStorage.setStoredToken(null);
   }
 
+  Future dropDatabase() async {
+    var databasePath = await getDatabasesPath();
+
+    await deleteDatabase(databasePath);
+  }
+
   Future logout() async {
     try {
       await _api.unsubscribe();
@@ -113,5 +120,7 @@ class AuthService {
     }
 
     await cleanToken();
+
+    await dropDatabase();
   }
 }

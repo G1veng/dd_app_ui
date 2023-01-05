@@ -5,6 +5,7 @@ import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/data/services/sync_service.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
+import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_statistics.dart';
 import 'package:dd_app_ui/domain/exceptions/nonetwork_exception.dart';
@@ -148,7 +149,17 @@ class UserProfileViewModel extends ChangeNotifier {
   Future changeSubscriptionStatePressed() async {
     await _apiService.changeSubscriptionStateOnUser(userId: state.user!.id);
 
-    await _syncService.syncUserStatistics(userId: state.user!.id);
+    var subscription = Subscription(
+        id: state.user!.id,
+        subscriberId: (await SharedPrefs.getStoredUser())!.id);
+
+    if (state.isSubscribed == true) {
+      await _dataService.delSubscription(subscription: subscription);
+    } else {
+      await _dataService.cuSubscription(subscription);
+    }
+
+    await _syncService.syncUser(userId: state.user!.id);
     state = state.copyWith(
       userStatistics: await _dataService.getUserStatisctics(state.user!.id),
       isSubscribed: state.isSubscribed == true ? false : true,
@@ -201,7 +212,9 @@ class UserProfileViewModel extends ChangeNotifier {
 
   Future _requestNextPosts() async {
     try {
-      await _syncService.syncUserPosts(take,
+      await _syncService.syncUserPosts(
+          userId: state.user!.id,
+          take,
           lastPostCreated: state.userPosts?.last.created);
     } on NoNetworkException {
       _showDialog("Network error", "Network erorr, please try later");
@@ -244,7 +257,7 @@ class UserProfileViewModel extends ChangeNotifier {
     }
 
     var headers = await TokenStorage.getAccessToken();
-    await _syncService.syncUserStatistics(userId: state.user!.id);
+    await _syncService.syncUser(userId: state.user!.id);
 
     state = state.copyWith(
       headers: headers,

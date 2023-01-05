@@ -93,4 +93,12 @@ abstract class ApiClient {
 
   @DELETE("/api/Push/Unsubscribe")
   Future unsubscribe();
+
+  @GET("/api/Post/GetPosts")
+  Future<List<PostModel>?> getPosts(
+    @Query("lastPostCreated") String? lastPostCreated,
+    @Query("userId") String userId,
+    @Query("take") int take,
+    @Query("skip") int skip,
+  );
 }

@@ -1,3 +1,4 @@
+import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/widgets/tab_users/users/users_view_model.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class UsersWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _createUserInfo(context, index),
+            _createFollowButton(context, index),
             _createProfileButton(context, index),
           ],
         ));
@@ -66,40 +68,56 @@ class UsersWidget extends StatelessWidget {
     var viewModel = context.watch<UsersViewModel>();
 
     return Expanded(
-        child: Row(
-      children: [
-        Container(
-            margin: const EdgeInsets.fromLTRB(5, 2, 5, 0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey,
-              foregroundImage: viewModel.state.users![index].avatar != null
-                  ? Image.network(
-                      "$baseUrl${viewModel.state.users![index].avatar}",
-                      headers: viewModel.state.headers,
-                    ).image
-                  : Image.asset(
-                      "images/empty_image.png",
-                    ).image,
-              radius: MediaQuery.of(context).size.width / 12,
-            )),
-        Flexible(
-            child: Text(
-          viewModel.state.users![index].name,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        )),
-      ],
-    ));
+        child: GestureDetector(
+            onTap: () =>
+                viewModel.pressedGoToProfile(viewModel.state.users![index].id),
+            child: Row(
+              children: [
+                Container(
+                  margin: const EdgeInsets.fromLTRB(5, 2, 5, 0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.grey,
+                    foregroundImage:
+                        viewModel.state.users![index].avatar != null
+                            ? Image.network(
+                                "$baseUrl${viewModel.state.users![index].avatar}",
+                                headers: viewModel.state.headers,
+                              ).image
+                            : Image.asset(
+                                "images/empty_image.png",
+                              ).image,
+                    radius: MediaQuery.of(context).size.width / 12,
+                  ),
+                ),
+                Flexible(
+                    child: Text(
+                  viewModel.state.users![index].name,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
+              ],
+            )));
   }
 
   Widget _createProfileButton(BuildContext context, int index) {
+    //var viewModel = context.read<UsersViewModel>();
+
+    return IconButton(
+        onPressed: () {
+          //TODO сделать переход в директ
+        },
+        icon: const Icon(MyIcons.chat));
+  }
+
+  Widget _createFollowButton(BuildContext context, int index) {
     var viewModel = context.watch<UsersViewModel>();
 
-    return ElevatedButton(
-        onPressed: () =>
-            viewModel.pressedGoToProfile(viewModel.state.users![index].id),
-        child: const Text("Profile"));
+    return OutlinedButton(
+        onPressed: () => viewModel.changeSubscriptionStatePressed(index),
+        child: Text(viewModel.state.isFollowed![index] == true
+            ? "Unfollow"
+            : "Follow"));
   }
 }

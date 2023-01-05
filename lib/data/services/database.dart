@@ -5,6 +5,7 @@ import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
+import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_statistics.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -21,7 +22,7 @@ class DB {
   Future init() async {
     if (!_initialized) {
       var databasePath = await getDatabasesPath();
-      var path = join(databasePath, "db_v1.0.14.db");
+      var path = join(databasePath, "db_v1.0.15.db");
 
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
@@ -45,6 +46,7 @@ class DB {
     PostWithPostLikeState: (map) => PostWithPostLikeState.fromMap(map),
     UserStatistics: (map) => UserStatistics.fromMap(map),
     PostComment: (map) => PostComment.fromMap(map),
+    Subscription: (map) => Subscription.fromMap(map),
   };
 
   String _dbName(Type type) {

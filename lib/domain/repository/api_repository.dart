@@ -49,4 +49,10 @@ abstract class ApiRepository {
   Future<bool> isSubscribedOn({required String userId});
   Future subscribe({required PushTokenModel model});
   Future unsubscribe();
+  Future<List<PostModel>?> getPosts({
+    required String? lastPostCreated,
+    required String userId,
+    required int take,
+    required int skip,
+  });
 }

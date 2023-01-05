@@ -17,21 +17,20 @@ class UserProfileWidget extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: viewModel.state.user != null
-              ? Flexible(
-                  child: Text(
+              ? Text(
                   viewModel.state.user!.name,
                   overflow: TextOverflow.ellipsis,
-                ))
+                )
               : const Text(""),
           centerTitle: true,
-          actions: <Widget>[
-            IconButton(
-              onPressed: viewModel.state.isCurrentUser == true
-                  ? viewModel.logout
-                  : null,
-              icon: const Icon(MyIcons.logout),
-            )
-          ],
+          actions: viewModel.state.isCurrentUser == true
+              ? <Widget>[
+                  IconButton(
+                    onPressed: viewModel.logout,
+                    icon: const Icon(MyIcons.logout),
+                  ),
+                ]
+              : null,
         ),
         body: SafeArea(
           child: viewModel.state.isLoading!

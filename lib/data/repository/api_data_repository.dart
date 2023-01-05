@@ -168,4 +168,13 @@ class ApiDataRepository extends ApiRepository {
   Future unsubscribe() async {
     return await _api.unsubscribe();
   }
+
+  @override
+  Future<List<PostModel>?> getPosts(
+      {required String? lastPostCreated,
+      required String userId,
+      required int take,
+      required int skip}) async {
+    return await _api.getPosts(lastPostCreated, userId, take, skip);
+  }
 }

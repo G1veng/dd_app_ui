@@ -15,16 +15,18 @@ void showModal(
     showDialog(
       context: ctx,
       builder: (context) {
-        return Stack(
-          children: [
-            Center(
-                child: Container(
+        return SizedBox(
+            height: 100,
+            width: 200,
+            child: Stack(
+              children: [
+                Center(
                     child: Text(
-              content,
-              style: TextStyle(fontSize: 10),
-            )))
-          ],
-        );
+                  content,
+                  style: const TextStyle(fontSize: 10),
+                ))
+              ],
+            ));
         // return AlertDialog(
         //   title: Text(title),
         //   content: Text(content),

@@ -86,6 +86,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future refresh() async {
+    state = state.clearPostInfo();
+    skip = 0;
+    _asyncInit();
+  }
+
   void postPressed(String postId) => {
         Navigator.of(context)
             .pushNamed(TabNavigatorRoutes.postDetails, arguments: postId)
@@ -96,11 +102,10 @@ class HomeViewModel extends ChangeNotifier {
         .pushNamed(TabNavigatorRoutes.userProfile, arguments: userId);
   }
 
-  void postLikePressed(String postId, int index) async {
-    var newLikeState = state.postsInfo![index].postLikeState! == 0 ? 1 : 0;
-
-    await _dataService
-        .cuPostLikeState(PostLikeState(id: postId, isLiked: newLikeState));
+  Future postLikePressed(String postId, int index) async {
+    await _apiService.changePostLikeState(postId: postId);
+    await _syncService.syncPostLikeState(postId: postId);
+    await _syncService.syncPost(postId: postId);
 
     var post = await _dataService.getPostWithLikeStatePostFiles(postId);
 
@@ -119,7 +124,11 @@ class HomeViewModel extends ChangeNotifier {
       {Navigator.of(context).pushNamed(TabNavigatorRoutes.createPost)};
 
   void _asyncInit() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(
+      isLoading: true,
+      postsInfo: [],
+      postAuthors: [],
+    );
 
     var user = await SharedPrefs.getStoredUser();
     var headers = await TokenStorage.getAccessToken();
@@ -137,24 +146,24 @@ class HomeViewModel extends ChangeNotifier {
     state = state.copyWith(isLoading: true);
     List<String> postAuthors = [];
 
-    await _syncService.syncPosts(take,
-        lastPostCreated: state.postsInfo?.last.created, skip: skip);
+    await _syncService.syncUserPosts(
+        userId: (await SharedPrefs.getStoredUser())!.id,
+        take,
+        lastPostCreated: state.postsInfo == null || state.postsInfo!.isEmpty
+            ? null
+            : state.postsInfo!.last.created,
+        skip: skip);
 
-    var posts = (await _dataService.getPostsWithLikeStatePostFilesById(
-      state.postsInfo?.last.created == null
-          ? {"authorId": state.user!.id}
-          : {
-              "created": state.postsInfo?.last.created,
-              "authorId": state.user!.id
-            },
-      take: take,
-      conds: state.postsInfo?.last.created == null
-          ? [
-              DbQueryEnum.notEqual,
-            ]
-          : [DbQueryEnum.isLess, DbQueryEnum.notEqual],
-    ))
-        ?.toList();
+    var posts = (await _dataService.getCurrentUserSubscriptionsPosts(
+        where: state.postsInfo == null || state.postsInfo!.isEmpty
+            ? null
+            : {
+                "created": state.postsInfo?.last.created,
+              },
+        take: take,
+        conds: state.postsInfo == null || state.postsInfo!.isEmpty
+            ? null
+            : [DbQueryEnum.isLess]));
 
     if (posts != null) {
       for (var post in posts) {
@@ -172,8 +181,6 @@ class HomeViewModel extends ChangeNotifier {
           postsInfo: extPostsInfo,
           postAuthors: extPostAuthors,
           isLoading: false);
-
-      //skip += take;
     }
   }
 

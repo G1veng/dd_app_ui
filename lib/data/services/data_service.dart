@@ -5,8 +5,10 @@ import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
+import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_statistics.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 
 class DataService {
   Future cuUser(User user) async {
@@ -15,6 +17,10 @@ class DataService {
 
   Future cuUsers(List<User> users) async {
     await DB.instance.createUpdateRange(users);
+  }
+
+  Future<Post?> getPost({required String postId}) async {
+    return await DB.instance.get(postId);
   }
 
   Future<List<User>?> getUsers({
@@ -30,6 +36,10 @@ class DataService {
             orderBy: '"name" DESC',
             conditions: conds))
         .toList();
+  }
+
+  Future cuSubscription(Subscription sub) async {
+    return await DB.instance.createUpdate<Subscription>(sub);
   }
 
   Future<User?> getUser(String id) async {
@@ -64,6 +74,70 @@ class DataService {
       likesAmount: post.likesAmount,
       postLikeState: postLikeState.isLiked,
     );
+  }
+
+  Future<List<Subscription>?> getSusbcriptions({
+    required String userId,
+    int? take,
+    int? skip,
+  }) async {
+    return (await DB.instance.getAll<Subscription>(
+      whereMap: {"subscriberId": userId},
+      take: take,
+      skip: skip,
+      conditions: [DbQueryEnum.equal],
+    ))
+        .toList();
+  }
+
+  Future delSubscription({required Subscription subscription}) async {
+    return await DB.instance.delete(subscription);
+  }
+
+  Future<Iterable<PostWithPostLikeState>?> getCurrentUserSubscriptionsPosts({
+    required Map<String, dynamic>? where,
+    int? take,
+    int? skip,
+    required List<DbQueryEnum>? conds,
+  }) async {
+    List<String> subsIds = [];
+    List<PostWithPostLikeState> res = [];
+    var curUser = await SharedPrefs.getStoredUser();
+
+    var curUserSubscriptions = await getSusbcriptions(userId: curUser!.id);
+
+    if (curUserSubscriptions != null) {
+      for (var curUserSub in curUserSubscriptions) {
+        subsIds.add(curUserSub.id);
+      }
+    }
+
+    if (where != null) {
+      where.addAll({"authorId": subsIds});
+    } else {
+      where = {"authorId": subsIds};
+    }
+
+    var posts = (await DB.instance.getAll<Post>(
+            whereMap: where, take: take, skip: skip, conditions: conds))
+        .toList();
+
+    for (var post in posts) {
+      var postLikeState = (await DB.instance.get<PostLikeState>(post.id));
+
+      res.add(PostWithPostLikeState(
+          id: post.id,
+          created: post.created,
+          text: post.text,
+          authorId: post.authorId,
+          postFiles: (await getPostFiles(post.id!))!.toList(),
+          authorAvatar: post.authorAvatar,
+          commentAmount: post.commentAmount,
+          likesAmount: post.likesAmount,
+          postLikeState: postLikeState == null ? 0 : postLikeState.isLiked));
+    }
+
+    return res;
   }
 
   Future<Iterable<PostWithPostLikeState>?> getPostsWithLikeStatePostFilesById(

@@ -16,6 +16,7 @@ class PostState {
   final Map<String, String>? headers;
   final int pageCount = 0;
   final Post? post;
+  final bool? postLikeState;
   final List<PostComment>? postComments;
   final List<PostFile>? postFiles;
   final List<User>? postCommentsCreators;
@@ -34,6 +35,7 @@ class PostState {
     this.currentUser,
     this.isLoading = true,
     this.isUpdating = true,
+    this.postLikeState = false,
   });
 
   PostState copyWith({
@@ -46,6 +48,7 @@ class PostState {
     currentUser,
     isLoading,
     isUpdating,
+    postLikeState,
   }) {
     return PostState(
       headers:
@@ -58,6 +61,7 @@ class PostState {
       currentUser: currentUser ?? this.currentUser,
       isLoading: isLoading ?? this.isLoading,
       isUpdating: isUpdating ?? this.isUpdating,
+      postLikeState: postLikeState ?? this.postLikeState,
     );
   }
 }
@@ -85,7 +89,7 @@ class PostViewModel extends ChangeNotifier {
       var current = lvc.offset;
       var percent = (current / max * 100);
       if (percent > 80) {
-        if (!state.isLoading) {
+        if (!state.isUpdating) {
           _startDelayAsync();
           await _requestNextComments();
         }
@@ -121,6 +125,17 @@ class PostViewModel extends ChangeNotifier {
     _addCreatedComment(postComment);
 
     createCommentTec.clear();
+  }
+
+  Future postLikePressed(String postId) async {
+    var newLikeState = !state.postLikeState!;
+
+    await _api.changePostLikeState(postId: postId);
+    await _syncService.syncPostLikeState(postId: postId);
+    await _syncService.syncPost(postId: postId);
+    var post = await _dataService.getPost(postId: postId);
+
+    state = state.copyWith(postLikeState: newLikeState, post: post);
   }
 
   Future pressedGoToProfile({String? userId}) async {
@@ -163,8 +178,11 @@ class PostViewModel extends ChangeNotifier {
       );
 
       await _requestNextComments();
+      var postLikeState =
+          (await _dataService.getPostLikeState(postId!))?.isLiked ?? 0;
 
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+          isLoading: false, postLikeState: postLikeState == 1 ? true : false);
     }
   }
 
@@ -187,11 +205,11 @@ class PostViewModel extends ChangeNotifier {
         take: take);
     if (newComments != null) {
       postComments.addAll(newComments);
-    }
 
-    for (var postComment in postComments) {
-      postCommentsCreators
-          .add((await _dataService.getUser(postComment.authorId))!);
+      for (var postComment in newComments) {
+        postCommentsCreators
+            .add((await _dataService.getUser(postComment.authorId))!);
+      }
     }
 
     state = state.copyWith(
@@ -200,7 +218,7 @@ class PostViewModel extends ChangeNotifier {
     skip += take;
   }
 
-  Future _startDelayAsync({int duration = 1}) async {
+  Future _startDelayAsync({int duration = 2}) async {
     state = state.copyWith(isUpdating: true);
     await Future.delayed(Duration(seconds: duration));
     state = state.copyWith(isUpdating: false);

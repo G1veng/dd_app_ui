@@ -103,4 +103,16 @@ class ApiService {
   Future unsubscribe() async {
     return await _api.unsubscribe();
   }
+
+  Future<List<PostModel>?> getPosts(
+      {required String? lastPostCreated,
+      required String userId,
+      required int take,
+      required int skip}) async {
+    return await _api.getPosts(
+        lastPostCreated: lastPostCreated,
+        userId: userId,
+        take: take,
+        skip: skip);
+  }
 }

@@ -24,8 +24,10 @@ class TabHomeWidget extends StatelessWidget {
               onPressed: () => viewModel.createPostPressed()),
         ),
         body: viewModel.state.postsInfo != null
-            ? viewModel.state.postsInfo!.isNotEmpty
-                ? ListView.separated(
+            ? RefreshIndicator(
+                onRefresh: viewModel.refresh,
+                child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     controller: viewModel.lvc,
                     itemBuilder: (_, listIndex) {
                       var post = viewModel.state.postsInfo![listIndex];
@@ -47,8 +49,7 @@ class TabHomeWidget extends StatelessWidget {
                       );
                     },
                     separatorBuilder: (context, index) => const Divider(),
-                    itemCount: viewModel.state.postsInfo!.length)
-                : const SizedBox.shrink()
+                    itemCount: viewModel.state.postsInfo!.length))
             : const Center(child: CircularProgressIndicator()));
   }
 

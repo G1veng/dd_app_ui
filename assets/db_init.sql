@@ -50,3 +50,10 @@ CREATE TABLE t_PostComment(
         ,FOREIGN KEY(postId) REFERENCES t_Post(id)
         ,FOREIGN KEY(authorId) REFERENCES t_User(id)
 );
+CREATE TABLE t_Subscription(
+        id                      TEXT NOT NULL
+        ,subscriberId           TEXT NOT NULL
+        ,PRIMARY KEY (subscriberId, id)
+        ,FOREIGN KEY(subscriberId) REFERENCES t_Post(id)
+        ,FOREIGN KEY(id) REFERENCES t_User(id)
+)
