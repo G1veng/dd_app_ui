@@ -14,30 +14,33 @@ class UserProfileWidget extends StatelessWidget {
     var viewModel = context.watch<UserProfileViewModel>();
 
     return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: viewModel.state.user != null
-              ? Text(
-                  viewModel.state.user!.name,
-                  overflow: TextOverflow.ellipsis,
-                )
-              : const Text(""),
-          centerTitle: true,
-          actions: viewModel.state.isCurrentUser == true
-              ? <Widget>[
-                  IconButton(
-                    onPressed: viewModel.logout,
-                    icon: const Icon(MyIcons.logout),
-                  ),
-                ]
-              : null,
-        ),
-        body: SafeArea(
-          child: viewModel.state.isLoading!
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : Column(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: viewModel.state.user != null
+            ? Text(
+                viewModel.state.user!.name,
+                overflow: TextOverflow.ellipsis,
+              )
+            : const Text(""),
+        centerTitle: true,
+        actions: viewModel.state.isCurrentUser == true
+            ? <Widget>[
+                IconButton(
+                  onPressed: viewModel.logout,
+                  icon: const Icon(MyIcons.logout),
+                ),
+              ]
+            : null,
+      ),
+      body: SafeArea(
+        child: viewModel.state.isLoading!
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : RefreshIndicator(
+                onRefresh: viewModel.refresh,
+                child: ListView(
+                  shrinkWrap: true,
                   children: [
                     _createUserInformation(context),
                     viewModel.state.isCurrentUser != true
@@ -48,8 +51,9 @@ class UserProfileWidget extends StatelessWidget {
                         ? const LinearProgressIndicator()
                         : const SizedBox.shrink(),
                   ],
-                ),
-        ));
+                )),
+      ),
+    );
   }
 
   static Widget create(Object? arg) {
@@ -67,22 +71,20 @@ class UserProfileWidget extends StatelessWidget {
     var viewModel = context.watch<UserProfileViewModel>();
 
     return Expanded(
-      child: RefreshIndicator(
-        onRefresh: viewModel.refresh,
-        child: GridView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(1.0),
-          controller: viewModel.lvc,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisSpacing: 1.0,
-            mainAxisSpacing: 1.0,
-            crossAxisCount: 3,
-          ),
-          itemCount: viewModel.state.userPosts!.length,
-          itemBuilder: (_, index) {
-            return _createPost(context, index);
-          },
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(1.0),
+        controller: viewModel.lvc,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisSpacing: 1.0,
+          mainAxisSpacing: 1.0,
+          crossAxisCount: 3,
         ),
+        itemCount: viewModel.state.userPosts!.length,
+        itemBuilder: (_, index) {
+          return _createPost(context, index);
+        },
       ),
     );
   }
