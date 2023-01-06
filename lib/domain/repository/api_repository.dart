@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dd_app_ui/domain/models/create_direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/direct_message_model.dart';
@@ -67,4 +69,10 @@ abstract class ApiRepository {
     required int take,
     required int skip,
   });
+  Future<DirectModel?> getUserDirect({
+    required String directId,
+  });
+  Future createDirectMessage({required CreateDirectMessageModel model});
+  Future<DirectModel?> getDirectWithUser({required String userId});
+  Future createDirect({required CreateDirectModel model});
 }

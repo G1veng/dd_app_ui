@@ -1,5 +1,9 @@
 import 'package:dd_app_ui/data/services/database.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_file.dart';
+import 'package:dd_app_ui/domain/models/direct_member.dart';
+import 'package:dd_app_ui/domain/models/direct_message.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
@@ -221,5 +225,102 @@ class DataService {
 
   Future cuPostComment(PostComment postComment) async {
     return await DB.instance.createUpdate(postComment);
+  }
+
+  Future cuDirects(List<Direct> directs) async {
+    await DB.instance.createUpdateRange(directs);
+  }
+
+  Future<List<Direct>?> getDirects({
+    Map<String, dynamic>? where,
+    int? take,
+    int? skip,
+    List<DbQueryEnum>? conds,
+  }) async {
+    return (await DB.instance.getAll<Direct>(
+            take: take,
+            skip: skip,
+            whereMap: where,
+            orderBy: '"title" DESC',
+            conditions: conds))
+        .toList();
+  }
+
+  Future cuDirectMessages(List<DirectMessage> directMessages) async {
+    await DB.instance.createUpdateRange(directMessages);
+  }
+
+  Future<List<DirectMessage>?> getDirectMessages({
+    Map<String, dynamic>? where,
+    int? take,
+    int? skip,
+    List<DbQueryEnum>? conds,
+  }) async {
+    return (await DB.instance.getAll<DirectMessage>(
+            take: take,
+            skip: skip,
+            whereMap: where,
+            orderBy: '"sended" DESC',
+            conditions: conds))
+        .toList();
+  }
+
+  Future cuDirect(Direct direct) async {
+    await DB.instance.createUpdate(direct);
+  }
+
+  Future<Direct?> getDirect({required String directId}) async {
+    return await DB.instance.get(directId);
+  }
+
+  Future cuDirectMember(DirectMember directMember) async {
+    var isExist = (await DB.instance.getAll<DirectMember>(
+            whereMap: {"id": directMember.id, "userId": directMember.userId},
+            conditions: [DbQueryEnum.equal, DbQueryEnum.equal]))
+        .isNotEmpty;
+
+    if (isExist) {
+      await DB.instance
+          .update(directMember, where: "id = ? and userId = ?", whereArgs: [
+        directMember.id,
+        directMember.userId,
+      ]);
+    } else {
+      await DB.instance.insert(directMember);
+    }
+  }
+
+  Future cuDirectMembers(List<DirectMember> directMember) async {
+    return await DB.instance.createUpdateRange(directMember);
+  }
+
+  Future<List<DirectMember>?> getDirectMembers({
+    Map<String, dynamic>? where,
+    int? take,
+    int? skip,
+    List<DbQueryEnum>? conds,
+  }) async {
+    return (await DB.instance.getAll<DirectMember>(
+      take: take,
+      skip: skip,
+      whereMap: where,
+      conditions: conds,
+    ))
+        .toList();
+  }
+
+  Future cuDirectMessageFiles(List<DirectFile> directFile) async {
+    return await DB.instance.createUpdateRange(directFile);
+  }
+
+  Future<List<DirectFile>?> getDirectMessageFiles(
+      String directMessageId) async {
+    return (await DB.instance
+            .getAll<DirectFile>(whereMap: {"messageId": directMessageId}))
+        .toList();
+  }
+
+  Future iDirectMessage(DirectMessage message) async {
+    await DB.instance.insert(message);
   }
 }

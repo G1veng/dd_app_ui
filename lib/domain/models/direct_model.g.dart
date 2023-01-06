@@ -26,11 +26,13 @@ Map<String, dynamic> _$DirectModelToJson(DirectModel instance) =>
 
 DirectImage _$DirectImageFromJson(Map<String, dynamic> json) => DirectImage(
       link: json['link'] as String,
+      id: json['id'] as String,
     );
 
 Map<String, dynamic> _$DirectImageToJson(DirectImage instance) =>
     <String, dynamic>{
       'link': instance.link,
+      'id': instance.id,
     };
 
 DirectMember _$DirectMemberFromJson(Map<String, dynamic> json) => DirectMember(

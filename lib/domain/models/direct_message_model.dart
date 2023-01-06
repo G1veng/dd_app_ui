@@ -9,7 +9,6 @@ class DirectMessageModel {
   final String directMessage;
   final String sended;
   final String senderId;
-  final String senderName;
   final List<DirectFile> directFiles;
 
   DirectMessageModel({
@@ -17,7 +16,6 @@ class DirectMessageModel {
     required this.directMessage,
     required this.sended,
     required this.senderId,
-    required this.senderName,
     required this.directFiles,
   });
 
@@ -29,10 +27,12 @@ class DirectMessageModel {
 
 @JsonSerializable()
 class DirectFile {
+  final String id;
   final String link;
 
   DirectFile({
     required this.link,
+    required this.id,
   });
 
   factory DirectFile.fromJson(Map<String, dynamic> json) =>

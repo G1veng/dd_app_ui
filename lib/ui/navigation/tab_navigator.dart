@@ -1,4 +1,5 @@
 import 'package:dd_app_ui/domain/enums/tab_item.dart';
+import 'package:dd_app_ui/ui/widgets/tab_direct/direct/direct_widget.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/create_post/create_post_widget.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/post_details/post_widget.dart';
 import 'package:dd_app_ui/ui/widgets/tab_user_profile/user_profile_widget.dart';
@@ -9,6 +10,7 @@ class TabNavigatorRoutes {
   static const String postDetails = "/app/postDetails";
   static const String createPost = "/app/createPost";
   static const String userProfile = "/user/userProfile";
+  static const String direct = "/directs/direct";
 }
 
 class TabNavigator extends StatelessWidget {
@@ -33,6 +35,8 @@ class TabNavigator extends StatelessWidget {
         TabNavigatorRoutes.createPost: (context) => CreatePostWidget.create(),
         TabNavigatorRoutes.userProfile: (context) =>
             UserProfileWidget.create(arg),
+        TabNavigatorRoutes.direct: (context) =>
+            DirectWidget.create(context: context, arg: arg),
       };
 
   @override

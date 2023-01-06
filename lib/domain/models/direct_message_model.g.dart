@@ -12,7 +12,6 @@ DirectMessageModel _$DirectMessageModelFromJson(Map<String, dynamic> json) =>
       directMessage: json['directMessage'] as String,
       sended: json['sended'] as String,
       senderId: json['senderId'] as String,
-      senderName: json['senderName'] as String,
       directFiles: (json['directFiles'] as List<dynamic>)
           .map((e) => DirectFile.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -24,15 +23,16 @@ Map<String, dynamic> _$DirectMessageModelToJson(DirectMessageModel instance) =>
       'directMessage': instance.directMessage,
       'sended': instance.sended,
       'senderId': instance.senderId,
-      'senderName': instance.senderName,
       'directFiles': instance.directFiles,
     };
 
 DirectFile _$DirectFileFromJson(Map<String, dynamic> json) => DirectFile(
       link: json['link'] as String,
+      id: json['id'] as String,
     );
 
 Map<String, dynamic> _$DirectFileToJson(DirectFile instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'link': instance.link,
     };

@@ -4,6 +4,8 @@ import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/data/services/sync_service.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
 import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
@@ -19,6 +21,7 @@ import 'package:dd_app_ui/ui/widgets/roots/app/app_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class UserProfileState {
   final User? user;
@@ -139,6 +142,33 @@ class UserProfileViewModel extends ChangeNotifier {
       _showDialog("Error", "Happened unexpected error, please try later");
     }
     AppNavigator.toLoader();
+  }
+
+  Future gotoDirectPressed(String userId) async {
+    var direct = await _apiService.getDirectWithUser(userId: userId);
+    if (direct == null) {
+      var directId = const Uuid().v4();
+
+      await _dataService.cuDirect(Direct(
+          id: directId,
+          directImage: state.user!.avatar,
+          title: state.user!.name));
+
+      await _apiService.createDirect(
+          model: CreateDirectModel(
+        id: directId,
+        userId: userId,
+      ));
+
+      _pushDirect(directId);
+      return;
+    }
+    _pushDirect(direct.directId);
+  }
+
+  void _pushDirect(String directId) {
+    Navigator.of(context)
+        .pushNamed(TabNavigatorRoutes.direct, arguments: directId);
   }
 
   void postPressed(String postId) => {

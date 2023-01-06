@@ -45,10 +45,16 @@ class ApiModule {
                   .getRefreshToken(RefreshTokenRequestModel(refreshToken: rt));
               await TokenStorage.setStoredToken(token);
               options.headers["Authorization"] = "Bearer ${token!.accessToken}";
+            } else {
+              //var service = AuthService();
+              //await service.logout();
+              await AppNavigator.toAuth();
+              return handler
+                  .resolve(Response(statusCode: 400, requestOptions: options));
             }
           } catch (e) {
             var service = AuthService();
-            //await service.logout();
+            await service.logout();
             await service.cleanToken();
             AppNavigator.toLoader();
             return handler

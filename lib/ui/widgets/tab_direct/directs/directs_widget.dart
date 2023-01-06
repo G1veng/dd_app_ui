@@ -3,12 +3,12 @@ import 'package:dd_app_ui/ui/widgets/tab_direct/directs/directs_view_model.dart'
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class DirectWidget extends StatelessWidget {
-  const DirectWidget({Key? key}) : super(key: key);
+class DirectsWidget extends StatelessWidget {
+  const DirectsWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var viewModel = context.watch<DirectViewModel>();
+    var viewModel = context.watch<DirectsViewModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -54,45 +54,47 @@ class DirectWidget extends StatelessWidget {
     );
   }
 
-  static Widget create() => ChangeNotifierProvider<DirectViewModel>(
-        create: (context) => DirectViewModel(contex: context),
+  static Widget create() => ChangeNotifierProvider<DirectsViewModel>(
+        create: (context) => DirectsViewModel(context: context),
         lazy: false,
-        child: const DirectWidget(),
+        child: const DirectsWidget(),
       );
 
   Widget _createDirectRow(BuildContext context, int index) => Container(
-      margin: const EdgeInsets.all(5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-              child: Row(children: [
-            _createDirectImage(context, index),
-            _createDirectInfo(context, index),
-          ])),
-          _createGotoDirectButton(context, index),
-        ],
-      ));
+        margin: const EdgeInsets.all(5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+                child: Row(children: [
+              _createDirectImage(context, index),
+              _createDirectInfo(context, index),
+            ])),
+            _createGotoDirectButton(context, index),
+          ],
+        ),
+      );
 
   Widget _createGotoDirectButton(BuildContext context, int index) {
-    //var viewModel = context.watch<DirectViewModel>();
+    var viewModel = context.watch<DirectsViewModel>();
 
     return IconButton(
         onPressed: () {
-          //TODO переход в директ
+          viewModel.pressedGoToDirect(
+              directId: viewModel.state.directs![index].id);
         },
         icon: const Icon(Icons.arrow_circle_right_outlined));
   }
 
   Widget _createDirectImage(BuildContext context, int index) {
-    var viewModel = context.watch<DirectViewModel>();
+    var viewModel = context.watch<DirectsViewModel>();
 
     return Container(
         margin: const EdgeInsets.only(right: 5),
         child: CircleAvatar(
           backgroundColor: Colors.grey,
           foregroundImage: Image.network(
-            "$baseUrl${viewModel.state.directs![index].directImage.link}",
+            "$baseUrl${viewModel.state.directs![index].directImage}",
             headers: viewModel.state.headers,
           ).image,
           radius: MediaQuery.of(context).size.width / 10,
@@ -100,13 +102,13 @@ class DirectWidget extends StatelessWidget {
   }
 
   Widget _createDirectInfo(BuildContext context, int index) {
-    var viewModel = context.watch<DirectViewModel>();
+    var viewModel = context.watch<DirectsViewModel>();
 
     return Expanded(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(viewModel.state.directs![index].directTitle,
+        Text(viewModel.state.directs![index].title,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -114,7 +116,8 @@ class DirectWidget extends StatelessWidget {
         Text(
           viewModel.state.directMessages![index].isEmpty == true
               ? ""
-              : viewModel.state.directMessages![index].first.directMessage,
+              : viewModel.state.directMessages![index].first.directMessage ??
+                  "Picture",
           overflow: TextOverflow.ellipsis,
         ),
       ],

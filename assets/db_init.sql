@@ -56,4 +56,31 @@ CREATE TABLE t_Subscription(
         ,PRIMARY KEY (subscriberId, id)
         ,FOREIGN KEY(subscriberId) REFERENCES t_Post(id)
         ,FOREIGN KEY(id) REFERENCES t_User(id)
-)
+);
+CREATE TABLE t_Direct(
+        id                      TEXT NOT NULL PRIMARY KEY
+        ,title                  TEXT NOT NULL
+        ,directImage            TEXT
+);
+CREATE TABLE t_DirectMember(
+        id                      TEXT NOT NULL
+        ,userId                 TEXT NOT NULL
+        ,PRIMARY KEY (id, userId)
+        ,FOREIGN KEY(id) REFERENCES t_Direct(id)
+        ,FOREIGN KEY(userId) REFERENCES t_User(id)
+);
+CREATE TABLE t_DirectMessage(
+        id                      TEXT NOT NULL PRIMARY KEY
+        ,directId               TEXT NOT NULL
+        ,directMessage          TEXT
+        ,sended                 TEXT NOT NULL
+        ,senderId               TEXT NOT NULL
+        ,FOREIGN KEY(senderId) REFERENCES t_User(id)
+        ,FOREIGN KEY(directId) REFERENCES t_Direct(id)
+);
+CREATE TABLE t_DirectFile(
+        id                      TEXT NOT NULL PRIMARY KEY
+        ,link                   TEXT NOT NULL
+        ,messageId              TEXT NOT NULL
+        ,FOREIGN KEY(messageId) REFERENCES t_DirectMessage(id)
+);

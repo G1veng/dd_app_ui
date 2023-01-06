@@ -26,12 +26,13 @@ class PostWidget extends StatelessWidget {
                   child: SizedBox(
               child: CircularProgressIndicator(),
             )))
-          : Column(
+          : Flexible(
+              child: Column(
               children: [
                 _createPostComments(context),
                 _createFieldAddComment(context),
               ],
-            ),
+            )),
     );
   }
 
@@ -122,7 +123,8 @@ class PostWidget extends StatelessWidget {
   Widget _cretePostComment(BuildContext context, int index) {
     var viewModel = context.read<PostViewModel>();
 
-    return Row(
+    return Flexible(
+        child: Row(
       children: [
         GestureDetector(
             onTap: () => viewModel.pressedGoToProfile(
@@ -158,7 +160,7 @@ class PostWidget extends StatelessWidget {
           ),
         ))
       ],
-    );
+    ));
   }
 
   Widget _createFieldAddComment(BuildContext context) {
@@ -185,7 +187,10 @@ class PostWidget extends StatelessWidget {
                 controller: viewModel.createCommentTec,
                 maxLines: null,
                 decoration: const InputDecoration(
-                    border: UnderlineInputBorder(), hintText: "Enter comment"),
+                  border: UnderlineInputBorder(),
+                  hintText: "Enter comment",
+                  counterText: "",
+                ),
                 textAlign: TextAlign.start,
               ))),
       Container(

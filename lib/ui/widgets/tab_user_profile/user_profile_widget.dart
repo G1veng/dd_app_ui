@@ -33,26 +33,25 @@ class UserProfileWidget extends StatelessWidget {
             : null,
       ),
       body: SafeArea(
-        child: viewModel.state.isLoading!
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : RefreshIndicator(
-                onRefresh: viewModel.refresh,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    _createUserInformation(context),
-                    viewModel.state.isCurrentUser != true
-                        ? _createFollowMessageButtons(context)
-                        : const SizedBox.shrink(),
-                    _createUserPostsGridView(context),
-                    viewModel.state.isUpdating!
-                        ? const LinearProgressIndicator()
-                        : const SizedBox.shrink(),
-                  ],
-                )),
-      ),
+          child: viewModel.state.isLoading!
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : RefreshIndicator(
+                  onRefresh: viewModel.refresh,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      _createUserInformation(context),
+                      viewModel.state.isCurrentUser != true
+                          ? _createFollowMessageButtons(context)
+                          : const SizedBox.shrink(),
+                      _createUserPostsGridView(context),
+                      viewModel.state.isUpdating!
+                          ? const LinearProgressIndicator()
+                          : const SizedBox.shrink(),
+                    ],
+                  ))),
     );
   }
 
@@ -70,22 +69,20 @@ class UserProfileWidget extends StatelessWidget {
   Widget _createUserPostsGridView(BuildContext context) {
     var viewModel = context.watch<UserProfileViewModel>();
 
-    return Expanded(
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(1.0),
-        controller: viewModel.lvc,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisSpacing: 1.0,
-          mainAxisSpacing: 1.0,
-          crossAxisCount: 3,
-        ),
-        itemCount: viewModel.state.userPosts!.length,
-        itemBuilder: (_, index) {
-          return _createPost(context, index);
-        },
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(1.0),
+      controller: viewModel.lvc,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisSpacing: 1.0,
+        mainAxisSpacing: 1.0,
+        crossAxisCount: 3,
       ),
+      itemCount: viewModel.state.userPosts!.length,
+      itemBuilder: (_, index) {
+        return _createPost(context, index);
+      },
     );
   }
 
@@ -101,7 +98,7 @@ class UserProfileWidget extends StatelessWidget {
         ),
         OutlinedButton(
             onPressed: () {
-              //TODO переход в директ
+              viewModel.gotoDirectPressed(viewModel.state.user!.id);
             },
             child: const Text("Message")),
       ],

@@ -1,17 +1,20 @@
-import 'package:dd_app_ui/data/services/api_service.dart';
-import 'package:dd_app_ui/domain/models/direct_message_model.dart';
-import 'package:dd_app_ui/domain/models/direct_model.dart';
+import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/data/services/sync_service.dart';
+import 'package:dd_app_ui/domain/enums/db_query.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_message.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/material.dart';
 
-class DirectState {
-  final List<DirectModel>? directs;
-  final List<List<DirectMessageModel>>? directMessages;
+class DirectsState {
+  final List<Direct>? directs;
+  final List<List<DirectMessage>>? directMessages;
   final Map<String, String>? headers;
   final bool? isLoading;
   final bool? isUpdating;
 
-  DirectState({
+  DirectsState({
     this.directs,
     this.headers,
     this.isLoading = false,
@@ -19,14 +22,14 @@ class DirectState {
     this.isUpdating = false,
   });
 
-  DirectState copyWith({
+  DirectsState copyWith({
     directs,
     headers,
     isLoading,
     directMessages,
     isUpdating,
   }) =>
-      DirectState(
+      DirectsState(
         directs: directs ?? this.directs,
         headers: headers != null
             ? {"Authorization": "Bearer $headers"}
@@ -36,7 +39,7 @@ class DirectState {
         isUpdating: isUpdating ?? this.isUpdating,
       );
 
-  DirectState clear() => DirectState(
+  DirectsState clear() => DirectsState(
         directs: null,
         headers: headers,
         isLoading: isLoading,
@@ -45,13 +48,15 @@ class DirectState {
       );
 }
 
-class DirectViewModel extends ChangeNotifier {
-  final BuildContext contex;
-  final ApiService _apiService = ApiService();
+class DirectsViewModel extends ChangeNotifier {
+  final BuildContext context;
+  final SyncService _syncService = SyncService();
+  final DataService _dataService = DataService();
   final lvc = ScrollController();
-  int take = 10, skip = 0;
+  final _take = 10;
+  int _skip = 0;
 
-  DirectViewModel({required this.contex}) {
+  DirectsViewModel({required this.context}) {
     _asyncInit();
 
     lvc.addListener(() async {
@@ -67,18 +72,25 @@ class DirectViewModel extends ChangeNotifier {
     });
   }
 
-  var _state = DirectState();
-  DirectState get state => _state;
-  set state(DirectState val) {
+  var _state = DirectsState();
+  DirectsState get state => _state;
+  set state(DirectsState val) {
     _state = val;
     notifyListeners();
   }
 
   Future refresh() async {
     state = state.clear();
-    skip = 0;
+    _skip = 0;
 
     await _asyncInit();
+  }
+
+  Future pressedGoToDirect({String? directId}) async {
+    return await Navigator.of(context).pushNamed(
+      TabNavigatorRoutes.direct,
+      arguments: directId,
+    );
   }
 
   Future _asyncInit() async {
@@ -95,22 +107,22 @@ class DirectViewModel extends ChangeNotifier {
   }
 
   Future _requestNextDirects() async {
-    List<List<DirectMessageModel>> dirMess = state.directMessages ?? [];
-    List<DirectModel> extDirects = state.directs ?? [];
+    List<List<DirectMessage>> dirMess = state.directMessages ?? [];
+    List<Direct> extDirects = state.directs ?? [];
 
-    var directs = await _apiService.getUserDirects(
-      take: take,
-      skip: skip,
-    );
+    await _syncService.syncDirects(_take, skip: _skip);
+    var directs = await _dataService.getDirects(take: _take, skip: _skip);
     if (directs != null) {
       extDirects.addAll(directs);
 
       for (var direct in directs) {
-        var dirMessage = await _apiService.getDirectMessages(
-            lastDirectMessageCreated: null,
-            directId: direct.directId,
-            take: 1,
-            skip: 0);
+        await _syncService.syncDirectMessages(take: 1, directId: direct.id);
+
+        var dirMessage = await _dataService.getDirectMessages(
+          take: 1,
+          where: {"directId": direct.id},
+          conds: [DbQueryEnum.equal],
+        );
 
         dirMess.add(dirMessage ?? []);
       }
@@ -122,6 +134,6 @@ class DirectViewModel extends ChangeNotifier {
       );
     }
 
-    skip += take;
+    _skip += _take;
   }
 }

@@ -1,5 +1,7 @@
 import 'package:dd_app_ui/domain/db_model.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_message.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
@@ -12,6 +14,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import 'package:dd_app_ui/domain/models/direct_member.dart' as dir_member;
+import 'package:dd_app_ui/domain/models/direct_file.dart' as dir_file;
 
 class DB {
   DB._();
@@ -22,7 +26,7 @@ class DB {
   Future init() async {
     if (!_initialized) {
       var databasePath = await getDatabasesPath();
-      var path = join(databasePath, "db_v1.0.15.db");
+      var path = join(databasePath, "db_v1.0.16.db");
 
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
@@ -47,6 +51,10 @@ class DB {
     UserStatistics: (map) => UserStatistics.fromMap(map),
     PostComment: (map) => PostComment.fromMap(map),
     Subscription: (map) => Subscription.fromMap(map),
+    Direct: (map) => Direct.fromMap(map),
+    dir_member.DirectMember: (map) => dir_member.DirectMember.fromMap(map),
+    DirectMessage: (map) => DirectMessage.fromMap(map),
+    dir_file.DirectFile: (map) => dir_file.DirectFile.fromMap(map),
   };
 
   String _dbName(Type type) {
@@ -114,9 +122,10 @@ class DB {
     return await _db.insert(_dbName(T), model.toMap());
   }
 
-  Future<int> update<T extends DbModel>(T model) async =>
+  Future<int> update<T extends DbModel>(T model,
+          {String? where, List<Object?>? whereArgs}) async =>
       await _db.update(_dbName(T), model.toMap(),
-          where: 'id = ?', whereArgs: [model.id]);
+          where: where ?? 'id = ?', whereArgs: whereArgs ?? [model.id]);
 
   Future<int> delete<T extends DbModel>(T model) async =>
       await _db.delete(_dbName(T), where: 'id = ?', whereArgs: [model.id]);

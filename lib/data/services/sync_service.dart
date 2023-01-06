@@ -1,5 +1,10 @@
 import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_member.dart' as dir_member;
+import 'package:dd_app_ui/domain/models/direct_message.dart';
+import 'package:dd_app_ui/domain/models/direct_file.dart' as dir_file;
+import 'package:dd_app_ui/domain/models/direct_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_like_state.dart';
 import 'package:dd_app_ui/domain/models/subscription.dart';
@@ -148,6 +153,84 @@ class SyncService {
               await _api.getUserSubscriptionsAmount(userId: userId)));
 
       await _dataService.cuUser(User.fromJson(user.toJson()));
+    }
+  }
+
+  Future syncDirects(
+    int take, {
+    int skip = 0,
+  }) async {
+    var directs = await _api.getUserDirects(take: take, skip: skip);
+    if (directs != null) {
+      await _dataService.cuDirects(directs
+          .map((e) => Direct(
+              id: e.directId,
+              directImage: e.directImage.link,
+              title: e.directTitle))
+          .toList());
+
+      for (var direct in directs) {
+        await syncDirectMembers(direct: direct);
+      }
+    }
+  }
+
+  Future syncDirectMembers({required DirectModel direct}) async {
+    //await syncDirect(directId: directId);
+
+    //var direct = await _api.getUserDirect(directId: directId);
+
+    for (var member in direct.directMembers) {
+      await syncUser(userId: member.directMember);
+      await _dataService.cuDirectMember(dir_member.DirectMember(
+          id: direct.directId, userId: member.directMember));
+    }
+  }
+
+  Future syncDirectMessages({
+    required int take,
+    required String directId,
+    int skip = 0,
+    String? lastDirectMessageCreated,
+  }) async {
+    var directMessages = await _api.getDirectMessages(
+        lastDirectMessageCreated: lastDirectMessageCreated,
+        directId: directId,
+        take: take,
+        skip: skip);
+    if (directMessages != null) {
+      await _dataService.cuDirectMessages(directMessages
+          .map((e) => DirectMessage(
+              id: e.directMessageId,
+              directMessage: e.directMessage,
+              directId: directId,
+              sended: e.sended,
+              senderId: e.senderId))
+          .toList());
+
+      for (var message in directMessages) {
+        if (message.directFiles.isNotEmpty) {
+          await _dataService.cuDirectMessageFiles(message.directFiles
+              .map((e) => dir_file.DirectFile(
+                    link: e.link,
+                    id: e.id,
+                    messageId: message.directMessageId,
+                  ))
+              .toList());
+        }
+      }
+    }
+  }
+
+  Future syncDirect({required String directId}) async {
+    var direct = await _api.getUserDirect(directId: directId);
+    if (direct != null) {
+      await _dataService.cuDirect(Direct(
+          id: direct.directId,
+          directImage: direct.directImage.link,
+          title: direct.directTitle));
+
+      await syncDirectMembers(direct: direct);
     }
   }
 }

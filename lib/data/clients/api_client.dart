@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dd_app_ui/domain/models/create_direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/direct_message_model.dart';
@@ -117,4 +119,20 @@ abstract class ApiClient {
     @Query("take") int take,
     @Query("skip") int skip,
   );
+
+  @GET("/api/Direct/GetUserDirect")
+  Future<DirectModel?> getUserDirect(
+    @Query("directId") String directId,
+  );
+
+  @POST("/api/Direct/CreateDirectMessage")
+  Future createDirectMessage(@Body() CreateDirectMessageModel model);
+
+  @GET("/api/Direct/GetDirectWithUser")
+  Future<DirectModel?> getDirectWithUser(
+    @Query("userId") String userId,
+  );
+
+  @POST("/api/Direct/CreateDirect")
+  Future createDirect(@Body() CreateDirectModel model);
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dd_app_ui/domain/models/create_direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/direct_message_model.dart';
@@ -133,5 +135,23 @@ class ApiService {
         directId: directId,
         take: take,
         skip: skip);
+  }
+
+  Future<DirectModel?> getUserDirect({
+    required String directId,
+  }) async {
+    return await _api.getUserDirect(directId: directId);
+  }
+
+  Future createDirectMessage({required CreateDirectMessageModel model}) async {
+    return await _api.createDirectMessage(model: model);
+  }
+
+  Future<DirectModel?> getDirectWithUser({required String userId}) async {
+    return await _api.getDirectWithUser(userId: userId);
+  }
+
+  Future createDirect({required CreateDirectModel model}) async {
+    return await _api.createDirect(model: model);
   }
 }

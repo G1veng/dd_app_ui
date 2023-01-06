@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:dd_app_ui/data/clients/api_client.dart';
+import 'package:dd_app_ui/domain/models/create_direct_message_model.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_comment_model.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/create_user_request_model.dart';
@@ -197,5 +199,25 @@ class ApiDataRepository extends ApiRepository {
       required int skip}) async {
     return await _api.getDirectMessages(
         lastDirectMessageCreated, directId, take, skip);
+  }
+
+  @override
+  Future<DirectModel?> getUserDirect({required String directId}) async {
+    return await _api.getUserDirect(directId);
+  }
+
+  @override
+  Future createDirectMessage({required CreateDirectMessageModel model}) async {
+    return await _api.createDirectMessage(model);
+  }
+
+  @override
+  Future<DirectModel?> getDirectWithUser({required String userId}) async {
+    return await _api.getDirectWithUser(userId);
+  }
+
+  @override
+  Future createDirect({required CreateDirectModel model}) async {
+    return await _api.createDirect(model);
   }
 }

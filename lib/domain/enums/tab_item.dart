@@ -37,7 +37,7 @@ class TabEnums {
     } else if (tabItem == TabItemEnum.profile) {
       return UserProfileWidget.create(arg);
     } else if (tabItem == TabItemEnum.direct) {
-      return DirectWidget.create();
+      return DirectsWidget.create();
     }
     return null;
   }

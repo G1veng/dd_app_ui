@@ -25,9 +25,11 @@ class DirectModel {
 @JsonSerializable()
 class DirectImage {
   final String link;
+  final String id;
 
   DirectImage({
     required this.link,
+    required this.id,
   });
 
   factory DirectImage.fromJson(Map<String, dynamic> json) =>
