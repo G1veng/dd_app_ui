@@ -5,6 +5,7 @@ import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/domain/models/create_post_model.dart';
 import 'package:dd_app_ui/domain/models/post.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
@@ -51,8 +52,8 @@ class CreatePostViewModel extends ChangeNotifier {
   BuildContext context;
   CreatePostState _state = CreatePostState();
   var postText = TextEditingController();
-  final _api = ApiService();
-  final _data = DataService();
+  final _apiService = ApiService();
+  final _dataService = DataService();
 
   CreatePostViewModel({required this.context}) {
     postText.addListener(() {
@@ -131,8 +132,8 @@ class CreatePostViewModel extends ChangeNotifier {
         files.add(File(path));
       }
 
-      var metaData = await _api.uploadFiles(files: files);
-      await _data.cuPost(Post(
+      var metaData = await _apiService.uploadFiles(files: files);
+      await _dataService.cuPost(Post(
           id: postId,
           created: created,
           text: state.postText,
@@ -141,15 +142,52 @@ class CreatePostViewModel extends ChangeNotifier {
           commentAmount: 0,
           likesAmount: 0));
 
-      await _api.createPost(
+      await _apiService.createPost(
           model: CreatePostModel(
               id: postId,
               text: state.postText!,
               files: metaData!,
               created: created.replaceAll(r' ', 'T')));
 
-      //TODO отправку уведомлений подписчикам
+      _sendNotificationsAsync(
+        state.postText!,
+        postId,
+      );
+
       _goToProfile();
+    }
+  }
+
+  Future _sendNotificationsAsync(String message, String postId) async {
+    var subscribers = await _dataService.getSusbcriptions(
+      userId: state.user!.id,
+    );
+
+    if (subscribers == null) {
+      return;
+    }
+
+    var alert = Alert(
+      title: "New post from ${state.user!.name}",
+      body: message,
+    );
+    var customData = CustomData(
+      additionalProp1: postId,
+      additionalProp2: TabNavigatorRoutes.postDetails,
+      additionalProp3: "",
+    );
+    var push = Push(
+      alert: alert,
+      customData: customData,
+    );
+
+    for (var subscriber in subscribers) {
+      var model = SendPushModel(
+        userId: subscriber.subscriberId,
+        push: push,
+      );
+
+      await _apiService.sendPush(model: model);
     }
   }
 

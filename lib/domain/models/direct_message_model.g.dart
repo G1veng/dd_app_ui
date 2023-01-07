@@ -9,11 +9,11 @@ part of 'direct_message_model.dart';
 DirectMessageModel _$DirectMessageModelFromJson(Map<String, dynamic> json) =>
     DirectMessageModel(
       directMessageId: json['directMessageId'] as String,
-      directMessage: json['directMessage'] as String,
+      directMessage: json['directMessage'] as String?,
       sended: json['sended'] as String,
       senderId: json['senderId'] as String,
-      directFiles: (json['directFiles'] as List<dynamic>)
-          .map((e) => DirectFile.fromJson(e as Map<String, dynamic>))
+      directFiles: (json['directFiles'] as List<dynamic>?)
+          ?.map((e) => DirectFile.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

@@ -12,8 +12,9 @@ DirectModel _$DirectModelFromJson(Map<String, dynamic> json) => DirectModel(
       directMembers: (json['directMembers'] as List<dynamic>)
           .map((e) => DirectMember.fromJson(e as Map<String, dynamic>))
           .toList(),
-      directImage:
-          DirectImage.fromJson(json['directImage'] as Map<String, dynamic>),
+      directImage: json['directImage'] == null
+          ? null
+          : DirectImage.fromJson(json['directImage'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DirectModelToJson(DirectModel instance) =>
@@ -25,14 +26,14 @@ Map<String, dynamic> _$DirectModelToJson(DirectModel instance) =>
     };
 
 DirectImage _$DirectImageFromJson(Map<String, dynamic> json) => DirectImage(
-      link: json['link'] as String,
       id: json['id'] as String,
+      link: json['link'] as String,
     );
 
 Map<String, dynamic> _$DirectImageToJson(DirectImage instance) =>
     <String, dynamic>{
-      'link': instance.link,
       'id': instance.id,
+      'link': instance.link,
     };
 
 DirectMember _$DirectMemberFromJson(Map<String, dynamic> json) => DirectMember(

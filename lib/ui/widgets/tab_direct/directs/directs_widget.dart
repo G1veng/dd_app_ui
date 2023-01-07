@@ -17,16 +17,16 @@ class DirectsWidget extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () => {
-                    //TODO создание директа
-                  },
-              icon: Icon(
-                Icons.add,
-                size: MediaQuery.of(context).size.width / 10,
-              ))
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () => {
+        //             //TODO создание директа
+        //           },
+        //       icon: Icon(
+        //         Icons.add,
+        //         size: MediaQuery.of(context).size.width / 10,
+        //       ))
+        // ],
       ),
       body: viewModel.state.isLoading == false
           ? RefreshIndicator(
@@ -93,10 +93,14 @@ class DirectsWidget extends StatelessWidget {
         margin: const EdgeInsets.only(right: 5),
         child: CircleAvatar(
           backgroundColor: Colors.grey,
-          foregroundImage: Image.network(
-            "$baseUrl${viewModel.state.directs![index].directImage}",
-            headers: viewModel.state.headers,
-          ).image,
+          foregroundImage: viewModel.state.directs![index].directImage != null
+              ? Image.network(
+                  "$baseUrl${viewModel.state.directs![index].directImage}",
+                  headers: viewModel.state.headers,
+                ).image
+              : Image.asset(
+                  "images/empty_image.png",
+                ).image,
           radius: MediaQuery.of(context).size.width / 10,
         ));
   }

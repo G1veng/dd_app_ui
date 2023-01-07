@@ -7,9 +7,11 @@ import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/create_direct_message_model.dart';
 import 'package:dd_app_ui/domain/models/direct.dart';
 import 'package:dd_app_ui/domain/models/direct_message.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
+import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
@@ -129,8 +131,55 @@ class DirectViewModel extends ChangeNotifier {
     var mess = state.directMessages ?? [];
     newMessage!.addAll(mess);
 
+    _sendNotificationsAsync(
+        (state.createMessageText == null || state.createMessageText!.isEmpty)
+            ? "Sended files"
+            : state.createMessageText!,
+        directId);
+
     state = state.copyWith(directMessages: newMessage, createMessageText: "");
     createMessageTec.text = "";
+  }
+
+  Future _sendNotificationsAsync(String message, String directId) async {
+    var members = await _dataService.getDirectMembers(
+      where: {
+        "id": state.direct!.id,
+        "userId": (await SharedPrefs.getStoredUser())!.id
+      },
+      conds: [
+        DbQueryEnum.equal,
+        DbQueryEnum.notEqual,
+      ],
+    );
+
+    if (members == null) {
+      return;
+    }
+
+    var alert = Alert(
+      title: "New message from ${state.currentUser!.name}",
+      body: message,
+    );
+    var customData = CustomData(
+      additionalProp1: directId,
+      additionalProp2: TabNavigatorRoutes.direct,
+      additionalProp3: "",
+    );
+    var push = Push(
+      badge: 1,
+      alert: alert,
+      customData: customData,
+    );
+
+    for (var member in members) {
+      var model = SendPushModel(
+        userId: member.userId,
+        push: push,
+      );
+
+      _apiService.sendPush(model: model);
+    }
   }
 
   Future _asyncInit() async {
@@ -153,7 +202,7 @@ class DirectViewModel extends ChangeNotifier {
         for (var member in directMembers) {
           var user = await _dataService.getUser(member.userId);
 
-          avatars.addAll({member.id: user?.avatar});
+          avatars.addAll({member.userId: user?.avatar});
         }
 
         state = state.copyWith(membersAvatars: avatars);
@@ -163,6 +212,58 @@ class DirectViewModel extends ChangeNotifier {
     }
 
     state = state.copyWith(isLoading: false);
+    _updateDirect();
+  }
+
+  Future _updateDirect({int soconds = 1}) async {
+    for (;;) {
+      Future.delayed(Duration(seconds: soconds));
+      var newMessages = await _apiService.getDirectMessages(
+        lastDirectMessageCreated: null,
+        directId: directId,
+        take: 20,
+        skip: 0,
+      );
+
+      if (state.directMessages != null && newMessages != null) {
+        if (state.directMessages!.first.id !=
+            newMessages.first.directMessageId) {
+          int newMessageAmount = 0;
+
+          for (var message in newMessages) {
+            if (message.directMessageId != state.directMessages![0].id) {
+              newMessageAmount++;
+              continue;
+            }
+            break;
+          }
+
+          await _dataService.cuDirectMessages(
+            newMessages
+                .map((e) => DirectMessage(
+                    id: e.directMessageId,
+                    directMessage: e.directMessage,
+                    directId: directId,
+                    sended: e.sended,
+                    senderId: e.senderId))
+                .toList(),
+          );
+
+          var messages = await _dataService.getDirectMessages(
+            where: {"directId": directId},
+            conds: [DbQueryEnum.equal],
+            take: newMessageAmount,
+          );
+
+          if (messages != null) {
+            var stateMess = state.directMessages ?? [];
+
+            messages.addAll(stateMess);
+            state = state.copyWith(directMessages: messages);
+          }
+        }
+      }
+    }
   }
 
   Future _requestNextMessages() async {

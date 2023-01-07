@@ -10,6 +10,7 @@ import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/push_token_model.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
 import "package:dio/dio.dart";
@@ -135,4 +136,7 @@ abstract class ApiClient {
 
   @POST("/api/Direct/CreateDirect")
   Future createDirect(@Body() CreateDirectModel model);
+
+  @POST("/api/Push/SendPush")
+  Future<List<String>> sendPush(@Body() SendPushModel model);
 }

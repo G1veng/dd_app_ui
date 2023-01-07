@@ -10,6 +10,7 @@ import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/push_token_model.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
 import 'package:dd_app_ui/domain/repository/api_repository.dart';
 import 'package:dd_app_ui/internal/dependecies/repository_model.dart';
@@ -153,5 +154,9 @@ class ApiService {
 
   Future createDirect({required CreateDirectModel model}) async {
     return await _api.createDirect(model: model);
+  }
+
+  Future sendPush({required SendPushModel model}) async {
+    return await _api.sendPush(model: model);
   }
 }

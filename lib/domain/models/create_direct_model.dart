@@ -8,10 +8,14 @@ part 'create_direct_model.g.dart';
 class CreateDirectModel {
   final String id;
   final String userId;
+  final String title;
+  final String? directImage;
 
   CreateDirectModel({
     required this.id,
+    required this.title,
     required this.userId,
+    required this.directImage,
   });
 
   factory CreateDirectModel.fromJson(Map<String, dynamic> json) =>

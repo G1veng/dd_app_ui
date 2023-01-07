@@ -6,6 +6,7 @@ import 'package:dd_app_ui/data/services/sync_service.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/create_direct_model.dart';
 import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_member.dart';
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
 import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
@@ -151,14 +152,22 @@ class UserProfileViewModel extends ChangeNotifier {
 
       await _dataService.cuDirect(Direct(
           id: directId,
-          directImage: state.user!.avatar,
+          directImage: state.user?.avatar,
           title: state.user!.name));
 
       await _apiService.createDirect(
           model: CreateDirectModel(
         id: directId,
         userId: userId,
+        title: state.user!.name,
+        directImage: state.user!.avatar,
       ));
+
+      await _dataService.cuDirectMembers([
+        DirectMember(id: directId, userId: userId),
+        DirectMember(
+            id: directId, userId: (await SharedPrefs.getStoredUser())!.id),
+      ]);
 
       _pushDirect(directId);
       return;
@@ -166,8 +175,8 @@ class UserProfileViewModel extends ChangeNotifier {
     _pushDirect(direct.directId);
   }
 
-  void _pushDirect(String directId) {
-    Navigator.of(context)
+  Future _pushDirect(String directId) async {
+    await Navigator.of(context)
         .pushNamed(TabNavigatorRoutes.direct, arguments: directId);
   }
 

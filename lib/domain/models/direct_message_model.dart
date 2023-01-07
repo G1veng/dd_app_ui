@@ -6,17 +6,17 @@ part 'direct_message_model.g.dart';
 @JsonSerializable()
 class DirectMessageModel {
   final String directMessageId;
-  final String directMessage;
+  final String? directMessage;
   final String sended;
   final String senderId;
-  final List<DirectFile> directFiles;
+  final List<DirectFile>? directFiles;
 
   DirectMessageModel({
     required this.directMessageId,
-    required this.directMessage,
+    this.directMessage,
     required this.sended,
     required this.senderId,
-    required this.directFiles,
+    this.directFiles,
   });
 
   factory DirectMessageModel.fromJson(Map<String, dynamic> json) =>

@@ -165,7 +165,7 @@ class SyncService {
       await _dataService.cuDirects(directs
           .map((e) => Direct(
               id: e.directId,
-              directImage: e.directImage.link,
+              directImage: e.directImage?.link,
               title: e.directTitle))
           .toList());
 
@@ -209,8 +209,8 @@ class SyncService {
           .toList());
 
       for (var message in directMessages) {
-        if (message.directFiles.isNotEmpty) {
-          await _dataService.cuDirectMessageFiles(message.directFiles
+        if (message.directFiles != null && message.directFiles!.isNotEmpty) {
+          await _dataService.cuDirectMessageFiles(message.directFiles!
               .map((e) => dir_file.DirectFile(
                     link: e.link,
                     id: e.id,
@@ -227,7 +227,7 @@ class SyncService {
     if (direct != null) {
       await _dataService.cuDirect(Direct(
           id: direct.directId,
-          directImage: direct.directImage.link,
+          directImage: direct.directImage?.link,
           title: direct.directTitle));
 
       await syncDirectMembers(direct: direct);

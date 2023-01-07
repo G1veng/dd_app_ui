@@ -7,9 +7,12 @@ import 'package:dd_app_ui/domain/models/post.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_file.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
+import 'package:dd_app_ui/internal/config/app_config.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 class PostState {
@@ -24,6 +27,8 @@ class PostState {
   final User? currentUser;
   final bool isLoading;
   final bool isUpdating;
+  final Image? avatar;
+  final User? postCreator;
 
   PostState({
     this.headers,
@@ -36,6 +41,8 @@ class PostState {
     this.isLoading = true,
     this.isUpdating = true,
     this.postLikeState = false,
+    this.avatar,
+    this.postCreator,
   });
 
   PostState copyWith({
@@ -49,6 +56,8 @@ class PostState {
     isLoading,
     isUpdating,
     postLikeState,
+    avatar,
+    postCreator,
   }) {
     return PostState(
       headers:
@@ -62,6 +71,8 @@ class PostState {
       isLoading: isLoading ?? this.isLoading,
       isUpdating: isUpdating ?? this.isUpdating,
       postLikeState: postLikeState ?? this.postLikeState,
+      avatar: avatar ?? this.avatar,
+      postCreator: postCreator ?? this.postCreator,
     );
   }
 }
@@ -150,11 +161,24 @@ class PostViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future loadAvatar() async {
+    var user = await SharedPrefs.getStoredUser();
+    var img = await NetworkAssetBundle(Uri.parse("$baseUrl${user!.avatar}"))
+        .load("$baseUrl${user.avatar}?v=1");
+    state = state.copyWith(
+        avatar: Image.memory(
+      img.buffer.asUint8List(),
+      fit: BoxFit.fill,
+    ));
+  }
+
   void _asyncInit() async {
     state = state.copyWith(
       isLoading: true,
       isUpdating: false,
     );
+
+    await loadAvatar();
 
     var headers = await TokenStorage.getAccessToken();
 
@@ -175,6 +199,7 @@ class PostViewModel extends ChangeNotifier {
         headers: headers,
         post: Post.fromJson(post.toJson()),
         currentUser: currentUser,
+        postCreator: (await _dataService.getUser(postAuthor!.id!)),
       );
 
       await _requestNextComments();
@@ -189,7 +214,10 @@ class PostViewModel extends ChangeNotifier {
   Future _requestNextComments() async {
     List<User> postCommentsCreators = state.postCommentsCreators ?? [];
 
-    await _syncService.syncPostComments(take, postId: postId!);
+    await _syncService.syncPostComments(
+        lastPostCreated: state.postComments?.last.created,
+        take,
+        postId: postId!);
 
     List<PostComment> postComments = state.postComments ?? [];
     var newComments = await _dataService.getPostComments(
@@ -214,8 +242,6 @@ class PostViewModel extends ChangeNotifier {
 
     state = state.copyWith(
         postComments: postComments, postCommentsCreators: postCommentsCreators);
-
-    skip += take;
   }
 
   Future _startDelayAsync({int duration = 2}) async {

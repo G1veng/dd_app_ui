@@ -13,6 +13,7 @@ import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
 
@@ -219,5 +220,10 @@ class ApiDataRepository extends ApiRepository {
   @override
   Future createDirect({required CreateDirectModel model}) async {
     return await _api.createDirect(model);
+  }
+
+  @override
+  Future<List<String>> sendPush({required SendPushModel model}) async {
+    return await _api.sendPush(model);
   }
 }

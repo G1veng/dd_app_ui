@@ -5,15 +5,15 @@ part 'direct_model.g.dart';
 @JsonSerializable()
 class DirectModel {
   final String directId;
-  final String directTitle;
-  final List<DirectMember> directMembers;
-  final DirectImage directImage;
+  String directTitle;
+  List<DirectMember> directMembers;
+  DirectImage? directImage;
 
   DirectModel({
     required this.directId,
     required this.directTitle,
     required this.directMembers,
-    required this.directImage,
+    this.directImage,
   });
 
   factory DirectModel.fromJson(Map<String, dynamic> json) =>
@@ -24,12 +24,12 @@ class DirectModel {
 
 @JsonSerializable()
 class DirectImage {
-  final String link;
-  final String id;
+  String id;
+  String link;
 
   DirectImage({
-    required this.link,
     required this.id,
+    required this.link,
   });
 
   factory DirectImage.fromJson(Map<String, dynamic> json) =>

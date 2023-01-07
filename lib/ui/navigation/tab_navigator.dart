@@ -22,7 +22,7 @@ class TabNavigator extends StatelessWidget {
     required this.tabItem,
   }) : super(key: key);
 
-  Map<String, WidgetBuilder> _routeBuilders(BuildContext context,
+  Map<String, WidgetBuilder> routeBuilders(BuildContext context,
           {Object? arg}) =>
       {
         TabNavigatorRoutes.root: (context) =>
@@ -45,7 +45,7 @@ class TabNavigator extends StatelessWidget {
       key: navigatorKey,
       initialRoute: TabNavigatorRoutes.root,
       onGenerateRoute: (settings) {
-        var rb = _routeBuilders(context, arg: settings.arguments);
+        var rb = routeBuilders(context, arg: settings.arguments);
         if (rb.containsKey(settings.name)) {
           return MaterialPageRoute(
               builder: (context) => rb[settings.name]!(context));

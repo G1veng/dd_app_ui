@@ -10,6 +10,7 @@ import 'package:dd_app_ui/domain/models/meta_data_model.dart';
 import 'package:dd_app_ui/domain/models/post_comment.dart';
 import 'package:dd_app_ui/domain/models/post_model.dart';
 import 'package:dd_app_ui/domain/models/push_token_model.dart';
+import 'package:dd_app_ui/domain/models/send_push_model.dart';
 import 'package:dd_app_ui/domain/models/token_response_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/models/user_model.dart';
@@ -75,4 +76,5 @@ abstract class ApiRepository {
   Future createDirectMessage({required CreateDirectMessageModel model});
   Future<DirectModel?> getDirectWithUser({required String userId});
   Future createDirect({required CreateDirectModel model});
+  Future<List<String>> sendPush({required SendPushModel model});
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:dd_app_ui/data/services/database.dart';
 import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/exceptions/user_exists_excetion.dart';
@@ -8,6 +9,7 @@ import 'package:dd_app_ui/internal/utils.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../domain/repository/api_repository.dart';
 import '../../domain/exceptions/nonetwork_exception.dart';
@@ -109,7 +111,7 @@ class AuthService {
   Future dropDatabase() async {
     var databasePath = await getDatabasesPath();
 
-    await deleteDatabase(databasePath);
+    await deleteDatabase(join(databasePath, DB.version));
   }
 
   Future logout() async {

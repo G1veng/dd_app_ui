@@ -22,11 +22,12 @@ class DB {
   static final DB instance = DB._();
   static late Database _db;
   static bool _initialized = false;
+  static String version = "db_v1.0.19.db";
 
   Future init() async {
     if (!_initialized) {
       var databasePath = await getDatabasesPath();
-      var path = join(databasePath, "db_v1.0.16.db");
+      var path = join(databasePath, version);
 
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;

@@ -1,6 +1,9 @@
 import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/sync_service.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
+import 'package:dd_app_ui/domain/models/create_direct_model.dart';
+import 'package:dd_app_ui/domain/models/direct.dart';
+import 'package:dd_app_ui/domain/models/direct_member.dart';
 import 'package:dd_app_ui/domain/models/subscription.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
@@ -8,6 +11,7 @@ import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
+import 'package:uuid/uuid.dart';
 
 class UsersState {
   final List<User>? users;
@@ -95,6 +99,45 @@ class UsersViewModel extends ChangeNotifier {
     await _requestNextUsers();
 
     state = state.copyWith(isLoading: false, headers: headers);
+  }
+
+  Future gotoDirectPressed(String userId) async {
+    var direct = await _apiService.getDirectWithUser(userId: userId);
+    if (direct == null) {
+      var directId = const Uuid().v4();
+      var user = await _dataService.getUser(userId);
+
+      await _dataService.cuDirect(Direct(
+        id: directId,
+        directImage: user?.avatar,
+        title: user!.name,
+      ));
+
+      await _apiService.createDirect(
+          model: CreateDirectModel(
+        id: directId,
+        userId: userId,
+        title: user.name,
+        directImage: user.avatar,
+      ));
+
+      await _dataService.cuDirectMembers([
+        DirectMember(id: directId, userId: userId),
+        DirectMember(
+          id: directId,
+          userId: (await SharedPrefs.getStoredUser())!.id,
+        ),
+      ]);
+
+      _pushDirect(directId);
+      return;
+    }
+    _pushDirect(direct.directId);
+  }
+
+  Future _pushDirect(String directId) async {
+    await Navigator.of(context)
+        .pushNamed(TabNavigatorRoutes.direct, arguments: directId);
   }
 
   Future _requestNextUsers() async {

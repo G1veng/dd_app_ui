@@ -105,11 +105,11 @@ class UsersWidget extends StatelessWidget {
   }
 
   Widget _createProfileButton(BuildContext context, int index) {
-    //var viewModel = context.read<UsersViewModel>();
+    var viewModel = context.read<UsersViewModel>();
 
     return IconButton(
         onPressed: () {
-          //TODO переход в директ
+          viewModel.gotoDirectPressed(viewModel.state.users![index].id);
         },
         icon: const Icon(MyIcons.chat));
   }

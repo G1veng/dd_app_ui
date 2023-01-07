@@ -1,7 +1,6 @@
 import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/ui/widgets/common/page_indicator_widget.dart';
-import 'package:dd_app_ui/ui/widgets/roots/app/app_view_model.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/post_details/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,13 +25,12 @@ class PostWidget extends StatelessWidget {
                   child: SizedBox(
               child: CircularProgressIndicator(),
             )))
-          : Flexible(
-              child: Column(
+          : Column(
               children: [
                 _createPostComments(context),
                 _createFieldAddComment(context),
               ],
-            )),
+            ),
     );
   }
 
@@ -45,6 +43,53 @@ class PostWidget extends StatelessWidget {
       lazy: false,
       child: const PostWidget(),
     );
+  }
+
+  Widget _createPostDescription(BuildContext context) {
+    var viewModel = context.read<PostViewModel>();
+
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        margin: const EdgeInsets.all(2),
+        child: GestureDetector(
+            onTap: () => viewModel.pressedGoToProfile(
+                userId: viewModel.state.post!.authorId!),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              foregroundImage: viewModel.state.post!.authorAvatar != null
+                  ? Image.network(
+                      "$baseUrl${viewModel.state.post!.authorAvatar}",
+                      headers: viewModel.state.headers,
+                    ).image
+                  : Image.asset(
+                      "images/empty_image.png",
+                    ).image,
+              radius: MediaQuery.of(context).size.width / 20,
+            )),
+      ),
+      Expanded(
+          child: Container(
+              margin: const EdgeInsets.only(right: 5, left: 5),
+              child: RichText(
+                maxLines: null,
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                  ),
+                  children: <TextSpan>[
+                    TextSpan(
+                        text: "${viewModel.state.postCreator!.name} ",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        )),
+                    TextSpan(
+                      text: "${viewModel.state.post!.text}",
+                    ),
+                  ],
+                ),
+              )))
+    ]);
   }
 
   Widget _createPostComments(BuildContext context) {
@@ -70,6 +115,7 @@ class PostWidget extends StatelessWidget {
                 current: viewModel.pager[0],
               ),
               _createPostStatistics(context),
+              _createPostDescription(context),
             ],
           );
         } else {
@@ -104,12 +150,12 @@ class PostWidget extends StatelessWidget {
                         MyIcons.heartFilled,
                         color: Colors.red,
                       ),
-                Text(" ${viewModel.state.post!.likesAmount} Likes")
+                Text(" ${viewModel.state.post?.likesAmount ?? 0} Likes")
               ],
             ),
           ),
           Row(children: [
-            Text("${viewModel.state.postComments?.length ?? 0} Comments "),
+            Text("${viewModel.state.post?.commentAmount ?? 0} Comments "),
             const Icon(
               MyIcons.comment,
               color: Colors.blue,
@@ -123,8 +169,7 @@ class PostWidget extends StatelessWidget {
   Widget _cretePostComment(BuildContext context, int index) {
     var viewModel = context.read<PostViewModel>();
 
-    return Flexible(
-        child: Row(
+    return Row(
       children: [
         GestureDetector(
             onTap: () => viewModel.pressedGoToProfile(
@@ -139,8 +184,7 @@ class PostWidget extends StatelessWidget {
                   ).image,
                   radius: (MediaQuery.of(context).size.width / 15),
                 ))),
-        Expanded(
-            child: RichText(
+        RichText(
           maxLines: null,
           text: TextSpan(
             style: const TextStyle(
@@ -158,14 +202,13 @@ class PostWidget extends StatelessWidget {
               ),
             ],
           ),
-        ))
+        )
       ],
-    ));
+    );
   }
 
   Widget _createFieldAddComment(BuildContext context) {
     var viewModel = context.read<PostViewModel>();
-    var appViewModel = context.read<AppViewModel>();
 
     return Row(children: [
       GestureDetector(
@@ -174,7 +217,11 @@ class PostWidget extends StatelessWidget {
               margin: const EdgeInsets.all(5.0),
               child: CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage: appViewModel.avatar!.image,
+                backgroundImage: viewModel.state.avatar != null
+                    ? viewModel.state.avatar!.image
+                    : Image.asset(
+                        "images/empty_image.png",
+                      ).image,
                 radius: (MediaQuery.of(context).size.width / 13),
               ))),
       Flexible(

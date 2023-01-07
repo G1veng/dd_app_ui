@@ -94,6 +94,20 @@ class DataService {
         .toList();
   }
 
+  Future<List<Subscription>?> getSubscribers({
+    required String userId,
+    int? take,
+    int? skip,
+  }) async {
+    return (await DB.instance.getAll<Subscription>(
+      whereMap: {"id": userId},
+      take: take,
+      skip: skip,
+      conditions: [DbQueryEnum.equal],
+    ))
+        .toList();
+  }
+
   Future delSubscription({required Subscription subscription}) async {
     return await DB.instance.delete(subscription);
   }
