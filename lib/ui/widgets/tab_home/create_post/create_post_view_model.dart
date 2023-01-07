@@ -159,7 +159,7 @@ class CreatePostViewModel extends ChangeNotifier {
   }
 
   Future _sendNotificationsAsync(String message, String postId) async {
-    var subscribers = await _dataService.getSusbcriptions(
+    var subscribers = await _dataService.getSubscribers(
       userId: state.user!.id,
     );
 
