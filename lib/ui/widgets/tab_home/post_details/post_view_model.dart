@@ -116,6 +116,11 @@ class PostViewModel extends ChangeNotifier {
   PostState get state => _state;
 
   void createPostComment() async {
+    await _api.getUserById(userId: state.currentUser!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var postComment = PostComment(
         id: const Uuid().v4(),
         text: state.createCommentText!,
@@ -139,6 +144,11 @@ class PostViewModel extends ChangeNotifier {
   }
 
   Future postLikePressed(String postId) async {
+    await _api.getUserById(userId: state.currentUser!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var newLikeState = !state.postLikeState!;
 
     await _api.changePostLikeState(postId: postId);
@@ -182,14 +192,14 @@ class PostViewModel extends ChangeNotifier {
 
     var headers = await TokenStorage.getAccessToken();
 
-    var post = await _api.getPost(postId: postId!);
+    await _syncService.syncPost(postId: postId!);
+
+    var post = await _dataService.getPost(postId: postId!);
     if (post != null) {
       await _dataService.cuPost(Post.fromJson(post.toJson()));
 
-      var postAuthor = await _api.getUserById(userId: post.authorId!);
-      if (postAuthor != null) {
-        await _dataService.cuUser(User.fromJson(postAuthor.toJson()));
-      }
+      await _syncService.syncUser(userId: post.authorId!);
+      var postAuthor = await _dataService.getUser(post.authorId!);
 
       var postFiles = (await _dataService.getPostFiles(postId!))!.toList();
       var currentUser = await _dataService.getUser(post.authorId!);
@@ -199,7 +209,7 @@ class PostViewModel extends ChangeNotifier {
         headers: headers,
         post: Post.fromJson(post.toJson()),
         currentUser: currentUser,
-        postCreator: (await _dataService.getUser(postAuthor!.id!)),
+        postCreator: (await _dataService.getUser(postAuthor!.id)),
       );
 
       await _requestNextComments();

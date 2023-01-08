@@ -1,8 +1,10 @@
+import 'package:dd_app_ui/data/services/api_service.dart';
 import 'package:dd_app_ui/data/services/data_service.dart';
 import 'package:dd_app_ui/data/services/sync_service.dart';
 import 'package:dd_app_ui/domain/enums/db_query.dart';
 import 'package:dd_app_ui/domain/models/direct.dart';
 import 'package:dd_app_ui/domain/models/direct_message.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dd_app_ui/ui/navigation/tab_navigator.dart';
 import 'package:flutter/material.dart';
@@ -116,7 +118,9 @@ class DirectsViewModel extends ChangeNotifier {
       extDirects.addAll(directs);
 
       for (var direct in directs) {
-        await _syncService.syncDirectMessages(take: 1, directId: direct.id);
+        if ((await SharedPrefs.getConnectionState())) {
+          await _syncService.syncDirectMessages(take: 1, directId: direct.id);
+        }
 
         var dirMessage = await _dataService.getDirectMessages(
           take: 1,

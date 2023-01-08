@@ -119,8 +119,11 @@ class UsersWidget extends StatelessWidget {
 
     return OutlinedButton(
         onPressed: () => viewModel.changeSubscriptionStatePressed(index),
-        child: Text(viewModel.state.isFollowed![index] == true
-            ? "Unfollow"
-            : "Follow"));
+        child: viewModel.state.isFollowed == null ||
+                viewModel.state.isFollowed!.isEmpty
+            ? const Text("Follow")
+            : Text(viewModel.state.isFollowed![index] == true
+                ? "Unfollow"
+                : "Follow"));
   }
 }

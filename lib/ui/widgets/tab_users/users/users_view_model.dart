@@ -153,8 +153,11 @@ class UsersViewModel extends ChangeNotifier {
       var expUsers = state.users ?? [];
       var expIsFollowed = state.isFollowed ?? [];
 
-      for (var user in users) {
-        expIsFollowed.add((await _apiService.isSubscribedOn(userId: user.id)));
+      if ((await SharedPrefs.getConnectionState()) == true) {
+        for (var user in users) {
+          expIsFollowed
+              .add((await _apiService.isSubscribedOn(userId: user.id)));
+        }
       }
 
       expUsers.addAll(users);
@@ -162,6 +165,7 @@ class UsersViewModel extends ChangeNotifier {
       state = state.copyWith(
         users: expUsers,
         isFollowed: expIsFollowed,
+        isUpdating: false,
       );
 
       skip += take;
@@ -171,7 +175,6 @@ class UsersViewModel extends ChangeNotifier {
   Future _startDelayAsync({int duration = 1}) async {
     state = state.copyWith(isUpdating: true);
     await Future.delayed(Duration(seconds: duration));
-    state = state.copyWith(isUpdating: false);
   }
 
   Future changeSubscriptionStatePressed(int index) async {

@@ -79,7 +79,7 @@ class UserProfileWidget extends StatelessWidget {
         mainAxisSpacing: 1.0,
         crossAxisCount: 3,
       ),
-      itemCount: viewModel.state.userPosts!.length,
+      itemCount: viewModel.state.userPosts?.length ?? 0,
       itemBuilder: (_, index) {
         return _createPost(context, index);
       },
@@ -116,10 +116,15 @@ class UserProfileWidget extends StatelessWidget {
           width: (MediaQuery.of(context).size.width / 3),
           decoration: BoxDecoration(
             image: DecorationImage(
-                image: Image.network(
-                  "$baseUrl${viewModel.state.userPosts![index].postFiles![0]!.link}",
-                  headers: viewModel.state.headers,
-                ).image,
+                image: viewModel.state.isInternetConnection == null ||
+                        viewModel.state.isInternetConnection == true
+                    ? Image.network(
+                        "$baseUrl${viewModel.state.userPosts![index].postFiles![0]!.link}",
+                        headers: viewModel.state.headers,
+                      ).image
+                    : Image.asset(
+                        "images/empty_image.png",
+                      ).image,
                 fit: BoxFit.cover,
                 alignment: Alignment.center),
           ),

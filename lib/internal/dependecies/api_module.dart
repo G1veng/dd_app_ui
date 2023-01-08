@@ -3,6 +3,7 @@ import 'package:dd_app_ui/data/clients/auth_client.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/internal/config/token_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
@@ -32,7 +33,16 @@ class ApiModule {
         options.headers.addAll({"Authorization": "Bearer $token"});
         return handler.next(options);
       },
+      onResponse: (e, handler) async {
+        await SharedPrefs.setConnectionState(true);
+        return handler.next(e);
+      },
       onError: (e, handler) async {
+        if (e.type == DioErrorType.connectTimeout) {
+          await SharedPrefs.setConnectionState(null);
+          return handler.resolve(
+              Response(statusCode: 400, requestOptions: e.requestOptions));
+        }
         if (e.response?.statusCode == 401) {
           // ignore: deprecated_member_use
           dio.lock();

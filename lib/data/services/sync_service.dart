@@ -17,6 +17,11 @@ class SyncService {
   final _dataService = DataService();
 
   Future syncPostLikeState({required String postId}) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var postLikeState = await _api.getPostLikeState(postId: postId);
     await _dataService.cuPostLikeState(
         PostLikeState(id: postId, isLiked: postLikeState == true ? 1 : 0));
@@ -28,6 +33,11 @@ class SyncService {
     String? lastPostCreated,
     int skip = 0,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var curUser = await SharedPrefs.getStoredUser();
 
     var posts = await _api.getSubscriptionPosts(
@@ -62,6 +72,11 @@ class SyncService {
     String? lastPostCreated,
     int skip = 0,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var posts = await _api.getPosts(
       userId: userId,
       lastPostCreated: lastPostCreated,
@@ -89,6 +104,11 @@ class SyncService {
     String? lastPostCreated,
     int skip = 0,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var users = await _api.getUsers(take, skip);
     if (users == null) {
       return;
@@ -108,6 +128,11 @@ class SyncService {
     String? lastPostCreated,
     int skip = 0,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     await syncPost(postId: postId);
 
     var postComments = await _api.getPostComments(
@@ -127,6 +152,11 @@ class SyncService {
   }
 
   Future syncPost({required postId}) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var post = await _api.getPost(postId: postId);
 
     if (post != null) {
@@ -141,6 +171,11 @@ class SyncService {
   }
 
   Future syncUser({required String userId}) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var user = await _api.getUserById(userId: userId);
 
     if (user != null) {
@@ -160,6 +195,11 @@ class SyncService {
     int take, {
     int skip = 0,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var directs = await _api.getUserDirects(take: take, skip: skip);
     if (directs != null) {
       await _dataService.cuDirects(directs
@@ -176,9 +216,10 @@ class SyncService {
   }
 
   Future syncDirectMembers({required DirectModel direct}) async {
-    //await syncDirect(directId: directId);
-
-    //var direct = await _api.getUserDirect(directId: directId);
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
 
     for (var member in direct.directMembers) {
       await syncUser(userId: member.directMember);
@@ -193,6 +234,11 @@ class SyncService {
     int skip = 0,
     String? lastDirectMessageCreated,
   }) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var directMessages = await _api.getDirectMessages(
         lastDirectMessageCreated: lastDirectMessageCreated,
         directId: directId,
@@ -223,6 +269,11 @@ class SyncService {
   }
 
   Future syncDirect({required String directId}) async {
+    await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var direct = await _api.getUserDirect(directId: directId);
     if (direct != null) {
       await _dataService.cuDirect(Direct(

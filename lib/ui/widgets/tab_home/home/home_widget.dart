@@ -1,5 +1,6 @@
 import 'package:dd_app_ui/domain/models/post_with_post_like_state.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
+import 'package:dd_app_ui/internal/config/shared_prefs.dart';
 import 'package:dd_app_ui/ui/widgets/common/page_indicator_widget.dart';
 import 'package:dd_app_ui/domain/icons_images/icons_icons.dart';
 import 'package:dd_app_ui/ui/widgets/tab_home/home/home_view_model.dart';
@@ -84,10 +85,15 @@ class TabHomeWidget extends StatelessWidget {
                   return Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: Image.network(
-                          "$baseUrl${viewModel.state.postsInfo![listIndex].postFiles![pageViewIndex]!.link}",
-                          headers: viewModel.state.headers,
-                        ).image,
+                        image: viewModel.state.isInternetConnection == null ||
+                                viewModel.state.isInternetConnection == false
+                            ? Image.asset(
+                                "images/empty_image.png",
+                              ).image
+                            : Image.network(
+                                "$baseUrl${viewModel.state.postsInfo![listIndex].postFiles![pageViewIndex]!.link}",
+                                headers: viewModel.state.headers,
+                              ).image,
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                       ),

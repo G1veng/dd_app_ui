@@ -49,6 +49,10 @@ class AppViewModel extends ChangeNotifier {
 
   void asyncInit() async {
     user = await SharedPrefs.getStoredUser();
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var img = await NetworkAssetBundle(Uri.parse("$baseUrl${user!.avatar}"))
         .load("$baseUrl${user!.avatar}?v=1");
     avatar = Image.memory(

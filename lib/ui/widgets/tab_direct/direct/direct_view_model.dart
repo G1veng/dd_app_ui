@@ -107,6 +107,12 @@ class DirectViewModel extends ChangeNotifier {
   }
 
   Future createMessage() async {
+    await _apiService.getUserById(
+        userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var messageId = const Uuid().v4();
     var sended = DateTime.now().toUtc().toString().replaceAll(r' ', 'T');
 
@@ -183,7 +189,10 @@ class DirectViewModel extends ChangeNotifier {
   }
 
   Future _asyncInit() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(
+      isLoading: true,
+      isUpdating: true,
+    );
 
     state = state.copyWith(
       currentUser: (await SharedPrefs.getStoredUser()),
@@ -211,13 +220,19 @@ class DirectViewModel extends ChangeNotifier {
       await _requestNextMessages();
     }
 
-    state = state.copyWith(isLoading: false);
+    state = state.copyWith(isLoading: false, isUpdating: false);
     _updateDirect();
   }
 
   Future _updateDirect({int soconds = 1}) async {
     for (;;) {
       Future.delayed(Duration(seconds: soconds));
+      await _apiService.getUserById(
+          userId: (await SharedPrefs.getStoredUser())!.id);
+      if (!(await SharedPrefs.getConnectionState())) {
+        continue;
+      }
+
       var newMessages = await _apiService.getDirectMessages(
         lastDirectMessageCreated: null,
         directId: directId,

@@ -88,6 +88,10 @@ class AuthService {
         AppNavigator.toLoader();
       }
 
+      if (!(await SharedPrefs.getConnectionState())) {
+        return true;
+      }
+
       if (user != null) {
         var token = await FirebaseMessaging.instance.getToken();
         if (token != null) {

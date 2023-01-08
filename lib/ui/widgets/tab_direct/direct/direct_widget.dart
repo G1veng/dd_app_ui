@@ -17,7 +17,9 @@ class DirectWidget extends StatelessWidget {
       ),
       body: viewModel.state.isLoading == false
           ? Column(children: [
-              _createDirectMessages(context),
+              viewModel.state.isUpdating == false
+                  ? _createDirectMessages(context)
+                  : const Center(child: CircularProgressIndicator()),
               _createFieldAddComment(context),
             ])
           : const Center(child: CircularProgressIndicator()),

@@ -34,6 +34,7 @@ class UserProfileState {
   final bool? isUpdating;
   final bool? isCurrentUser;
   final bool? isSubscribed;
+  final bool? isInternetConnection;
 
   UserProfileState({
     this.isCurrentUser,
@@ -45,15 +46,18 @@ class UserProfileState {
     this.isLoading = false,
     this.isUpdating = false,
     this.isSubscribed = false,
+    this.isInternetConnection = false,
   });
 
   UserProfileState clear() {
     return UserProfileState(
       user: user,
       headers: headers,
+      isCurrentUser: isCurrentUser,
       userStatistics: null,
       userPosts: null,
       avatar: null,
+      isInternetConnection: false,
     );
   }
 
@@ -67,6 +71,7 @@ class UserProfileState {
     isLoading,
     isCurrentUser,
     isSubscribed,
+    isInternetConnection,
   }) {
     List<PostWithPostLikeState>? extendeUserPosts;
 
@@ -92,6 +97,7 @@ class UserProfileState {
       avatar: avatar ?? this.avatar,
       isCurrentUser: isCurrentUser ?? this.isCurrentUser,
       isSubscribed: isSubscribed ?? this.isSubscribed,
+      isInternetConnection: isInternetConnection ?? this.isInternetConnection,
     );
   }
 }
@@ -146,6 +152,11 @@ class UserProfileViewModel extends ChangeNotifier {
   }
 
   Future gotoDirectPressed(String userId) async {
+    await _apiService.getUserById(userId: state.user!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     var direct = await _apiService.getDirectWithUser(userId: userId);
     if (direct == null) {
       var directId = const Uuid().v4();
@@ -186,6 +197,11 @@ class UserProfileViewModel extends ChangeNotifier {
       };
 
   Future changeSubscriptionStatePressed() async {
+    await _apiService.getUserById(userId: state.user!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     await _apiService.changeSubscriptionStateOnUser(userId: state.user!.id);
 
     var subscription = Subscription(
@@ -207,6 +223,10 @@ class UserProfileViewModel extends ChangeNotifier {
 
   Future refresh() async {
     state = state.clear();
+    await _apiService.getUserById(userId: state.user!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
 
     await _asyncInit();
   }
@@ -214,6 +234,10 @@ class UserProfileViewModel extends ChangeNotifier {
   Future changePhoto() async {
     String? imagePath;
     var viewModel = context.read<AppViewModel>();
+    await _apiService.getUserById(userId: state.user!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
 
     await Navigator.of(AppNavigator.key.currentState!.context)
         .push(MaterialPageRoute(
@@ -252,7 +276,6 @@ class UserProfileViewModel extends ChangeNotifier {
   Future _startDelayAsync({int duration = 1}) async {
     state = state.copyWith(isUpdating: true);
     await Future.delayed(Duration(seconds: duration));
-    state = state.copyWith(isUpdating: false);
   }
 
   Future _requestNextPosts() async {
@@ -283,21 +306,26 @@ class UserProfileViewModel extends ChangeNotifier {
 
       innerPosts.addAll(posts.toList());
 
-      state = state.copyWith(userPosts: innerPosts);
+      state = state.copyWith(
+        userPosts: innerPosts,
+        isCurrentUser: false,
+        isUpdating: false,
+      );
     }
   }
 
   Future _asyncInit() async {
     state = state.copyWith(
-      isLoading: true,
-    );
+        isLoading: true,
+        isInternetConnection: (await SharedPrefs.getConnectionState()));
 
     if (userId == null) {
       state = state.copyWith(user: await SharedPrefs.getStoredUser());
     } else {
+      await _syncService.syncUser(userId: userId!);
+
       state = state.copyWith(
-        user: User.fromJson(
-            (await _apiService.getUserById(userId: userId!))!.toJson()),
+        user: await _dataService.getUser(userId!),
       );
     }
 
@@ -309,10 +337,13 @@ class UserProfileViewModel extends ChangeNotifier {
       userStatistics: await _dataService.getUserStatisctics(state.user!.id),
       isCurrentUser:
           userId == null || (await SharedPrefs.getStoredUser())!.id == userId,
-      isSubscribed: (await _apiService.isSubscribedOn(userId: state.user!.id)),
+      isSubscribed: (await SharedPrefs.getConnectionState()) == false
+          ? false
+          : (await _apiService.isSubscribedOn(userId: state.user!.id)),
     );
 
-    if (state.user!.avatar != null) {
+    if ((await SharedPrefs.getConnectionState()) == true &&
+        state.user!.avatar != null) {
       var img =
           await NetworkAssetBundle(Uri.parse("$baseUrl${state.user!.avatar}"))
               .load("$baseUrl${state.user!.avatar}?v=2");

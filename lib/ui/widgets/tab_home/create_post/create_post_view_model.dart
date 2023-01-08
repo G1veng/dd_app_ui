@@ -122,6 +122,11 @@ class CreatePostViewModel extends ChangeNotifier {
   }
 
   Future createPost() async {
+    await _apiService.getUserById(userId: state.user!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     if (state.images != null && state.images!.isNotEmpty) {
       String postId = const Uuid().v4();
       String created = DateTime.now().toUtc().toString();

@@ -288,20 +288,11 @@ class DataService {
   }
 
   Future cuDirectMember(DirectMember directMember) async {
-    var isExist = (await DB.instance.getAll<DirectMember>(
-            whereMap: {"id": directMember.id, "userId": directMember.userId},
-            conditions: [DbQueryEnum.equal, DbQueryEnum.equal]))
-        .isNotEmpty;
-
-    if (isExist) {
-      await DB.instance
-          .update(directMember, where: "id = ? and userId = ?", whereArgs: [
-        directMember.id,
-        directMember.userId,
-      ]);
-    } else {
-      await DB.instance.insert(directMember);
-    }
+    await DB.instance
+        .update(directMember, where: "id = ? and userId = ?", whereArgs: [
+      directMember.id,
+      directMember.userId,
+    ]);
   }
 
   Future cuDirectMembers(List<DirectMember> directMember) async {
@@ -335,6 +326,6 @@ class DataService {
   }
 
   Future iDirectMessage(DirectMessage message) async {
-    await DB.instance.insert(message);
+    await DB.instance.update(message);
   }
 }

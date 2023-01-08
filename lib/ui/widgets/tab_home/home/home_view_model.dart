@@ -15,6 +15,7 @@ class HomeSate {
   final Map<String, String>? headers;
   final List<PostWithPostLikeState>? postsInfo;
   final List<String>? postAuthors;
+  final bool? isInternetConnection;
 
   HomeSate({
     this.postAuthors,
@@ -22,6 +23,7 @@ class HomeSate {
     this.user,
     this.headers,
     this.postsInfo,
+    this.isInternetConnection,
   });
 
   HomeSate copyWith({
@@ -31,6 +33,7 @@ class HomeSate {
     headers,
     List<String>? postAuthors,
     List<PostWithPostLikeState>? postsInfo,
+    isInternetConnection,
   }) {
     return HomeSate(
       headers:
@@ -39,6 +42,7 @@ class HomeSate {
       user: user ?? this.user,
       postsInfo: postsInfo ?? this.postsInfo,
       postAuthors: postAuthors ?? this.postAuthors,
+      isInternetConnection: isInternetConnection ?? this.isInternetConnection,
     );
   }
 
@@ -49,6 +53,7 @@ class HomeSate {
       user: user,
       postsInfo: null,
       postAuthors: null,
+      isInternetConnection: false,
     );
   }
 }
@@ -88,6 +93,7 @@ class HomeViewModel extends ChangeNotifier {
   Future refresh() async {
     state = state.clearPostInfo();
     skip = 0;
+
     _asyncInit();
   }
 
@@ -102,6 +108,12 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future postLikePressed(String postId, int index) async {
+    await _apiService.getUserById(
+        userId: (await SharedPrefs.getStoredUser())!.id);
+    if (!(await SharedPrefs.getConnectionState())) {
+      return;
+    }
+
     await _apiService.changePostLikeState(postId: postId);
     await _syncService.syncPostLikeState(postId: postId);
     await _syncService.syncPost(postId: postId);
@@ -127,6 +139,7 @@ class HomeViewModel extends ChangeNotifier {
       isLoading: true,
       postsInfo: [],
       postAuthors: [],
+      isInternetConnection: (await SharedPrefs.getConnectionState()),
     );
 
     var user = await SharedPrefs.getStoredUser();
@@ -166,8 +179,7 @@ class HomeViewModel extends ChangeNotifier {
 
     if (posts != null) {
       for (var post in posts) {
-        postAuthors.add(
-            (await _apiService.getUserById(userId: post.authorId!))!.name!);
+        postAuthors.add((await _dataService.getUser(post.authorId!))!.name);
       }
 
       var extPostAuthors = state.postAuthors ?? [];
@@ -177,15 +189,15 @@ class HomeViewModel extends ChangeNotifier {
       extPostsInfo.addAll(posts);
 
       state = state.copyWith(
-          postsInfo: extPostsInfo,
-          postAuthors: extPostAuthors,
-          isLoading: false);
+        postsInfo: extPostsInfo,
+        postAuthors: extPostAuthors,
+        isLoading: false,
+      );
     }
   }
 
   Future _startDelayAsync({int duration = 1}) async {
     state = state.copyWith(isLoading: true);
     await Future.delayed(Duration(seconds: duration));
-    state = state.copyWith(isLoading: false);
   }
 }
