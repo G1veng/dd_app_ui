@@ -113,7 +113,7 @@ class UserProfileViewModel extends ChangeNotifier {
   final _syncService = SyncService();
   final lvc = ScrollController();
   String? userId;
-  int take = 10;
+  int take = 20;
 
   bool isDelay = false;
 

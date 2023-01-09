@@ -22,7 +22,7 @@ class DB {
   static final DB instance = DB._();
   static late Database _db;
   static bool _initialized = false;
-  static String version = "db_v1.0.19.db";
+  static String version = "db_v1.0.21.db";
 
   Future init() async {
     if (!_initialized) {
@@ -32,13 +32,6 @@ class DB {
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
     }
-  }
-
-  Future dropDB() async {
-    var databasePath = await getDatabasesPath();
-
-    await deleteDatabase(join(databasePath, DB.version));
-    _initialized = false;
   }
 
   Future _createDB(Database db, int version) async {

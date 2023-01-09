@@ -101,7 +101,6 @@ class SyncService {
 
   Future syncUsers(
     int take, {
-    String? lastPostCreated,
     int skip = 0,
   }) async {
     await _api.getUserById(userId: (await SharedPrefs.getStoredUser())!.id);
@@ -117,9 +116,6 @@ class SyncService {
     for (var user in users) {
       await syncUser(userId: user.id!);
     }
-
-    await _dataService
-        .cuUsers(users.map((e) => User.fromJson(e.toJson())).toList());
   }
 
   Future syncPostComments(

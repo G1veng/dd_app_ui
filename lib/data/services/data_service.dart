@@ -326,6 +326,6 @@ class DataService {
   }
 
   Future iDirectMessage(DirectMessage message) async {
-    await DB.instance.update(message);
+    await DB.instance.insert(message);
   }
 }

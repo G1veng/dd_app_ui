@@ -5,13 +5,10 @@ import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/exceptions/user_exists_excetion.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
-import 'package:dd_app_ui/internal/init_app.dart';
 import 'package:dd_app_ui/internal/utils.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import '../../domain/repository/api_repository.dart';
 import '../../domain/exceptions/nonetwork_exception.dart';
 import '../../domain/exceptions/wrong_credential_exception.dart';
@@ -101,7 +98,7 @@ class AuthService {
 
         await SharedPrefs.setStoredUser(user);
 
-        await initApp();
+        //await DB.instance.init();
 
         await _dataService.cuUser(user);
       }
@@ -124,7 +121,5 @@ class AuthService {
     }
 
     await cleanToken();
-
-    await DB.instance.dropDB();
   }
 }
