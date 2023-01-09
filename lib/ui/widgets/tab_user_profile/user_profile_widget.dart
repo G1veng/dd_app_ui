@@ -15,7 +15,8 @@ class UserProfileWidget extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: viewModel.state.isCurrentUser == null ||
+            !viewModel.state.isCurrentUser!,
         title: viewModel.state.user != null
             ? Text(
                 viewModel.state.user!.name,
@@ -40,12 +41,14 @@ class UserProfileWidget extends StatelessWidget {
               : RefreshIndicator(
                   onRefresh: viewModel.refresh,
                   child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     shrinkWrap: true,
                     children: [
                       _createUserInformation(context),
-                      viewModel.state.isCurrentUser != true
-                          ? _createFollowMessageButtons(context)
-                          : const SizedBox.shrink(),
+                      viewModel.state.isCurrentUser == null ||
+                              viewModel.state.isCurrentUser == true
+                          ? const SizedBox.shrink()
+                          : _createFollowMessageButtons(context),
                       _createUserPostsGridView(context),
                       viewModel.state.isUpdating!
                           ? const LinearProgressIndicator()
@@ -71,7 +74,7 @@ class UserProfileWidget extends StatelessWidget {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: const ScrollPhysics(),
       padding: const EdgeInsets.all(1.0),
       controller: viewModel.lvc,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

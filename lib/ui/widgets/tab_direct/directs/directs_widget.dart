@@ -17,16 +17,6 @@ class DirectsWidget extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         centerTitle: true,
-        // actions: [
-        //   IconButton(
-        //       onPressed: () => {
-        //             //TODO создание директа
-        //           },
-        //       icon: Icon(
-        //         Icons.add,
-        //         size: MediaQuery.of(context).size.width / 10,
-        //       ))
-        // ],
       ),
       body: viewModel.state.isLoading == false
           ? RefreshIndicator(

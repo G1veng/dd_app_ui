@@ -37,7 +37,7 @@ class UserProfileState {
   final bool? isInternetConnection;
 
   UserProfileState({
-    this.isCurrentUser,
+    this.isCurrentUser = false,
     this.user,
     this.headers,
     this.userStatistics,
@@ -308,7 +308,6 @@ class UserProfileViewModel extends ChangeNotifier {
 
       state = state.copyWith(
         userPosts: innerPosts,
-        isCurrentUser: false,
         isUpdating: false,
       );
     }

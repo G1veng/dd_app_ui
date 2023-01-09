@@ -34,6 +34,13 @@ class DB {
     }
   }
 
+  Future dropDB() async {
+    var databasePath = await getDatabasesPath();
+
+    await deleteDatabase(join(databasePath, DB.version));
+    _initialized = false;
+  }
+
   Future _createDB(Database db, int version) async {
     var dbInitScript = await rootBundle.loadString('assets/db_init.sql');
     dbInitScript.split(';').forEach((element) async {

@@ -179,6 +179,8 @@ class SyncService {
     var user = await _api.getUserById(userId: userId);
 
     if (user != null) {
+      await _dataService.cuUser(User.fromJson(user.toJson()));
+
       await _dataService.cuUserStatistics(UserStatistics(
           id: user.id!,
           userPostAmount: await _api.getUserPostAmount(userId: userId),
@@ -186,8 +188,6 @@ class SyncService {
               await _api.getUserSubscribersAmount(userId: userId),
           userSubscriptionsAmount:
               await _api.getUserSubscriptionsAmount(userId: userId)));
-
-      await _dataService.cuUser(User.fromJson(user.toJson()));
     }
   }
 

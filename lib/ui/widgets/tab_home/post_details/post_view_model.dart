@@ -251,13 +251,15 @@ class PostViewModel extends ChangeNotifier {
     }
 
     state = state.copyWith(
-        postComments: postComments, postCommentsCreators: postCommentsCreators);
+      postComments: postComments,
+      postCommentsCreators: postCommentsCreators,
+      isUpdating: false,
+    );
   }
 
   Future _startDelayAsync({int duration = 2}) async {
     state = state.copyWith(isUpdating: true);
     await Future.delayed(Duration(seconds: duration));
-    state = state.copyWith(isUpdating: false);
   }
 
   void _addCreatedComment(PostComment postComment) {

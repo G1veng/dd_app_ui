@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dd_app_ui/domain/models/user.dart';
-import 'package:intl/date_symbols.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefs {

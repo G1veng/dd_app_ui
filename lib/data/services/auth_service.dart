@@ -5,6 +5,7 @@ import 'package:dd_app_ui/domain/models/push_token_model.dart';
 import 'package:dd_app_ui/domain/models/user.dart';
 import 'package:dd_app_ui/domain/exceptions/user_exists_excetion.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
+import 'package:dd_app_ui/internal/init_app.dart';
 import 'package:dd_app_ui/internal/utils.dart';
 import 'package:dd_app_ui/ui/navigation/app_navigator.dart';
 import 'package:dio/dio.dart';
@@ -99,6 +100,9 @@ class AuthService {
         }
 
         await SharedPrefs.setStoredUser(user);
+
+        await initApp();
+
         await _dataService.cuUser(user);
       }
 
@@ -112,12 +116,6 @@ class AuthService {
     await TokenStorage.setStoredToken(null);
   }
 
-  Future dropDatabase() async {
-    var databasePath = await getDatabasesPath();
-
-    await deleteDatabase(join(databasePath, DB.version));
-  }
-
   Future logout() async {
     try {
       await _api.unsubscribe();
@@ -127,6 +125,6 @@ class AuthService {
 
     await cleanToken();
 
-    await dropDatabase();
+    await DB.instance.dropDB();
   }
 }
