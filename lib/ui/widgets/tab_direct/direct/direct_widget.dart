@@ -14,6 +14,7 @@ class DirectWidget extends StatelessWidget {
       appBar: AppBar(
         title: Text(viewModel.state.directTitle ?? ""),
         centerTitle: true,
+        backwardsCompatibility: true,
       ),
       body: viewModel.state.isLoading == false
           ? Column(children: [

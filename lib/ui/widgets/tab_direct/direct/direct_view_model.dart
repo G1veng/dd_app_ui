@@ -199,7 +199,7 @@ class DirectViewModel extends ChangeNotifier {
       headers: (await TokenStorage.getAccessToken()),
     );
 
-    await _syncService.syncDirect(directId: directId);
+    //await _syncService.syncDirect(directId: directId);
     var direct = await _dataService.getDirect(directId: directId);
     if (direct != null) {
       state = state.copyWith(directTitle: direct.title, direct: direct);

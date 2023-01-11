@@ -56,8 +56,16 @@ class AuthService {
           await TokenStorage.setStoredToken(
             token,
           );
+
           var user = await _api.getUser();
           if (user != null) {
+            await DB.instance.init();
+            await _dataService.cuUser(user);
+            var token = await FirebaseMessaging.instance.getToken();
+            if (token != null) {
+              await _api.subscribe(model: PushTokenModel(token: token));
+            }
+
             SharedPrefs.setStoredUser(
               user,
             );
@@ -83,6 +91,7 @@ class AuthService {
       } on DioError {
         await SharedPrefs.setStoredUser(null);
         await AuthService().logout();
+        await DB.instance.deleteDB();
         AppNavigator.toLoader();
       }
 
@@ -98,8 +107,6 @@ class AuthService {
 
         await SharedPrefs.setStoredUser(user);
 
-        //await DB.instance.init();
-
         await _dataService.cuUser(user);
       }
 
@@ -114,6 +121,8 @@ class AuthService {
   }
 
   Future logout() async {
+    await DB.instance.deleteDB();
+
     try {
       await _api.unsubscribe();
     } on Exception catch (e, _) {

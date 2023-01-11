@@ -1,6 +1,7 @@
 import 'package:dd_app_ui/data/clients/api_client.dart';
 import 'package:dd_app_ui/data/clients/auth_client.dart';
 import 'package:dd_app_ui/data/services/auth_service.dart';
+import 'package:dd_app_ui/data/services/database.dart';
 import 'package:dd_app_ui/domain/models/refresh_token_request_model.dart';
 import 'package:dd_app_ui/internal/config/app_config.dart';
 import 'package:dd_app_ui/internal/config/shared_prefs.dart';
@@ -64,7 +65,8 @@ class ApiModule {
             }
           } catch (e) {
             var service = AuthService();
-            await service.logout();
+            //await service.logout();
+            await DB.instance.deleteDB();
             await service.cleanToken();
             AppNavigator.toLoader();
             return handler

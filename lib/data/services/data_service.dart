@@ -137,7 +137,12 @@ class DataService {
     }
 
     var posts = (await DB.instance.getAll<Post>(
-            whereMap: where, take: take, skip: skip, conditions: conds))
+      whereMap: where,
+      take: take,
+      skip: skip,
+      conditions: conds,
+      orderBy: "created DESC",
+    ))
         .toList();
 
     for (var post in posts) {
@@ -245,6 +250,26 @@ class DataService {
     await DB.instance.createUpdateRange(directs);
   }
 
+  // Future<List<Direct>?> getUserDirectss({
+  //   required String userId,
+  //   int? take,
+  //   int? skip,
+  //   List<DbQueryEnum>? conds,
+  // }) async {
+  //   List<Direct> res = [];
+
+  //   var directIds = await DB.instance.getAll<DirectMember>(
+  //     whereMap: {"userId": userId},
+  //     conditions: [DbQueryEnum.equal],
+  //     take: take,
+  //     skip: skip,
+  //   );
+
+  //   for (var id in directIds) {
+  //     //res.add(DB.instance.get<>(id))
+  //   }
+  // }
+
   Future<List<Direct>?> getDirects({
     Map<String, dynamic>? where,
     int? take,
@@ -289,7 +314,7 @@ class DataService {
 
   Future cuDirectMember(DirectMember directMember) async {
     await DB.instance
-        .update(directMember, where: "id = ? and userId = ?", whereArgs: [
+        .createUpdate(directMember, where: "id = ? and userId = ?", whereArgs: [
       directMember.id,
       directMember.userId,
     ]);

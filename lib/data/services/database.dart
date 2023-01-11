@@ -22,7 +22,7 @@ class DB {
   static final DB instance = DB._();
   static late Database _db;
   static bool _initialized = false;
-  static String version = "db_v1.0.21.db";
+  static String version = "db_v1.0.22.db";
 
   Future init() async {
     if (!_initialized) {
@@ -32,6 +32,11 @@ class DB {
       _db = await openDatabase(path, version: 1, onCreate: _createDB);
       _initialized = true;
     }
+  }
+
+  Future deleteDB() async {
+    await deleteDatabase(join(await getDatabasesPath(), version));
+    _initialized = false;
   }
 
   Future _createDB(Database db, int version) async {
@@ -109,8 +114,10 @@ class DB {
     return resList;
   }
 
-  Future<T?> get<T extends DbModel>(dynamic id) async {
-    var res = await _db.query(_dbName(T), where: 'id = ? ', whereArgs: [id]);
+  Future<T?> get<T extends DbModel>(dynamic id,
+      {String? where, List<Object?>? whereArgs}) async {
+    var res = await _db.query(_dbName(T),
+        where: where ?? 'id = ? ', whereArgs: whereArgs ?? [id]);
     return res.isNotEmpty ? _factories[T]!(res.first) : null;
   }
 
@@ -134,9 +141,12 @@ class DB {
   Future<int> cleanTable<T extends DbModel>() async =>
       await _db.delete(_dbName(T));
 
-  Future<int> createUpdate<T extends DbModel>(T model) async {
-    var dbItem = await get<T>(model.id);
-    var res = dbItem == null ? insert(model) : update(model);
+  Future<int> createUpdate<T extends DbModel>(T model,
+      {String? where, List<Object?>? whereArgs}) async {
+    var dbItem = await get<T>(model.id, where: where, whereArgs: whereArgs);
+    var res = dbItem == null
+        ? insert(model)
+        : update(model, where: where, whereArgs: whereArgs);
     return await res;
   }
 

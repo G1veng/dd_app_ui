@@ -52,6 +52,8 @@ class SyncService {
     for (var post in posts) {
       await syncUser(userId: post.authorId!);
 
+      await _dataService.cuPost(Post.fromJson(post.toJson()));
+
       await _dataService.cuSubscription(Subscription(
         id: post.authorId!,
         subscriberId: curUser!.id,
@@ -252,13 +254,14 @@ class SyncService {
 
       for (var message in directMessages) {
         if (message.directFiles != null && message.directFiles!.isNotEmpty) {
-          await _dataService.cuDirectMessageFiles(message.directFiles!
+          var files = message.directFiles!
               .map((e) => dir_file.DirectFile(
                     link: e.link,
                     id: e.id,
                     messageId: message.directMessageId,
                   ))
-              .toList());
+              .toList();
+          await _dataService.cuDirectMessageFiles(files);
         }
       }
     }

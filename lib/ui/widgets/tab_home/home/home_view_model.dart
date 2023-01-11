@@ -64,7 +64,7 @@ class HomeViewModel extends ChangeNotifier {
   final _dataService = DataService();
   final _syncService = SyncService();
   final _apiService = ApiService();
-  int take = 2, skip = 0;
+  int take = 10, skip = 0;
   Map<int, int> pager = <int, int>{};
   final lvc = ScrollController();
 
